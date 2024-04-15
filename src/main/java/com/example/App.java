@@ -24,7 +24,7 @@ public class App extends Application {
         BorderPane borderPane = new BorderPane();
 
         VBox sidebar = new VBox(10);
-        sidebar.setPrefWidth(200); 
+        sidebar.setPrefWidth(200);
         Button exampleGateButton = new Button("AND Gate");
         sidebar.getChildren().add(exampleGateButton);
 
