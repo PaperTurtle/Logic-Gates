@@ -12,6 +12,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.Cursor;
+import javafx.scene.control.Tooltip;
 
 /**
  * JavaFX App
@@ -48,6 +49,9 @@ public class App extends Application {
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
             imageView.setPickOnBounds(true);
+
+            Tooltip tooltip = new Tooltip(type + " Gate");
+            Tooltip.install(imageView, tooltip);
 
             imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
             imageView.setOnMouseExited(event -> imageView.setCursor(Cursor.DEFAULT));
