@@ -137,39 +137,6 @@
          sodipodi:ry="4"
          d="M 79,25 A 4,4 0 1 1 71,25 A 4,4 0 1 1 79,25 z"
          transform="translate(-17.423728,39.5)" />
-      <text
-         xml:space="preserve"
-         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-         x="-15.039063"
-         y="59.5"
-         id="text6866"
-         sodipodi:linespacing="100%"><tspan
-           sodipodi:role="line"
-           id="tspan6868"
-           x="-15.039063"
-           y="59.5">A</tspan></text>
-      <text
-         xml:space="preserve"
-         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-         x="-15.01172"
-         y="79.5"
-         id="text6870"
-         sodipodi:linespacing="100%"><tspan
-           sodipodi:role="line"
-           id="tspan6872"
-           x="-15.01172"
-           y="79.5">B</tspan></text>
-      <text
-         xml:space="preserve"
-         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-         x="91.910164"
-         y="69.5"
-         id="text6878"
-         sodipodi:linespacing="100%"><tspan
-           sodipodi:role="line"
-           id="tspan6880"
-           x="91.910164"
-           y="69.5">Q</tspan></text>
     </g>
   </g>
 </svg>

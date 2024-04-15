@@ -133,38 +133,5 @@
          id="path4973"
          sodipodi:nodetypes="ccsccccscccccccccsccsc" />
     </g>
-    <text
-       xml:space="preserve"
-       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-       x="11.460938"
-       y="20"
-       id="text6866"
-       sodipodi:linespacing="100%"><tspan
-         sodipodi:role="line"
-         id="tspan6868"
-         x="11.460938"
-         y="20">A</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-       x="11.488281"
-       y="40"
-       id="text6870"
-       sodipodi:linespacing="100%"><tspan
-         sodipodi:role="line"
-         id="tspan6872"
-         x="11.488281"
-         y="40">B</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:100%;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
-       x="118.41016"
-       y="30"
-       id="text6878"
-       sodipodi:linespacing="100%"><tspan
-         sodipodi:role="line"
-         id="tspan6880"
-         x="118.41016"
-         y="30">Q</tspan></text>
   </g>
 </svg>
