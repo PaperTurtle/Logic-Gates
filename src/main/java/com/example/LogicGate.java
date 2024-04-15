@@ -6,9 +6,12 @@ import java.util.List;
 public abstract class LogicGate {
     // List to hold input gates
     protected List<LogicGate> inputs;
+    // Path to the SVG file for this gate type
+    protected String svgFilePath;
 
-    public LogicGate() {
+    public LogicGate(String svgFilePath) {
         this.inputs = new ArrayList<>();
+        this.svgFilePath = svgFilePath;
     }
 
     /**
@@ -46,6 +49,10 @@ public abstract class LogicGate {
         return evaluate();
     }
 
+    public String getSvgFilePath() {
+        return svgFilePath;
+    }
+
     /**
      * Optional method to update the output of this gate.
      * This could be used to notify or update connected output devices or gates.
@@ -53,4 +60,5 @@ public abstract class LogicGate {
     public void updateOutput() {
         // TODO Implement functionality later
     }
+
 }
