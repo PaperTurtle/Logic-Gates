@@ -2,7 +2,7 @@ package com.example;
 
 public class NotGate extends LogicGate {
     public NotGate() {
-        super();
+        super("com/example/NOT_ANSI_Labelled.svg");
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.example;
 
 public class XnorGate extends LogicGate {
     public XnorGate() {
-        super();
+        super("com/example/XNOR_ANSI_Labelled.svg");
     }
 
     @Override

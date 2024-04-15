@@ -2,7 +2,7 @@ package com.example;
 
 public class NandGate extends LogicGate {
     public NandGate() {
-        super();
+        super("com/example/NAND_ANSI_Labelled.svg");
     }
 
     @Override

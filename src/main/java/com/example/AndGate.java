@@ -2,7 +2,7 @@ package com.example;
 
 public class AndGate extends LogicGate {
     public AndGate() {
-        super();
+        super("com/example/AND_ANSI_Labelled.svg");
     }
 
     /**

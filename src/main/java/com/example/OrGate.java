@@ -2,7 +2,7 @@ package com.example;
 
 public class OrGate extends LogicGate {
     public OrGate() {
-        super();
+        super("com/example/OR_ANSI_Labelled.svg");
     }
 
     @Override
