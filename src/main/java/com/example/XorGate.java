@@ -2,7 +2,7 @@ package com.example;
 
 public class XorGate extends LogicGate {
     public XorGate() {
-        super("com/example/XOR_ANSI_Labelled.svg");
+        super("/com/example/XOR_ANSI_Labelled.svg");
     }
 
     @Override

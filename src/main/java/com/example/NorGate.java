@@ -2,7 +2,7 @@ package com.example;
 
 public class NorGate extends LogicGate {
     public NorGate() {
-        super("com/example/NOR_ANSI_Labelled.svg");
+        super("/com/example/NOR_ANSI_Labelled.svg");
     }
 
     @Override
