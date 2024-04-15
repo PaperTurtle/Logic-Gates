@@ -1,14 +1,17 @@
 package com.example;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.HBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.Cursor;
 
 /**
  * JavaFX App
@@ -16,8 +19,7 @@ import javafx.scene.paint.Color;
 public class App extends Application {
 
     private Scene scene;
-    private Canvas canvas;
-    private GraphicsContext gc;
+    private CircuitCanvas circuitCanvas;
 
     @Override
     public void start(Stage stage) {
@@ -27,27 +29,12 @@ public class App extends Application {
         sidebar.setPrefWidth(200);
         initializeSidebar(sidebar);
 
-        canvas = new Canvas(600, 400);
-        gc = canvas.getGraphicsContext2D();
-        gc.setFill(Color.WHITE);
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        borderPane.widthProperty().addListener((obs, oldVal, newVal) -> {
-            double canvasWidth = newVal.doubleValue() - sidebar.getPrefWidth();
-            canvas.setWidth(canvasWidth);
-            gc.fillRect(0, 0, canvasWidth, canvas.getHeight());
-        });
-
-        borderPane.heightProperty().addListener((obs, oldVal, newVal) -> {
-            double canvasHeight = newVal.doubleValue();
-            canvas.setHeight(canvasHeight);
-            gc.fillRect(0, 0, canvas.getWidth(), canvasHeight);
-        });
+        circuitCanvas = new CircuitCanvas(600, 400);
 
         borderPane.setLeft(sidebar);
-        borderPane.setCenter(canvas);
+        borderPane.setCenter(circuitCanvas);
 
-        scene = new Scene(borderPane, 800, 600);
+        scene = new Scene(borderPane, 1000, 600);
         stage.setTitle("Logic Gates Simulator");
         stage.setScene(scene);
         stage.show();
@@ -56,14 +43,28 @@ public class App extends Application {
     private void initializeSidebar(VBox sidebar) {
         String[] gateTypes = { "AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR" };
         for (String type : gateTypes) {
-            Button gateButton = new Button(type);
-            gateButton.setOnAction(event -> addGateToCanvas(type));
-            sidebar.getChildren().add(gateButton);
-        }
-    }
+            ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
+            imageView.setFitHeight(50);
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
+            imageView.setPickOnBounds(true);
 
-    private void addGateToCanvas(String type) {
-        System.out.println(type + " gate added");
+            imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
+            imageView.setOnMouseExited(event -> imageView.setCursor(Cursor.DEFAULT));
+
+            imageView.setOnDragDetected(event -> {
+                Dragboard db = imageView.startDragAndDrop(TransferMode.COPY);
+                ClipboardContent content = new ClipboardContent();
+                content.putImage(imageView.getImage());
+                db.setContent(content);
+                db.setDragView(imageView.getImage(), event.getX(), event.getY());
+                event.consume();
+            });
+
+            HBox hbox = new HBox(imageView);
+            hbox.setPadding(new Insets(5));
+            sidebar.getChildren().add(hbox);
+        }
     }
 
     public static void main(String[] args) {
