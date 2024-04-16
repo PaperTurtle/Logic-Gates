@@ -19,6 +19,7 @@ public class CircuitCanvas extends Pane {
     private LogicGate startGate;
     private Mode currentMode = Mode.WORK;
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
+    private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
 
     public enum Mode {
         PAN, WORK
@@ -51,6 +52,7 @@ public class CircuitCanvas extends Pane {
         gate.createVisualRepresentation(this);
         gate.setPosition(x, y);
         setupDragHandlers(gate.imageView, gate);
+        gateImageViews.put(gate.getImageView(), gate);
     }
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
@@ -76,6 +78,14 @@ public class CircuitCanvas extends Pane {
                     Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
                     currentLine.setEndX(inputPos.getX());
                     currentLine.setEndY(inputPos.getY());
+
+                    LogicGate targetGate = findGateForInputMarker(inputMarker);
+                    int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
+
+                    if (targetGate != null) {
+                        targetGate.addInputConnection(currentLine, inputIndex);
+                    }
+
                     return true;
                 }
             }
@@ -86,6 +96,20 @@ public class CircuitCanvas extends Pane {
             currentLine = null;
         }
         return false;
+    }
+
+    private LogicGate findGateForInputMarker(Circle inputMarker) {
+        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
+            LogicGate gate = entry.getValue();
+            if (gate.getInputMarkers().contains(inputMarker)) {
+                return gate;
+            }
+        }
+        return null;
+    }
+
+    private int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
+        return gate.getInputMarkers().indexOf(inputMarker);
     }
 
     private void showInputMarkers(boolean show, Circle outputMarker) {
@@ -177,4 +201,5 @@ public class CircuitCanvas extends Pane {
             }
         });
     }
+
 }

@@ -21,6 +21,7 @@ public abstract class LogicGate {
     protected ImageView imageView;
     protected List<Circle> inputMarkers = new ArrayList<>();
     protected Circle outputMarker;
+    protected List<List<Line>> inputConnections = new ArrayList<>();
     protected List<Line> outputConnections = new ArrayList<>();
 
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
@@ -53,6 +54,20 @@ public abstract class LogicGate {
      */
     public void removeInput(LogicGate input) {
         inputs.remove(input);
+    }
+
+    public void addInputConnection(Line line, int inputIndex) {
+        List<Line> connections = getInputConnections(inputIndex);
+        if (connections != null) {
+            connections.add(line);
+        }
+    }
+
+    public void removeInputConnection(Line line, int inputIndex) {
+        List<Line> connections = getInputConnections(inputIndex);
+        if (connections != null) {
+            connections.remove(line);
+        }
     }
 
     /**
@@ -152,6 +167,26 @@ public abstract class LogicGate {
                 line.setStartY(outputPos.getY());
             }
         }
+
+        for (int i = 0; i < inputMarkers.size(); i++) {
+            Circle inputMarker = inputMarkers.get(i);
+            Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
+
+            List<Line> connections = getInputConnections(i);
+            if (connections != null) {
+                for (Line inputLine : connections) {
+                    inputLine.setEndX(inputPos.getX());
+                    inputLine.setEndY(inputPos.getY());
+                }
+            }
+        }
+    }
+
+    public List<Line> getInputConnections(int index) {
+        if (index >= 0 && index < inputConnections.size()) {
+            return inputConnections.get(index);
+        }
+        return null;
     }
 
     /**
@@ -165,12 +200,14 @@ public abstract class LogicGate {
         canvas.getChildren().add(imageView);
 
         outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
-        canvas.getChildren().add(outputMarker);
 
+        canvas.getChildren().add(outputMarker);
+        inputConnections.clear();
         for (Point2D point : inputPoints) {
             Circle inputMarker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
             inputMarkers.add(inputMarker);
             canvas.getChildren().add(inputMarker);
+            inputConnections.add(new ArrayList<>());
         }
 
         if (canvas instanceof CircuitCanvas) {
@@ -204,5 +241,23 @@ public abstract class LogicGate {
      */
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
+    }
+
+    /**
+     * Returns the list of input markers for this gate.
+     * 
+     * @return the list of input markers.
+     */
+    public List<Circle> getInputMarkers() {
+        return inputMarkers;
+    }
+
+    /**
+     * Returns the ImageView for this gate.
+     * 
+     * @return the ImageView.
+     */
+    public ImageView getImageView() {
+        return imageView;
     }
 }
