@@ -45,10 +45,10 @@ public class App extends Application {
                 double sidebarWidth = sidebar.getWidth();
                 double x = event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2 - sidebarWidth;
                 double y = event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2;
-                ImageView toPlace = new ImageView(floatingImageView.getImage());
-                toPlace.setX(x);
-                toPlace.setY(y);
-                circuitCanvas.getChildren().add(toPlace);
+                LogicGate gate = GateFactory.createGate(floatingImageView.getId());
+                if (gate != null) {
+                    circuitCanvas.drawGate(gate, x, y);
+                }
                 borderPane.getChildren().remove(floatingImageView);
                 floatingImageView = null;
             }
@@ -63,6 +63,7 @@ public class App extends Application {
         String[] gateTypes = { "AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR" };
         for (String type : gateTypes) {
             ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
+            imageView.setId(type);
             imageView.setFitHeight(50);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
@@ -77,13 +78,14 @@ public class App extends Application {
             imageView.setOnMouseClicked(event -> {
                 if (floatingImageView == null) {
                     floatingImageView = new ImageView(imageView.getImage());
+                    floatingImageView.setId(type);
                     floatingImageView.setFitHeight(50);
                     floatingImageView.setPreserveRatio(true);
                     floatingImageView.setOpacity(0.5);
                     floatingImageView.setX(event.getScreenX() - scene.getWindow().getX()
-                            - floatingImageView.getBoundsInLocal().getWidth() / 2 - 7);
+                            - floatingImageView.getBoundsInLocal().getWidth() / 2 - 28);
                     floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
-                            - floatingImageView.getBoundsInLocal().getHeight() / 2 - 27);
+                            - floatingImageView.getBoundsInLocal().getHeight() / 2);
                     borderPane.getChildren().add(floatingImageView);
                 }
             });
