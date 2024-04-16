@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 
 public abstract class LogicGate {
     // List to hold input gates
@@ -20,6 +21,7 @@ public abstract class LogicGate {
     protected ImageView imageView;
     protected List<Circle> inputMarkers = new ArrayList<>();
     protected Circle outputMarker;
+    protected List<Line> outputConnections = new ArrayList<>();
 
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
         this.inputs = new ArrayList<>();
@@ -88,6 +90,7 @@ public abstract class LogicGate {
             imageView.setX(x);
             imageView.setY(y);
             updateMarkers();
+            updateConnections();
         }
     }
 
@@ -101,6 +104,16 @@ public abstract class LogicGate {
             Point2D point = inputPoints.get(i);
             marker.setCenterX(imageView.getX() + point.getX());
             marker.setCenterY(imageView.getY() + point.getY());
+        }
+    }
+
+    private void updateConnections() {
+        if (outputMarker != null) {
+            Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
+            for (Line line : outputConnections) {
+                line.setStartX(outputPos.getX());
+                line.setStartY(outputPos.getY());
+            }
         }
     }
 
@@ -125,6 +138,14 @@ public abstract class LogicGate {
 
     public void handleDrag(double newX, double newY) {
         setPosition(newX, newY);
+    }
+
+    public void addOutputConnection(Line line) {
+        outputConnections.add(line);
+    }
+
+    public void removeOutputConnection(Line line) {
+        outputConnections.remove(line);
     }
 
     /**

@@ -60,6 +60,7 @@ public class CircuitCanvas extends Pane {
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 currentLine.setStroke(Color.BLUE);
                 this.getChildren().add(currentLine);
+                gate.addOutputConnection(currentLine);
                 showInputMarkers(true, outputMarker);
                 setupConnectionHandlers();
                 event.consume();
@@ -78,6 +79,11 @@ public class CircuitCanvas extends Pane {
                     return true;
                 }
             }
+        }
+        if (currentLine != null && startGate != null) {
+            this.getChildren().remove(currentLine);
+            startGate.removeOutputConnection(currentLine);
+            currentLine = null;
         }
         return false;
     }
@@ -139,6 +145,12 @@ public class CircuitCanvas extends Pane {
     }
 
     public void removeGate(ImageView gate) {
+        if (gateMarkers.containsKey(gate)) {
+            for (Circle marker : gateMarkers.get(gate)) {
+                this.getChildren().remove(marker);
+            }
+            gateMarkers.remove(gate);
+        }
         this.getChildren().remove(gate);
     }
 
