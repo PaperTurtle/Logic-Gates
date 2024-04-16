@@ -6,6 +6,7 @@ import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -13,6 +14,7 @@ import javafx.scene.shape.Line;
 
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.Platform;
 
 public class CircuitCanvas extends Pane {
     private Line currentLine;
@@ -20,13 +22,16 @@ public class CircuitCanvas extends Pane {
     private Mode currentMode = Mode.WORK;
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
+    private Point2D lastMouseCoordinates;
+    private App app;
 
     public enum Mode {
         PAN, WORK
     }
 
-    public CircuitCanvas(double width, double height) {
+    public CircuitCanvas(double width, double height, App app) {
         super();
+        this.app = app;
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
@@ -39,11 +44,13 @@ public class CircuitCanvas extends Pane {
                 case P:
                     currentMode = Mode.PAN;
                     updateMarkersVisibility();
+                    Platform.runLater(() -> app.setSidebarVisibility(false));
                     System.out.println("Switched to Pan Mode");
                     break;
                 case W:
                     currentMode = Mode.WORK;
                     updateMarkersVisibility();
+                    Platform.runLater(() -> app.setSidebarVisibility(true));
                     System.out.println("Switched to Work Mode");
                     break;
             }
