@@ -38,10 +38,12 @@ public class CircuitCanvas extends Pane {
             switch (event.getCode()) {
                 case P:
                     currentMode = Mode.PAN;
+                    updateMarkersVisibility();
                     System.out.println("Switched to Pan Mode");
                     break;
                 case W:
                     currentMode = Mode.WORK;
+                    updateMarkersVisibility();
                     System.out.println("Switched to Work Mode");
                     break;
             }
@@ -200,6 +202,21 @@ public class CircuitCanvas extends Pane {
                 resetInteractionHandlers();
             }
         });
+    }
+
+    private void updateMarkersVisibility() {
+        boolean showMarkers = currentMode == Mode.WORK;
+        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
+            List<Circle> markers = entry.getValue().getInputMarkers();
+            if (markers != null) {
+                for (Circle marker : markers) {
+                    marker.setVisible(showMarkers);
+                }
+            }
+            if (entry.getValue().outputMarker != null) {
+                entry.getValue().outputMarker.setVisible(showMarkers);
+            }
+        }
     }
 
 }
