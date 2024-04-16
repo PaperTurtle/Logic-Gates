@@ -8,8 +8,28 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+/**
+ * The SvgUtil class provides utility methods for handling SVG files.
+ * It includes a method to load an SVG file and convert it into a JavaFX Image.
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class SvgUtil {
 
+    /**
+     * Loads an SVG file from the specified path and converts it into a JavaFX
+     * Image.
+     * 
+     * The method uses Batik's PNGTranscoder to transcode the SVG file into a PNG
+     * format.
+     * The PNG data is then read into a BufferedImage using ImageIO, and finally
+     * converted
+     * into a JavaFX Image using SwingFXUtils.
+     * 
+     * @param svgFilePath the path to the SVG file to load.
+     * @return a JavaFX Image representing the SVG file, or null if an error
+     *         occurred.
+     */
     public static Image loadSvgImage(String svgFilePath) {
         try {
             PNGTranscoder transcoder = new PNGTranscoder();
