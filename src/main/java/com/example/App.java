@@ -57,6 +57,8 @@ public class App extends Application {
         stage.setTitle("Logic Gates Simulator");
         stage.setScene(scene);
         stage.show();
+
+        circuitCanvas.requestFocus();
     }
 
     private void initializeSidebar(VBox sidebar) {
