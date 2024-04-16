@@ -8,9 +8,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tooltip;
 
@@ -21,10 +18,11 @@ public class App extends Application {
 
     private Scene scene;
     private CircuitCanvas circuitCanvas;
+    private ImageView floatingImageView;
+    private BorderPane borderPane = new BorderPane();
 
     @Override
     public void start(Stage stage) {
-        BorderPane borderPane = new BorderPane();
 
         VBox sidebar = new VBox(10);
         sidebar.setPrefWidth(200);
@@ -36,6 +34,26 @@ public class App extends Application {
         borderPane.setCenter(circuitCanvas);
 
         scene = new Scene(borderPane, 1000, 600);
+        scene.setOnMouseMoved(event -> {
+            if (floatingImageView != null) {
+                floatingImageView.setX(event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
+                floatingImageView.setY(event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2);
+            }
+        });
+        scene.setOnMouseClicked(event -> {
+            if (floatingImageView != null && event.getTarget() == circuitCanvas) {
+                double sidebarWidth = sidebar.getWidth();
+                double x = event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2 - sidebarWidth;
+                double y = event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2;
+                ImageView toPlace = new ImageView(floatingImageView.getImage());
+                toPlace.setX(x);
+                toPlace.setY(y);
+                circuitCanvas.getChildren().add(toPlace);
+                borderPane.getChildren().remove(floatingImageView);
+                floatingImageView = null;
+            }
+        });
+
         stage.setTitle("Logic Gates Simulator");
         stage.setScene(scene);
         stage.show();
@@ -56,13 +74,18 @@ public class App extends Application {
             imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
             imageView.setOnMouseExited(event -> imageView.setCursor(Cursor.DEFAULT));
 
-            imageView.setOnDragDetected(event -> {
-                Dragboard db = imageView.startDragAndDrop(TransferMode.COPY);
-                ClipboardContent content = new ClipboardContent();
-                content.putImage(imageView.getImage());
-                db.setContent(content);
-                db.setDragView(imageView.getImage(), event.getX(), event.getY());
-                event.consume();
+            imageView.setOnMouseClicked(event -> {
+                if (floatingImageView == null) {
+                    floatingImageView = new ImageView(imageView.getImage());
+                    floatingImageView.setFitHeight(50);
+                    floatingImageView.setPreserveRatio(true);
+                    floatingImageView.setOpacity(0.5);
+                    floatingImageView.setX(event.getScreenX() - scene.getWindow().getX()
+                            - floatingImageView.getBoundsInLocal().getWidth() / 2 - 7);
+                    floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
+                            - floatingImageView.getBoundsInLocal().getHeight() / 2 - 27);
+                    borderPane.getChildren().add(floatingImageView);
+                }
             });
 
             HBox hbox = new HBox(imageView);
