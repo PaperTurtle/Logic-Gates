@@ -65,26 +65,57 @@ public abstract class LogicGate {
         return evaluate();
     }
 
+    /**
+     * Returns the path to the SVG file for this gate.
+     * 
+     * @return the path to the SVG file.
+     */
     public String getSvgFilePath() {
         return svgFilePath;
     }
 
+    /**
+     * Returns the list of input points for this gate.
+     * 
+     * @return the list of input points.
+     */
     public List<Point2D> getInputPoints() {
         return inputPoints;
     }
 
+    /**
+     * Sets the list of input points for this gate.
+     * 
+     * @param inputPoints the list of input points.
+     */
     public void setInputPoints(List<Point2D> inputPoints) {
         this.inputPoints = inputPoints;
     }
 
+    /**
+     * Returns the output point for this gate.
+     * 
+     * @return the output point.
+     */
     public Point2D getOutputPoint() {
         return outputPoint;
     }
 
+    /**
+     * Sets the output point for this gate.
+     * 
+     * @param outputPoint the output point.
+     */
     public void setOutputPoint(Point2D outputPoint) {
         this.outputPoint = outputPoint;
     }
 
+    /**
+     * Sets the position of the gate on the canvas.
+     * 
+     * @param x the x-coordinate.
+     * @param y the y-coordinate.
+     */
     public void setPosition(double x, double y) {
         if (imageView != null) {
             imageView.setX(x);
@@ -94,6 +125,9 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Updates the position of the markers and connections.
+     */
     private void updateMarkers() {
         if (outputMarker != null) {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
@@ -107,6 +141,9 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Updates the position of the output connections.
+     */
     private void updateConnections() {
         if (outputMarker != null) {
             Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
@@ -117,6 +154,11 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Creates the visual representation of the gate on the canvas.
+     * 
+     * @param canvas the canvas to draw the gate on.
+     */
     public void createVisualRepresentation(Pane canvas) {
         Image image = SvgUtil.loadSvgImage(getSvgFilePath());
         imageView = new ImageView(image);
@@ -136,24 +178,31 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Handles the drag event for the gate.
+     * 
+     * @param newX the new x-coordinate.
+     * @param newY the new y-coordinate.
+     */
     public void handleDrag(double newX, double newY) {
         setPosition(newX, newY);
     }
 
+    /**
+     * Adds an output connection to this gate.
+     * 
+     * @param line the Line to be added.
+     */
     public void addOutputConnection(Line line) {
         outputConnections.add(line);
     }
 
+    /**
+     * Removes an output connection from this gate.
+     * 
+     * @param line the Line to be removed.
+     */
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
     }
-
-    /**
-     * Optional method to update the output of this gate.
-     * This could be used to notify or update connected output devices or gates.
-     */
-    public void updateOutput() {
-        // TODO Implement functionality later
-    }
-
 }
