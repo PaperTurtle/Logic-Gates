@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.Cursor;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 
 /**
@@ -20,15 +21,22 @@ public class App extends Application {
     private CircuitCanvas circuitCanvas;
     private ImageView floatingImageView;
     private BorderPane borderPane = new BorderPane();
+    private VBox sidebar;
 
     @Override
     public void start(Stage stage) {
 
-        VBox sidebar = new VBox(10);
+        sidebar = new VBox(10);
         sidebar.setPrefWidth(200);
         initializeSidebar(sidebar);
 
-        circuitCanvas = new CircuitCanvas(600, 400);
+        circuitCanvas = new CircuitCanvas(600, 400, this);
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(circuitCanvas);
+        scrollPane.setPannable(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         borderPane.setLeft(sidebar);
         borderPane.setCenter(circuitCanvas);
@@ -96,6 +104,22 @@ public class App extends Application {
             hbox.setPadding(new Insets(5));
             sidebar.getChildren().add(hbox);
         }
+    }
+
+    public void setSidebarVisibility(boolean visible) {
+        if (visible) {
+            if (!borderPane.getChildren().contains(sidebar)) {
+                borderPane.setLeft(sidebar);
+            }
+            sidebar.setVisible(true);
+        } else {
+            borderPane.setLeft(null);
+            sidebar.setVisible(false);
+        }
+    }
+
+    public VBox getSidebar() {
+        return sidebar;
     }
 
     public static void main(String[] args) {
