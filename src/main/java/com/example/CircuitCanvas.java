@@ -1,6 +1,7 @@
 package com.example;
 
 import javafx.scene.layout.Pane;
+import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -18,7 +19,39 @@ public class CircuitCanvas extends Pane {
         ImageView imageView = new ImageView(image);
         imageView.setX(x);
         imageView.setY(y);
+        imageView.setPickOnBounds(true);
+        setupDragHandlers(imageView);
         this.getChildren().add(imageView);
+    }
+
+    private void setupDragHandlers(ImageView imageView) {
+        imageView.setOnMousePressed(event -> {
+            double offsetX = event.getSceneX() - imageView.getX();
+            double offsetY = event.getSceneY() - imageView.getY();
+            imageView.setUserData(new double[] { offsetX, offsetY });
+            imageView.setCursor(Cursor.CLOSED_HAND);
+            event.consume();
+        });
+
+        imageView.setOnMouseDragged(event -> {
+            double[] offset = (double[]) imageView.getUserData();
+            imageView.setX(event.getSceneX() - offset[0]);
+            imageView.setY(event.getSceneY() - offset[1]);
+            event.consume();
+        });
+
+        imageView.setOnMouseReleased(event -> {
+            imageView.setCursor(Cursor.HAND);
+            event.consume();
+        });
+
+        imageView.setOnMouseEntered(event -> {
+            imageView.setCursor(Cursor.HAND);
+        });
+
+        imageView.setOnMouseExited(event -> {
+            imageView.setCursor(Cursor.DEFAULT);
+        });
     }
 
     public void connectGates(double x1, double y1, double x2, double y2) {
