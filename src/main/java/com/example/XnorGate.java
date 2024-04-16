@@ -1,7 +1,6 @@
 package com.example;
 
 import java.util.Arrays;
-
 import javafx.geometry.Point2D;
 
 /**
@@ -16,7 +15,7 @@ import javafx.geometry.Point2D;
  * The evaluate method overrides the abstract method in the LogicGate class. It
  * calculates the number of true inputs and returns true if the number is even.
  * 
- * @see LogicGate for the abstract class.
+ * @see LogicGate
  * @author Seweryn Czabanowski
  */
 public class XnorGate extends LogicGate {
