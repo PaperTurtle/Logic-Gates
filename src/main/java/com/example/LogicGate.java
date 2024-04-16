@@ -117,6 +117,10 @@ public abstract class LogicGate {
             inputMarkers.add(inputMarker);
             canvas.getChildren().add(inputMarker);
         }
+
+        if (canvas instanceof CircuitCanvas) {
+            ((CircuitCanvas) canvas).setupOutputInteraction(outputMarker, this);
+        }
     }
 
     public void handleDrag(double newX, double newY) {
