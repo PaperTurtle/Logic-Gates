@@ -30,13 +30,13 @@ public class App extends Application {
         sidebar.setPrefWidth(200);
         initializeSidebar(sidebar);
 
-        circuitCanvas = new CircuitCanvas(600, 400, this);
-
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(circuitCanvas);
         scrollPane.setPannable(false);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        circuitCanvas = new CircuitCanvas(600, 400, this, scrollPane);
+        scrollPane.setContent(circuitCanvas);
 
         borderPane.setLeft(sidebar);
         borderPane.setCenter(circuitCanvas);
