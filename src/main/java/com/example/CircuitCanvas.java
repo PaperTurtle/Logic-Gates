@@ -53,11 +53,11 @@ public class CircuitCanvas extends Pane {
         setupDragHandlers(gate.imageView, gate);
     }
 
-    private void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
+    public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
             if (currentMode == Mode.WORK && currentLine == null) {
-                currentLine = new Line(outputMarker.getCenterX(), outputMarker.getCenterY(), event.getX(),
-                        event.getY());
+                Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
+                currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 currentLine.setStroke(Color.BLUE);
                 this.getChildren().add(currentLine);
                 showInputMarkers(true, outputMarker);
@@ -72,8 +72,9 @@ public class CircuitCanvas extends Pane {
             if (node instanceof Circle && node != outputMarker) {
                 Circle inputMarker = (Circle) node;
                 if (inputMarker.contains(x, y) && inputMarker.getOpacity() == 1.0) {
-                    currentLine.setEndX(inputMarker.getCenterX());
-                    currentLine.setEndY(inputMarker.getCenterY());
+                    Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
+                    currentLine.setEndX(inputPos.getX());
+                    currentLine.setEndY(inputPos.getY());
                     return true;
                 }
             }
@@ -135,12 +136,6 @@ public class CircuitCanvas extends Pane {
                 marker.setCenterY(newY + offset.getY());
             }
         }
-    }
-
-    public void connectGates(double x1, double y1, double x2, double y2) {
-        Line line = new Line(x1 + 15, y1 + 15, x2 + 15, y2 + 15);
-        line.setStroke(Color.BLUE);
-        this.getChildren().add(line);
     }
 
     public void removeGate(ImageView gate) {
