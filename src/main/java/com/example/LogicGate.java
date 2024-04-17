@@ -27,7 +27,7 @@ public abstract class LogicGate {
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
         this.inputs = new ArrayList<>();
         this.svgFilePath = svgFilePath;
-        this.inputPoints = inputPoints;
+        this.inputPoints = (inputPoints != null) ? inputPoints : new ArrayList<>();
         this.outputPoint = outputPoint;
     }
 
@@ -200,14 +200,16 @@ public abstract class LogicGate {
         canvas.getChildren().add(imageView);
 
         outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
-
         canvas.getChildren().add(outputMarker);
-        inputConnections.clear();
-        for (Point2D point : inputPoints) {
-            Circle inputMarker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-            inputMarkers.add(inputMarker);
-            canvas.getChildren().add(inputMarker);
-            inputConnections.add(new ArrayList<>());
+
+        if (inputPoints != null) {
+            inputConnections.clear();
+            for (Point2D point : inputPoints) {
+                Circle inputMarker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
+                inputMarkers.add(inputMarker);
+                canvas.getChildren().add(inputMarker);
+                inputConnections.add(new ArrayList<>());
+            }
         }
 
         if (canvas instanceof CircuitCanvas) {
