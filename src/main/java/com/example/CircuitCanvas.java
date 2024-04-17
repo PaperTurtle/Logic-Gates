@@ -23,22 +23,18 @@ public class CircuitCanvas extends Pane {
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
     private Point2D lastMouseCoordinates;
-    private App app;
     private ScrollPane scrollPane;
 
     public enum Mode {
         PAN, WORK
     }
 
-    public CircuitCanvas(double width, double height, App app, ScrollPane scrollPane) {
+    public CircuitCanvas(double width, double height) {
         super();
-        this.app = app;
-        this.scrollPane = scrollPane;
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
         setupModeChangeHandlers();
-        enablePanning();
     }
 
     private void setupModeChangeHandlers() {
@@ -48,13 +44,11 @@ public class CircuitCanvas extends Pane {
                     currentMode = Mode.PAN;
                     updateMarkersVisibility();
                     // enablePanning();
-                    Platform.runLater(() -> app.setSidebarVisibility(false));
                     System.out.println("Switched to Pan Mode");
                     break;
                 case W:
                     currentMode = Mode.WORK;
                     // updateMarkersVisibility();
-                    Platform.runLater(() -> app.setSidebarVisibility(true));
                     System.out.println("Switched to Work Mode");
                     break;
             }
