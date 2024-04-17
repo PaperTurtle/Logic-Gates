@@ -48,7 +48,7 @@ public class CircuitCanvas extends Pane {
                     break;
                 case W:
                     currentMode = Mode.WORK;
-                    // updateMarkersVisibility();
+                    updateMarkersVisibility();
                     System.out.println("Switched to Work Mode");
                     break;
             }
@@ -91,6 +91,9 @@ public class CircuitCanvas extends Pane {
         gate.setPosition(x, y);
         setupDragHandlers(gate.imageView, gate);
         gateImageViews.put(gate.getImageView(), gate);
+        if (gate instanceof SwitchGate) {
+            ((SwitchGate) gate).updateOutputConnectionsColor();
+        }
     }
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
