@@ -5,6 +5,9 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 
 public class SwitchGate extends LogicGate implements GateInterface {
     private boolean state = false; // false by default, can be toggled to true
@@ -12,13 +15,14 @@ public class SwitchGate extends LogicGate implements GateInterface {
     private Image onImage;
 
     public SwitchGate() {
-        super("/com/example/SWITCH_ANSI_Labelled.svg",
+        super(null,
                 null,
                 new Point2D(70, 25));
 
         offImage = SvgUtil.loadSvgImage("/com/example/SWITCH_ANSI_Labelled.svg");
         onImage = SvgUtil.loadSvgImage("/com/example/SWITCH_ON_ANSI_Labelled.svg");
         imageView = new javafx.scene.image.ImageView(offImage);
+        outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
     }
 
     @Override
@@ -30,11 +34,20 @@ public class SwitchGate extends LogicGate implements GateInterface {
     public void toggle() {
         state = !state;
         updateVisualState();
+        updateOutputConnectionsColor();
+    }
+
+    public void updateOutputConnectionsColor() {
+        Color lineColor = state ? Color.RED : Color.BLACK;
+        for (Line line : outputConnections) {
+            line.setStroke(lineColor);
+        }
     }
 
     private void updateVisualState() {
         if (imageView != null) {
             imageView.setImage(state ? onImage : offImage);
+            updateMarkerPosition();
         }
     }
 
@@ -43,6 +56,17 @@ public class SwitchGate extends LogicGate implements GateInterface {
         if (imageView != null) {
             canvas.getChildren().add(imageView);
             imageView.setOnMouseClicked(this::handleMouseClicked);
+        }
+        if (outputMarker != null) {
+            canvas.getChildren().add(outputMarker);
+            updateMarkerPosition();
+        }
+    }
+
+    private void updateMarkerPosition() {
+        if (imageView != null && outputMarker != null) {
+            outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
+            outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
         }
     }
 
