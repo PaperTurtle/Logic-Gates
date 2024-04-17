@@ -35,7 +35,7 @@ public class App extends Application {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-        circuitCanvas = new CircuitCanvas(600, 400, this, scrollPane);
+        circuitCanvas = new CircuitCanvas(600, 400);
         scrollPane.setContent(circuitCanvas);
 
         borderPane.setLeft(sidebar);
@@ -70,9 +70,10 @@ public class App extends Application {
     }
 
     private void initializeSidebar(VBox sidebar) {
-        String[] gateTypes = { "AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR" };
+        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "SWITCH" };
         for (String type : gateTypes) {
             ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
+
             imageView.setId(type);
             imageView.setFitHeight(50);
             imageView.setPreserveRatio(true);
@@ -103,18 +104,6 @@ public class App extends Application {
             HBox hbox = new HBox(imageView);
             hbox.setPadding(new Insets(5));
             sidebar.getChildren().add(hbox);
-        }
-    }
-
-    public void setSidebarVisibility(boolean visible) {
-        if (visible) {
-            if (!borderPane.getChildren().contains(sidebar)) {
-                borderPane.setLeft(sidebar);
-            }
-            sidebar.setVisible(true);
-        } else {
-            borderPane.setLeft(null);
-            sidebar.setVisible(false);
         }
     }
 
