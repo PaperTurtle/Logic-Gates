@@ -153,6 +153,8 @@ public class CircuitCanvas extends Pane {
     }
 
     private void setupDragHandlers(ImageView imageView, LogicGate gate) {
+        imageView.setPickOnBounds(true);
+
         imageView.setOnMousePressed(event -> {
             if (currentMode == Mode.PAN) {
                 double offsetX = event.getSceneX() - imageView.getX();
