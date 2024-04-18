@@ -199,8 +199,10 @@ public abstract class LogicGate {
         imageView = new ImageView(image);
         canvas.getChildren().add(imageView);
 
-        outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
-        canvas.getChildren().add(outputMarker);
+        if (outputPoint != null) {
+            outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
+            canvas.getChildren().add(outputMarker);
+        }
 
         if (inputPoints != null) {
             inputConnections.clear();
@@ -212,8 +214,17 @@ public abstract class LogicGate {
             }
         }
 
-        if (canvas instanceof CircuitCanvas) {
+        if (canvas instanceof CircuitCanvas && outputMarker != null) {
             ((CircuitCanvas) canvas).setupOutputInteraction(outputMarker, this);
+        }
+    }
+
+    public void propagateStateChange() {
+        for (Line line : outputConnections) {
+            line.setStroke(evaluate() ? Color.RED : Color.BLACK);
+        }
+        for (LogicGate gate : inputs) {
+            gate.propagateStateChange();
         }
     }
 
