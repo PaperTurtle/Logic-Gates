@@ -125,6 +125,7 @@ public class CircuitCanvas extends Pane {
 
                     if (targetGate != null) {
                         targetGate.addInputConnection(currentLine, inputIndex);
+                        targetGate.propagateStateChange();
                     }
 
                     return true;
