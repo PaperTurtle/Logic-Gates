@@ -30,12 +30,17 @@ public class CircuitCanvas extends Pane {
         PAN, WORK
     }
 
-    public CircuitCanvas(double width, double height) {
+    public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
+        this.scrollPane = scrollPane;
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
         setupModeChangeHandlers();
+
+        this.setOnMouseClicked(event -> {
+            this.requestFocus();
+        });
     }
 
     private void setupModeChangeHandlers() {
@@ -43,47 +48,17 @@ public class CircuitCanvas extends Pane {
             switch (event.getCode()) {
                 case P:
                     currentMode = Mode.PAN;
+                    this.setCursor(Cursor.OPEN_HAND);
                     updateMarkersVisibility();
-                    // enablePanning();
                     System.out.println("Switched to Pan Mode");
                     break;
                 case W:
                     currentMode = Mode.WORK;
+                    this.setCursor(Cursor.DEFAULT);
                     updateMarkersVisibility();
                     System.out.println("Switched to Work Mode");
                     break;
             }
-        });
-    }
-
-    public void enablePanning() {
-        setOnMousePressed(event -> {
-            if (currentMode == Mode.PAN) {
-                lastMouseCoordinates = new Point2D(event.getX(), event.getY());
-                requestFocus();
-                setCursor(Cursor.CLOSED_HAND);
-            }
-        });
-
-        setOnMouseDragged(event -> {
-            if (currentMode == Mode.PAN && lastMouseCoordinates != null) {
-                double deltaX = event.getX() - lastMouseCoordinates.getX();
-                double deltaY = event.getY() - lastMouseCoordinates.getY();
-
-                double newTranslateX = getTranslateX() - deltaX;
-                double newTranslateY = getTranslateY() - deltaY;
-                setTranslateX(newTranslateX);
-                setTranslateY(newTranslateY);
-
-                scrollPane.setHvalue(scrollPane.getHvalue() + deltaX / scrollPane.getWidth());
-                scrollPane.setVvalue(scrollPane.getVvalue() + deltaY / scrollPane.getHeight());
-
-                lastMouseCoordinates = new Point2D(event.getX(), event.getY());
-            }
-        });
-
-        setOnMouseReleased(event -> {
-            lastMouseCoordinates = null;
         });
     }
 
