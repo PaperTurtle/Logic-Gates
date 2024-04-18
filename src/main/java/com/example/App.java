@@ -70,7 +70,8 @@ public class App extends Application {
     }
 
     private void initializeSidebar(VBox sidebar) {
-        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "SWITCH" };
+        // ! TODO ADD LIGHTBULB TO SIDEBAR OR ADD SCROLLABLE SECTIONS
+        String[] gateTypes = { "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "SWITCH", "LIGHTBULB" };
         for (String type : gateTypes) {
             ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
 
@@ -105,6 +106,40 @@ public class App extends Application {
             hbox.setPadding(new Insets(5));
             sidebar.getChildren().add(hbox);
         }
+
+        ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ANSI_Labelled.svg"));
+
+        imageView.setId("Lightbulb");
+        imageView.setFitHeight(50);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setPickOnBounds(true);
+
+        Tooltip tooltip = new Tooltip("Lightbulb");
+        Tooltip.install(imageView, tooltip);
+
+        imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
+        imageView.setOnMouseExited(event -> imageView.setCursor(Cursor.DEFAULT));
+
+        imageView.setOnMouseClicked(event -> {
+            if (floatingImageView == null) {
+                floatingImageView = new ImageView(imageView.getImage());
+                floatingImageView.setId("Lightbulb");
+                floatingImageView.setFitHeight(50);
+                floatingImageView.setPreserveRatio(true);
+                floatingImageView.setOpacity(0.5);
+                floatingImageView.setX(event.getScreenX() - scene.getWindow().getX()
+                        - floatingImageView.getBoundsInLocal().getWidth() / 2 - 28);
+                floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
+                        - floatingImageView.getBoundsInLocal().getHeight() / 2);
+                borderPane.getChildren().add(floatingImageView);
+            }
+        });
+
+        HBox hbox = new HBox(imageView);
+        hbox.setPadding(new Insets(5));
+        sidebar.getChildren().add(hbox);
+
     }
 
     public VBox getSidebar() {
