@@ -24,6 +24,7 @@ public class CircuitCanvas extends Pane {
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
     private Point2D lastMouseCoordinates;
     private ScrollPane scrollPane;
+    private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
 
     public enum Mode {
         PAN, WORK
@@ -103,6 +104,8 @@ public class CircuitCanvas extends Pane {
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 currentLine.setStroke(Color.BLUE);
                 this.getChildren().add(currentLine);
+                lineToStartGateMap.put(currentLine, gate);
+                startGate = gate;
                 gate.addOutputConnection(currentLine);
                 showInputMarkers(true, outputMarker);
                 setupConnectionHandlers();
@@ -121,11 +124,17 @@ public class CircuitCanvas extends Pane {
                     currentLine.setEndY(inputPos.getY());
 
                     LogicGate targetGate = findGateForInputMarker(inputMarker);
-                    int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
+                    LogicGate sourceGate = lineToStartGateMap.get(currentLine);
 
-                    if (targetGate != null) {
+                    if (targetGate != null && sourceGate != null) {
+                        int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
                         targetGate.addInputConnection(currentLine, inputIndex);
+                        targetGate.addInput(sourceGate);
+                        sourceGate.addOutputConnection(currentLine);
+                        sourceGate.addOutputGate(targetGate);
                         targetGate.propagateStateChange();
+                        lineToStartGateMap.remove(currentLine);
+                        startGate = null;
                     }
 
                     return true;
