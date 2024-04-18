@@ -43,6 +43,8 @@ public class GateFactory {
                 return new XnorGate();
             case "SWITCH":
                 return new SwitchGate();
+            case "LIGHTBULB":
+                return new Lightbulb();
             default:
                 return null;
         }
