@@ -10,7 +10,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
 public class SwitchGate extends LogicGate implements GateInterface {
-    private boolean state = false; // false by default, can be toggled to true
+    private boolean state = false;
     private Image offImage;
     private Image onImage;
 
@@ -35,6 +35,7 @@ public class SwitchGate extends LogicGate implements GateInterface {
         state = !state;
         updateVisualState();
         updateOutputConnectionsColor();
+        propagateStateChange();
     }
 
     public void updateOutputConnectionsColor() {
@@ -59,6 +60,7 @@ public class SwitchGate extends LogicGate implements GateInterface {
         }
         if (outputMarker != null) {
             canvas.getChildren().add(outputMarker);
+            ((CircuitCanvas) canvas).setupOutputInteraction(outputMarker, this);
             updateMarkerPosition();
         }
     }
