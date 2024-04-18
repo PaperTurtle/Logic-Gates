@@ -149,8 +149,6 @@ public abstract class LogicGate {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
             outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
         }
-        System.out.println("Input points: " + inputPoints.size() + ", markers: " + inputMarkers.size());
-        ;
         for (int i = 0; i < inputPoints.size(); i++) {
             if (i < inputMarkers.size()) {
                 Circle marker = inputMarkers.get(i);
