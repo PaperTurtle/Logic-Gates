@@ -3,22 +3,30 @@ package com.example;
 import java.util.Arrays;
 
 import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class Lightbulb extends LogicGate implements GateInterface {
     private boolean state = false;
-    private ImageView imageView;
-    private Point2D position;
-
-    private static final String LIGHTBULB_OFF_IMAGE_PATH = "/com/example/LIGHTBULB_ANSI_Labelled.svg";
-    private static final String LIGHTBULB_ON_IMAGE_PATH = "/com/example/LIGHTBULB_ON_ANSI_Labelled.svg";
+    private Image offImage;
+    private Image onImage;
 
     public Lightbulb() {
-        super("/com/example/LIGHTBULB_ANSI_Labelled.svg",
+        super(null,
                 Arrays.asList(new Point2D(15,
                         25)),
                 null);
+        offImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ANSI_Labelled.svg");
+        onImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ON_ANSI_Labelled.svg");
+        imageView = new javafx.scene.image.ImageView(offImage);
+        for (Point2D point : inputPoints) {
+            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
+            inputMarkers.add(marker);
+        }
+
     }
 
     public void toggle() {
@@ -26,13 +34,35 @@ public class Lightbulb extends LogicGate implements GateInterface {
         updateVisualState();
     }
 
+    public void toggleLight(boolean currentState) {
+        this.state = currentState;
+        updateVisualState();
+    }
+
     private void updateVisualState() {
-        if (state) {
-            imageView.setImage(SvgUtil.loadSvgImage(LIGHTBULB_ON_IMAGE_PATH));
-        } else {
-            imageView.setImage(SvgUtil.loadSvgImage(LIGHTBULB_OFF_IMAGE_PATH));
+        if (imageView != null) {
+            imageView.setImage(state ? onImage : offImage);
         }
     }
+
+    @Override
+    public void createVisualRepresentation(Pane canvas) {
+        if (imageView != null) {
+            canvas.getChildren().add(imageView);
+        }
+        for (Circle marker : inputMarkers) {
+            if (marker != null) {
+                canvas.getChildren().add(marker);
+            }
+        }
+    }
+
+    // private void updateMarkerPosition() {
+    // if (imageView != null && outputMarker != null) {
+    // outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
+    // outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
+    // }
+    // }
 
     @Override
     public boolean evaluate() {
@@ -56,9 +86,5 @@ public class Lightbulb extends LogicGate implements GateInterface {
 
     public Circle getOutputMarker() {
         return outputMarker;
-    }
-
-    public Point2D getPosition() {
-        return position;
     }
 }

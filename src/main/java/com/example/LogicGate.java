@@ -149,11 +149,17 @@ public abstract class LogicGate {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
             outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
         }
+        System.out.println("Input points: " + inputPoints.size() + ", markers: " + inputMarkers.size());
+        ;
         for (int i = 0; i < inputPoints.size(); i++) {
-            Circle marker = inputMarkers.get(i);
-            Point2D point = inputPoints.get(i);
-            marker.setCenterX(imageView.getX() + point.getX());
-            marker.setCenterY(imageView.getY() + point.getY());
+            if (i < inputMarkers.size()) {
+                Circle marker = inputMarkers.get(i);
+                Point2D point = inputPoints.get(i);
+                marker.setCenterX(imageView.getX() + point.getX());
+                marker.setCenterY(imageView.getY() + point.getY());
+            } else {
+                System.err.println("No marker available for input point at index " + i);
+            }
         }
     }
 
@@ -227,6 +233,9 @@ public abstract class LogicGate {
         }
         for (LogicGate gate : outputGates) {
             gate.propagateStateChange();
+            if (gate instanceof Lightbulb) {
+                ((Lightbulb) gate).toggleLight(currentState);
+            }
         }
     }
 
