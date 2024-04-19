@@ -77,7 +77,7 @@ public class CircuitCanvas extends Pane {
             if (currentMode == Mode.WORK && currentLine == null) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
-                currentLine.setStroke(Color.BLUE);
+                currentLine.setStroke(Color.BLACK);
                 this.getChildren().add(currentLine);
                 lineToStartGateMap.put(currentLine, gate);
                 startGate = gate;
