@@ -42,6 +42,7 @@ public class Lightbulb extends LogicGate implements GateInterface {
     private void updateVisualState() {
         if (imageView != null) {
             imageView.setImage(state ? onImage : offImage);
+            updateMarkerPosition();
         }
     }
 
@@ -55,14 +56,19 @@ public class Lightbulb extends LogicGate implements GateInterface {
                 canvas.getChildren().add(marker);
             }
         }
+        updateMarkerPosition();
     }
 
-    // private void updateMarkerPosition() {
-    // if (imageView != null && outputMarker != null) {
-    // outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
-    // outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
-    // }
-    // }
+    private void updateMarkerPosition() {
+        if (imageView != null && inputMarkers != null) {
+            for (int i = 0; i < inputMarkers.size(); i++) {
+                Circle marker = inputMarkers.get(i);
+                Point2D inputPoint = inputPoints.get(i);
+                marker.setCenterX(imageView.getX() + inputPoint.getX());
+                marker.setCenterY(imageView.getY() + inputPoint.getY());
+            }
+        }
+    }
 
     @Override
     public boolean evaluate() {
