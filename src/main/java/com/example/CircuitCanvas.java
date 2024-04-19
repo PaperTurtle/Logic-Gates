@@ -167,6 +167,18 @@ public class CircuitCanvas extends Pane {
     private void setupDragHandlers(ImageView imageView, LogicGate gate) {
         imageView.setPickOnBounds(true);
 
+        imageView.setOnMouseDragged(event -> {
+            if (currentMode == Mode.PAN) {
+                Object[] data = (Object[]) imageView.getUserData();
+                double[] offset = new double[] { (double) data[0], (double) data[1] };
+                LogicGate draggedGate = (LogicGate) data[2];
+                double newX = event.getSceneX() - offset[0];
+                double newY = event.getSceneY() - offset[1];
+                draggedGate.handleDrag(newX, newY);
+            }
+            event.consume();
+        });
+
         imageView.setOnMousePressed(event -> {
             if (highlightedGate != null && highlightedGate != gate) {
                 highlightedGate.unhighlight();
