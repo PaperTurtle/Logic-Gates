@@ -1,7 +1,6 @@
 package com.example;
 
 import javafx.geometry.Point2D;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
