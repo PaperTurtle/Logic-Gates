@@ -234,7 +234,6 @@ public abstract class LogicGate {
             line.setStroke(currentState ? Color.RED : Color.BLACK);
         }
         for (LogicGate gate : outputGates) {
-            gate.propagateStateChange();
             if (gate instanceof Lightbulb) {
                 ((Lightbulb) gate).toggleLight(currentState);
             }
