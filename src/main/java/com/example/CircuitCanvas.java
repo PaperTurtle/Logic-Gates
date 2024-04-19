@@ -100,7 +100,6 @@ public class CircuitCanvas extends Pane {
 
                     LogicGate targetGate = findGateForInputMarker(inputMarker);
                     LogicGate sourceGate = lineToStartGateMap.get(currentLine);
-
                     if (targetGate != null && sourceGate != null) {
                         int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
                         targetGate.addInputConnection(currentLine, inputIndex);
