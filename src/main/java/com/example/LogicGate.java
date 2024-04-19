@@ -30,6 +30,10 @@ public abstract class LogicGate {
         this.svgFilePath = svgFilePath;
         this.inputPoints = (inputPoints != null) ? inputPoints : new ArrayList<>();
         this.outputPoint = outputPoint;
+
+        for (int i = 0; i < this.inputPoints.size(); i++) {
+            inputConnections.add(new ArrayList<>());
+        }
     }
 
     /**
