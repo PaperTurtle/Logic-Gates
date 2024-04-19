@@ -6,14 +6,20 @@ import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import javafx.application.Platform;
 
 public class CircuitCanvas extends Pane {
@@ -25,6 +31,9 @@ public class CircuitCanvas extends Pane {
     private Point2D lastMouseCoordinates;
     private ScrollPane scrollPane;
     private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
+    private LogicGate highlightedGate = null;
+    private ContextMenu openContextMenu = null;
+    private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
 
     public enum Mode {
         PAN, WORK
@@ -39,6 +48,10 @@ public class CircuitCanvas extends Pane {
         setupModeChangeHandlers();
 
         this.setOnMouseClicked(event -> {
+            if (highlightedGate != null) {
+                highlightedGate.unhighlight();
+                highlightedGate = null;
+            }
             this.requestFocus();
         });
     }
@@ -106,7 +119,7 @@ public class CircuitCanvas extends Pane {
                         targetGate.addInput(sourceGate);
                         sourceGate.addOutputConnection(currentLine);
                         sourceGate.addOutputGate(targetGate);
-                        targetGate.propagateStateChange();
+                        scheduleUpdate(targetGate);
                         lineToStartGateMap.remove(currentLine);
                         startGate = null;
                     }
@@ -155,33 +168,67 @@ public class CircuitCanvas extends Pane {
         imageView.setPickOnBounds(true);
 
         imageView.setOnMousePressed(event -> {
-            if (currentMode == Mode.PAN) {
+            if (highlightedGate != null && highlightedGate != gate) {
+                highlightedGate.unhighlight();
+            }
+            highlightedGate = gate;
+            gate.highlight();
+
+            if (event.getButton() == MouseButton.SECONDARY) {
+                if (openContextMenu != null) {
+                    openContextMenu.hide();
+                }
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem deleteItem = new MenuItem("Delete");
+                deleteItem.setOnAction(e -> {
+                    removeGate(imageView);
+                    if (highlightedGate == gate) {
+                        highlightedGate = null;
+                    }
+                });
+                MenuItem propertiesItem = new MenuItem("Properties");
+                propertiesItem.setOnAction(e -> showPropertiesDialog(gate));
+                contextMenu.getItems().addAll(deleteItem, propertiesItem);
+
+                contextMenu.show(imageView, event.getScreenX(), event.getScreenY());
+                contextMenu.setAutoHide(false);
+                contextMenu.setOnShown(e -> contextMenu.requestFocus());
+
+                openContextMenu = contextMenu;
+                event.consume();
+            }
+
+            if (event.getButton() == MouseButton.PRIMARY && currentMode == Mode.PAN) {
                 double offsetX = event.getSceneX() - imageView.getX();
                 double offsetY = event.getSceneY() - imageView.getY();
                 imageView.setUserData(new Object[] { offsetX, offsetY, gate });
                 imageView.setCursor(Cursor.CLOSED_HAND);
+                event.consume();
             }
-            event.consume();
-        });
-
-        imageView.setOnMouseDragged(event -> {
-            if (currentMode == Mode.PAN) {
-                Object[] data = (Object[]) imageView.getUserData();
-                double[] offset = new double[] { (double) data[0], (double) data[1] };
-                LogicGate draggedGate = (LogicGate) data[2];
-                double newX = event.getSceneX() - offset[0];
-                double newY = event.getSceneY() - offset[1];
-                draggedGate.handleDrag(newX, newY);
-            }
-            event.consume();
         });
 
         imageView.setOnMouseReleased(event -> {
-            if (currentMode == Mode.PAN) {
+            if (currentMode == Mode.PAN && event.getButton() == MouseButton.PRIMARY) {
                 imageView.setCursor(Cursor.HAND);
             }
-            event.consume();
         });
+
+        this.setOnMouseClicked(event -> {
+            if (!(event.getTarget() instanceof ImageView)) {
+                if (highlightedGate != null) {
+                    highlightedGate.unhighlight();
+                    highlightedGate = null;
+                }
+                if (openContextMenu != null) {
+                    openContextMenu.hide();
+                    openContextMenu = null;
+                }
+                this.requestFocus();
+            }
+        });
+    }
+
+    private void showPropertiesDialog(LogicGate gate) {
     }
 
     private void updateMarkers(ImageView gate, double newX, double newY) {
@@ -244,4 +291,17 @@ public class CircuitCanvas extends Pane {
         }
     }
 
+    public void propagateUpdates() {
+        while (!gatesToBeUpdated.isEmpty()) {
+            Set<LogicGate> currentBatch = new HashSet<>(gatesToBeUpdated);
+            gatesToBeUpdated.clear();
+            for (LogicGate gate : currentBatch) {
+                gate.propagateStateChange();
+            }
+        }
+    }
+
+    public void scheduleUpdate(LogicGate gate) {
+        gatesToBeUpdated.add(gate);
+    }
 }

@@ -292,4 +292,12 @@ public abstract class LogicGate {
     public ImageView getImageView() {
         return imageView;
     }
+
+    public void highlight() {
+        imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0)");
+    }
+
+    public void unhighlight() {
+        imageView.setStyle("");
+    }
 }
