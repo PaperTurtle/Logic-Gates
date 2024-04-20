@@ -259,14 +259,12 @@ public class CircuitCanvas extends Pane {
     public void removeGate(ImageView gate) {
         LogicGate logicGate = gateImageViews.get(gate);
         if (logicGate != null) {
-            // Remove all output connections from this gate
             List<Line> outputs = new ArrayList<>(logicGate.getOutputConnections());
             for (Line line : outputs) {
                 logicGate.removeOutputConnection(line);
                 removeConnection(line);
             }
 
-            // Remove all input connections to this gate
             for (int i = 0; i < logicGate.getInputMarkers().size(); i++) {
                 List<Line> connections = new ArrayList<>(logicGate.getInputConnections(i));
                 for (Line line : connections) {
@@ -278,16 +276,18 @@ public class CircuitCanvas extends Pane {
                 }
             }
 
-            List<Circle> markers = gateMarkers.get(gate);
-            if (markers != null) {
-                for (Circle marker : markers) {
+            if (logicGate.getInputMarkers() != null) {
+                for (Circle marker : logicGate.getInputMarkers()) {
                     this.getChildren().remove(marker);
                 }
-                gateMarkers.remove(gate);
+            }
+            if (logicGate.getOutputMarker() != null) {
+                this.getChildren().remove(logicGate.getOutputMarker());
             }
 
             this.getChildren().remove(gate);
             gateImageViews.remove(gate);
+            gateMarkers.remove(gate);
         }
     }
 
