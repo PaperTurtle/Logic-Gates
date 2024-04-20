@@ -300,6 +300,19 @@ public abstract class LogicGate {
     }
 
     /**
+     * Returns the list of input connections for this gate.
+     * 
+     * @return the list of input connections.
+     */
+    public List<List<Line>> getInputConnections() {
+        return inputConnections;
+    }
+
+    public Circle getOutputMarker() {
+        return outputMarker;
+    }
+
+    /**
      * Returns the list of output connections for this gate.
      * 
      * @return the list of output connections.
