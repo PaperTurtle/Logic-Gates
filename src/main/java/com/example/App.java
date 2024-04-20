@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
@@ -55,6 +56,16 @@ public class App extends Application {
                 floatingImageView.setY(event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2);
             }
         });
+
+        scrollableSidebar.setOnMouseClicked(event -> {
+            if (floatingImageView != null) {
+                if (!(event.getTarget() instanceof ImageView)) {
+                    borderPane.getChildren().remove(floatingImageView);
+                    floatingImageView = null;
+                }
+            }
+        });
+
         scene.setOnMouseClicked(event -> {
             if (floatingImageView != null && event.getTarget() == circuitCanvas) {
                 double sidebarWidth = sidebar.getWidth();
@@ -104,8 +115,20 @@ public class App extends Application {
                     floatingImageView.setX(event.getScreenX() - scene.getWindow().getX()
                             - floatingImageView.getBoundsInLocal().getWidth() / 2 - 28);
                     floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
-                            - floatingImageView.getBoundsInLocal().getHeight() / 2);
+                            - floatingImageView.getBoundsInLocal().getHeight() / 2 + 28);
                     borderPane.getChildren().add(floatingImageView);
+                }
+            });
+
+            imageView.setOnMouseClicked(event -> {
+                ImageView clickedImageView = (ImageView) event.getSource();
+                if (floatingImageView != null) {
+                    if (!floatingImageView.getId().equals(clickedImageView.getId())) {
+                        borderPane.getChildren().remove(floatingImageView);
+                        createFloatingImage(clickedImageView, event);
+                    }
+                } else {
+                    createFloatingImage(clickedImageView, event);
                 }
             });
 
@@ -113,6 +136,22 @@ public class App extends Application {
             hbox.setPadding(new Insets(5));
             sidebar.getChildren().add(hbox);
         }
+    }
+
+    private void createFloatingImage(ImageView sourceImageView, MouseEvent event) {
+        floatingImageView = new ImageView(sourceImageView.getImage());
+        floatingImageView.setId(sourceImageView.getId());
+        floatingImageView.setFitHeight(50);
+        floatingImageView.setPreserveRatio(true);
+        floatingImageView.setOpacity(0.5);
+
+        floatingImageView.setX(
+                event.getScreenX() - scene.getWindow().getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
+        floatingImageView.setY(
+                event.getScreenY() - scene.getWindow().getY() - floatingImageView.getBoundsInLocal().getHeight() / 2
+                        - 28);
+
+        borderPane.getChildren().add(floatingImageView);
     }
 
     public VBox getSidebar() {
