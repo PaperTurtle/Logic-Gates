@@ -49,9 +49,11 @@ public class CircuitCanvas extends Pane {
         setupModeChangeHandlers();
 
         this.setOnMouseClicked(event -> {
-            if (highlightedGate != null) {
-                highlightedGate.unhighlight();
-                highlightedGate = null;
+            if (event.getTarget() instanceof Pane || !(event.getTarget() instanceof ImageView)) {
+                if (highlightedGate != null) {
+                    highlightedGate.unhighlight();
+                    highlightedGate = null;
+                }
             }
             this.requestFocus();
         });
@@ -96,7 +98,6 @@ public class CircuitCanvas extends Pane {
                 lineToStartGateMap.put(currentLine, gate);
                 startGate = gate;
                 gate.addOutputConnection(currentLine);
-                showInputMarkers(true, outputMarker);
                 setupConnectionHandlers();
                 event.consume();
             }
@@ -151,15 +152,6 @@ public class CircuitCanvas extends Pane {
 
     private int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
         return gate.getInputMarkers().indexOf(inputMarker);
-    }
-
-    private void showInputMarkers(boolean show, Circle outputMarker) {
-        for (Node node : this.getChildren()) {
-            // if (node instanceof Circle && node != outputMarker) {
-            // Circle marker = (Circle) node;
-            // marker.setOpacity(show ? 1.0 : 0.2);
-            // }
-        }
     }
 
     private void resetInteractionHandlers() {
@@ -335,7 +327,6 @@ public class CircuitCanvas extends Pane {
                     this.getChildren().remove(currentLine);
                 }
                 currentLine = null;
-                showInputMarkers(false, null);
                 resetInteractionHandlers();
             }
         });
