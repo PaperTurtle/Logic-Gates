@@ -259,35 +259,60 @@ public class CircuitCanvas extends Pane {
     public void removeGate(ImageView gate) {
         LogicGate logicGate = gateImageViews.get(gate);
         if (logicGate != null) {
-            List<Line> outputs = new ArrayList<>(logicGate.getOutputConnections());
-            for (Line line : outputs) {
-                logicGate.removeOutputConnection(line);
-                removeConnection(line);
-            }
-
-            for (int i = 0; i < logicGate.getInputMarkers().size(); i++) {
-                List<Line> connections = new ArrayList<>(logicGate.getInputConnections(i));
-                for (Line line : connections) {
-                    LogicGate sourceGate = lineToStartGateMap.get(line);
-                    if (sourceGate != null) {
-                        sourceGate.removeOutputConnection(line);
-                    }
-                    removeConnection(line);
-                }
-            }
-
-            if (logicGate.getInputMarkers() != null) {
-                for (Circle marker : logicGate.getInputMarkers()) {
-                    this.getChildren().remove(marker);
-                }
-            }
+            removeAllConnections(logicGate);
+            this.getChildren().removeAll(logicGate.getInputMarkers());
             if (logicGate.getOutputMarker() != null) {
                 this.getChildren().remove(logicGate.getOutputMarker());
             }
-
             this.getChildren().remove(gate);
             gateImageViews.remove(gate);
             gateMarkers.remove(gate);
+            logicGate.inputs.forEach(inputGate -> {
+                inputGate.getOutputGates().remove(logicGate);
+                inputGate.evaluate();
+                inputGate.propagateStateChange();
+            });
+
+            logicGate.outputGates.forEach(outputGate -> {
+                outputGate.inputs.remove(logicGate);
+                outputGate.evaluate();
+                outputGate.propagateStateChange();
+            });
+        }
+        propagateUpdates();
+    }
+
+    private void removeAllConnections(LogicGate logicGate) {
+        new ArrayList<>(logicGate.getOutputConnections()).forEach(line -> {
+            LogicGate targetGate = lineToStartGateMap.get(line);
+            if (targetGate != null) {
+                targetGate.removeInput(logicGate);
+                targetGate.evaluate();
+                targetGate.propagateStateChange();
+            }
+            lineToStartGateMap.remove(line);
+            this.getChildren().remove(line);
+        });
+
+        // Handle input connections
+        logicGate.getInputConnections().forEach(connections -> new ArrayList<>(connections).forEach(line -> {
+            LogicGate sourceGate = lineToStartGateMap.get(line);
+            if (sourceGate != null) {
+                sourceGate.getOutputConnections().remove(line);
+                sourceGate.evaluate();
+                sourceGate.propagateStateChange();
+            }
+            lineToStartGateMap.remove(line);
+            this.getChildren().remove(line);
+        }));
+    }
+
+    private void removeMarkers(LogicGate logicGate) {
+        if (logicGate.getInputMarkers() != null) {
+            logicGate.getInputMarkers().forEach(this.getChildren()::remove);
+        }
+        if (logicGate.getOutputMarker() != null) {
+            this.getChildren().remove(logicGate.getOutputMarker());
         }
     }
 
@@ -334,9 +359,7 @@ public class CircuitCanvas extends Pane {
         while (!gatesToBeUpdated.isEmpty()) {
             Set<LogicGate> currentBatch = new HashSet<>(gatesToBeUpdated);
             gatesToBeUpdated.clear();
-            for (LogicGate gate : currentBatch) {
-                gate.propagateStateChange();
-            }
+            currentBatch.forEach(LogicGate::propagateStateChange);
         }
     }
 
