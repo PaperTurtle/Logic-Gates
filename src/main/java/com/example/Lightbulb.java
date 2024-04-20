@@ -72,6 +72,11 @@ public class Lightbulb extends LogicGate implements GateInterface {
 
     @Override
     public boolean evaluate() {
+        boolean newEvaluatedState = inputs.stream().anyMatch(LogicGate::getOutput);
+        if (newEvaluatedState != state) {
+            state = newEvaluatedState;
+            updateVisualState();
+        }
         return state;
     }
 
@@ -92,5 +97,14 @@ public class Lightbulb extends LogicGate implements GateInterface {
 
     public Circle getOutputMarker() {
         return outputMarker;
+    }
+
+    @Override
+    public void propagateStateChange() {
+        if (evaluate()) {
+            for (LogicGate gate : outputGates) {
+                gate.propagateStateChange();
+            }
+        }
     }
 }
