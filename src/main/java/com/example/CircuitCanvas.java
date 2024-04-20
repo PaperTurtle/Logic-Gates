@@ -120,6 +120,7 @@ public class CircuitCanvas extends Pane {
                         targetGate.addInput(sourceGate);
                         sourceGate.addOutputConnection(currentLine);
                         sourceGate.addOutputGate(targetGate);
+                        targetGate.evaluate();
                         scheduleUpdate(targetGate);
                         lineToStartGateMap.remove(currentLine);
                         startGate = null;
@@ -153,10 +154,10 @@ public class CircuitCanvas extends Pane {
 
     private void showInputMarkers(boolean show, Circle outputMarker) {
         for (Node node : this.getChildren()) {
-            if (node instanceof Circle && node != outputMarker) {
-                Circle marker = (Circle) node;
-                marker.setOpacity(show ? 1.0 : 0.2);
-            }
+            // if (node instanceof Circle && node != outputMarker) {
+            // Circle marker = (Circle) node;
+            // marker.setOpacity(show ? 1.0 : 0.2);
+            // }
         }
     }
 
