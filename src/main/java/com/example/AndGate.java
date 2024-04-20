@@ -38,16 +38,16 @@ public class AndGate extends LogicGate {
      */
     @Override
     public boolean evaluate() {
-        // Return true if there are no inputs (degenerate case)
-        if (inputs.isEmpty())
-            return true;
+        if (inputs.size() != 2) {
+            return false;
+        }
 
-        // Check if all inputs are true
-        for (LogicGate input : inputs) {
-            if (!input.getOutput()) {
-                return false; // If any input is false, AND gate output is false.
+        // Return true if there are no inputs (degenerate case)
+        for (LogicGate inputGate : inputs) {
+            if (!inputGate.getOutput()) {
+                return false;
             }
         }
-        return true; // If all inputs are true, AND gate output is true.
+        return true;
     }
 }
