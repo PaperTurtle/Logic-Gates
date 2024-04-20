@@ -74,6 +74,8 @@ public class CircuitCanvas extends Pane {
                     updateMarkersVisibility();
                     System.out.println("Switched to Work Mode");
                     break;
+                default:
+                    break;
             }
         });
     }
