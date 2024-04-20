@@ -34,9 +34,6 @@ public class SwitchGate extends LogicGate implements GateInterface {
         state = !state;
         updateVisualState();
         updateOutputConnectionsColor();
-        for (LogicGate outputGate : outputGates) {
-            outputGate.evaluate();
-        }
         propagateStateChange();
     }
 
@@ -76,5 +73,13 @@ public class SwitchGate extends LogicGate implements GateInterface {
 
     private void handleMouseClicked(MouseEvent event) {
         toggle();
+    }
+
+    @Override
+    public void propagateStateChange() {
+        for (LogicGate outputGate : outputGates) {
+            outputGate.evaluate();
+            outputGate.propagateStateChange();
+        }
     }
 }
