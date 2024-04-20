@@ -36,10 +36,17 @@ public class NotGate extends LogicGate {
      */
     @Override
     public boolean evaluate() {
-        if (inputs.isEmpty())
-            return true; // Default to true when no input (typically NOT gates have one input).
+        if (inputs.isEmpty()) {
+            return false;
+        }
 
-        // NOT gate inverts its single input
         return !inputs.get(0).getOutput();
+    }
+
+    @Override
+    public void removeInput(LogicGate input) {
+        super.removeInput(input);
+        evaluate();
+        propagateStateChange();
     }
 }
