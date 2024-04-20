@@ -230,13 +230,16 @@ public abstract class LogicGate {
 
     public void propagateStateChange() {
         boolean currentState = evaluate();
-        for (Line line : outputConnections) {
-            line.setStroke(currentState ? Color.RED : Color.BLACK);
-        }
+        updateOutputConnectionsColor(currentState);
+
         for (LogicGate gate : outputGates) {
-            if (gate instanceof Lightbulb) {
-                ((Lightbulb) gate).toggleLight(currentState);
-            }
+            gate.propagateStateChange();
+        }
+    }
+
+    private void updateOutputConnectionsColor(boolean state) {
+        for (Line line : outputConnections) {
+            line.setStroke(state ? Color.RED : Color.BLACK);
         }
     }
 
@@ -281,6 +284,15 @@ public abstract class LogicGate {
      */
     public List<Circle> getInputMarkers() {
         return inputMarkers;
+    }
+
+    /**
+     * Returns the list of output connections for this gate.
+     * 
+     * @return the list of output connections.
+     */
+    public List<Line> getOutputConnections() {
+        return outputConnections;
     }
 
     /**

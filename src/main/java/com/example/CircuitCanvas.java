@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -255,13 +256,38 @@ public class CircuitCanvas extends Pane {
     }
 
     public void removeGate(ImageView gate) {
-        if (gateMarkers.containsKey(gate)) {
-            for (Circle marker : gateMarkers.get(gate)) {
-                this.getChildren().remove(marker);
+        LogicGate logicGate = gateImageViews.get(gate);
+        if (logicGate != null) {
+            // Remove all output connections from this gate
+            List<Line> outputs = new ArrayList<>(logicGate.getOutputConnections());
+            for (Line line : outputs) {
+                logicGate.removeOutputConnection(line);
+                removeConnection(line);
             }
-            gateMarkers.remove(gate);
+
+            // Remove all input connections to this gate
+            for (int i = 0; i < logicGate.getInputMarkers().size(); i++) {
+                List<Line> connections = new ArrayList<>(logicGate.getInputConnections(i));
+                for (Line line : connections) {
+                    LogicGate sourceGate = lineToStartGateMap.get(line);
+                    if (sourceGate != null) {
+                        sourceGate.removeOutputConnection(line);
+                    }
+                    removeConnection(line);
+                }
+            }
+
+            List<Circle> markers = gateMarkers.get(gate);
+            if (markers != null) {
+                for (Circle marker : markers) {
+                    this.getChildren().remove(marker);
+                }
+                gateMarkers.remove(gate);
+            }
+
+            this.getChildren().remove(gate);
+            gateImageViews.remove(gate);
         }
-        this.getChildren().remove(gate);
     }
 
     public void removeConnection(Line connection) {
@@ -315,5 +341,6 @@ public class CircuitCanvas extends Pane {
 
     public void scheduleUpdate(LogicGate gate) {
         gatesToBeUpdated.add(gate);
+        Platform.runLater(this::propagateUpdates);
     }
 }
