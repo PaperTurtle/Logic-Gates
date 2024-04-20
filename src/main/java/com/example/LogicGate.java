@@ -24,6 +24,7 @@ public abstract class LogicGate {
     protected List<List<Line>> inputConnections = new ArrayList<>();
     protected List<Line> outputConnections = new ArrayList<>();
     protected List<LogicGate> outputGates = new ArrayList<>();
+    protected boolean currentState = false;
 
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
         this.inputs = new ArrayList<>();
@@ -49,6 +50,8 @@ public abstract class LogicGate {
     public void addInput(LogicGate input) {
         if (!inputs.contains(input)) {
             inputs.add(input);
+            evaluate();
+            propagateStateChange();
         }
     }
 
@@ -58,7 +61,9 @@ public abstract class LogicGate {
      * @param input the LogicGate to be removed.
      */
     public void removeInput(LogicGate input) {
-        inputs.remove(input);
+        if (inputs.contains(input)) {
+            inputs.remove(input);
+        }
     }
 
     public void addInputConnection(Line line, int inputIndex) {
@@ -229,11 +234,19 @@ public abstract class LogicGate {
     }
 
     public void propagateStateChange() {
-        boolean currentState = evaluate();
-        updateOutputConnectionsColor(currentState);
+        boolean newState = evaluate();
+        if (newState != currentState) {
+            currentState = newState;
+            updateOutputConnectionsColor(newState);
 
-        for (LogicGate gate : outputGates) {
-            gate.propagateStateChange();
+            for (LogicGate gate : outputGates) {
+                gate.propagateStateChange();
+            }
+            for (LogicGate gate : outputGates) {
+                if (gate instanceof Lightbulb) {
+                    ((Lightbulb) gate).toggleLight(currentState);
+                }
+            }
         }
     }
 
