@@ -121,6 +121,7 @@ public class CircuitCanvas extends Pane {
                         sourceGate.addOutputConnection(currentLine);
                         sourceGate.addOutputGate(targetGate);
                         targetGate.evaluate();
+                        targetGate.propagateStateChange();
                         scheduleUpdate(targetGate);
                         lineToStartGateMap.remove(currentLine);
                         startGate = null;
