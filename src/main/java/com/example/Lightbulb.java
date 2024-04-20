@@ -82,7 +82,9 @@ public class Lightbulb extends LogicGate implements GateInterface {
 
     @Override
     public void addInput(LogicGate input) {
-        // Not used for Lightbulb
+        super.addInput(input);
+        this.evaluate(); // Immediately evaluate to reflect the current state of inputs
+        this.updateVisualState(); // Update visual state to reflect the change
     }
 
     @Override
