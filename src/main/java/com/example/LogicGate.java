@@ -63,6 +63,9 @@ public abstract class LogicGate {
     public void removeInput(LogicGate input) {
         if (inputs.contains(input)) {
             inputs.remove(input);
+            System.out.println("Removed input gate: " + input.getClass().getSimpleName());
+            evaluate();
+            propagateStateChange();
         }
     }
 
@@ -74,9 +77,8 @@ public abstract class LogicGate {
     }
 
     public void removeInputConnection(Line line, int inputIndex) {
-        List<Line> connections = getInputConnections(inputIndex);
-        if (connections != null) {
-            connections.remove(line);
+        if (inputIndex >= 0 && inputIndex < inputConnections.size()) {
+            inputConnections.get(inputIndex).remove(line);
         }
     }
 
@@ -244,6 +246,7 @@ public abstract class LogicGate {
             }
             for (LogicGate gate : outputGates) {
                 if (gate instanceof Lightbulb) {
+                    System.out.println(inputConnections);
                     ((Lightbulb) gate).toggleLight(currentState);
                 }
             }
@@ -281,6 +284,15 @@ public abstract class LogicGate {
         }
     }
 
+    public int findInputConnectionIndex(Line line) {
+        for (List<Line> connections : inputConnections) {
+            if (connections.contains(line)) {
+                return inputConnections.indexOf(connections);
+            }
+        }
+        return -1;
+    }
+
     /**
      * Removes an output connection from this gate.
      * 
@@ -288,6 +300,10 @@ public abstract class LogicGate {
      */
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
+        for (LogicGate gate : outputGates) {
+            gate.removeInputConnection(line, gate.findInputConnectionIndex(line));
+            gate.evaluate(); // Re-evaluate the gate's state after removing the connection
+        }
     }
 
     /**
@@ -328,6 +344,10 @@ public abstract class LogicGate {
      */
     public ImageView getImageView() {
         return imageView;
+    }
+
+    public List<LogicGate> getOutputGates() {
+        return outputGates;
     }
 
     public void highlight() {
