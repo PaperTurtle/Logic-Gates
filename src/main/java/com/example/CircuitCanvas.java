@@ -11,6 +11,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -96,6 +97,7 @@ public class CircuitCanvas extends Pane {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 currentLine.setStroke(Color.BLACK);
+                currentLine.setStrokeWidth(3.5);
                 this.getChildren().add(currentLine);
                 lineToStartGateMap.put(currentLine, gate);
                 startGate = gate;
@@ -330,6 +332,22 @@ public class CircuitCanvas extends Pane {
                 }
                 currentLine = null;
                 resetInteractionHandlers();
+            }
+        });
+
+        this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() == MouseButton.SECONDARY && event.getTarget() instanceof Line) {
+                Line targetLine = (Line) event.getTarget();
+                if (openContextMenu != null) {
+                    openContextMenu.hide();
+                }
+                ContextMenu lineContextMenu = new ContextMenu();
+                MenuItem deleteLine = new MenuItem("Remove");
+                deleteLine.setOnAction(e -> removeConnection(targetLine));
+                lineContextMenu.getItems().add(deleteLine);
+                lineContextMenu.show(targetLine, event.getScreenX(), event.getScreenY());
+                openContextMenu = lineContextMenu;
+                event.consume();
             }
         });
     }
