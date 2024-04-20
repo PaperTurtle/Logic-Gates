@@ -7,15 +7,13 @@ import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 
-/**
- * JavaFX App
- */
 public class App extends Application {
 
     private Scene scene;
@@ -26,10 +24,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-
         sidebar = new VBox(10);
         sidebar.setPrefWidth(200);
-
         ScrollPane scrollableSidebar = new ScrollPane();
         scrollableSidebar.setContent(sidebar);
         scrollableSidebar.setFitToWidth(true);
@@ -50,6 +46,7 @@ public class App extends Application {
         borderPane.setCenter(circuitCanvas);
 
         scene = new Scene(borderPane, 1000, 600);
+        scene.getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
         scene.setOnMouseMoved(event -> {
             if (floatingImageView != null) {
                 floatingImageView.setX(event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
@@ -58,11 +55,9 @@ public class App extends Application {
         });
 
         scrollableSidebar.setOnMouseClicked(event -> {
-            if (floatingImageView != null) {
-                if (!(event.getTarget() instanceof ImageView)) {
-                    borderPane.getChildren().remove(floatingImageView);
-                    floatingImageView = null;
-                }
+            if (floatingImageView != null && !(event.getTarget() instanceof ImageView)) {
+                borderPane.getChildren().remove(floatingImageView);
+                floatingImageView = null;
             }
         });
 
@@ -83,23 +78,52 @@ public class App extends Application {
         stage.setTitle("Logic Gates Simulator");
         stage.setScene(scene);
         stage.show();
-
         circuitCanvas.requestFocus();
     }
 
     private void initializeSidebar(VBox sidebar) {
-        // ! TODO ADD LIGHTBULB TO SIDEBAR OR ADD SCROLLABLE SECTIONS
-        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "SWITCH", "LIGHTBULB" };
-        for (String type : gateTypes) {
-            ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
+        VBox inputsSection = new VBox(5);
+        VBox outputsSection = new VBox(5);
+        VBox gatesSection = new VBox(5);
+        inputsSection.getStyleClass().add("section");
+        outputsSection.getStyleClass().add("section");
+        gatesSection.getStyleClass().add("section");
 
+        sidebar.getChildren().addAll(createSectionLabel("Inputs"), inputsSection, createSectionLabel("Outputs"),
+                outputsSection, createSectionLabel("Logic Gates"), gatesSection);
+
+        String[] inputTypes = { "SWITCH" };
+        String[] outputTypes = { "LIGHTBULB" };
+        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR" };
+
+        addItemsToSection(inputsSection, inputTypes);
+        addItemsToSection(outputsSection, outputTypes);
+        addItemsToSection(gatesSection, gateTypes);
+    }
+
+    private Label createSectionLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("label-style");
+        return label;
+    }
+
+    private void addItemsToSection(VBox section, String[] types) {
+        HBox hbox = new HBox(10);
+        hbox.setPadding(new Insets(5, 0, 5, 0));
+        int count = 0;
+
+        for (String type : types) {
+            ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
             imageView.setId(type);
-            imageView.setFitHeight(50);
+            imageView.setFitWidth(90);
+            imageView.setFitHeight(40);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
             imageView.setPickOnBounds(true);
 
-            Tooltip tooltip = new Tooltip(type + " Gate");
+            String tooltipText = getTooltipText(type);
+            Tooltip tooltip = new Tooltip(tooltipText);
+            tooltip.setStyle("-fx-font-size: 12pt; -fx-background-color: #333333; -fx-text-fill: white;");
             Tooltip.install(imageView, tooltip);
 
             imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
@@ -107,34 +131,47 @@ public class App extends Application {
 
             imageView.setOnMouseClicked(event -> {
                 if (floatingImageView == null) {
-                    floatingImageView = new ImageView(imageView.getImage());
-                    floatingImageView.setId(type);
-                    floatingImageView.setFitHeight(50);
-                    floatingImageView.setPreserveRatio(true);
-                    floatingImageView.setOpacity(0.5);
-                    floatingImageView.setX(event.getScreenX() - scene.getWindow().getX()
-                            - floatingImageView.getBoundsInLocal().getWidth() / 2 - 28);
-                    floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
-                            - floatingImageView.getBoundsInLocal().getHeight() / 2 + 28);
-                    borderPane.getChildren().add(floatingImageView);
+                    createFloatingImage(imageView, event);
                 }
             });
 
-            imageView.setOnMouseClicked(event -> {
-                ImageView clickedImageView = (ImageView) event.getSource();
-                if (floatingImageView != null) {
-                    if (!floatingImageView.getId().equals(clickedImageView.getId())) {
-                        borderPane.getChildren().remove(floatingImageView);
-                        createFloatingImage(clickedImageView, event);
-                    }
-                } else {
-                    createFloatingImage(clickedImageView, event);
-                }
-            });
+            hbox.getChildren().add(imageView);
+            count++;
+            if (count % 2 == 0) {
+                section.getChildren().add(hbox);
+                hbox = new HBox(10);
+                hbox.setPadding(new Insets(5, 0, 5, 0));
+            }
+        }
+        if (count % 2 != 0) {
+            section.getChildren().add(hbox);
+        }
+    }
 
-            HBox hbox = new HBox(imageView);
-            hbox.setPadding(new Insets(5));
-            sidebar.getChildren().add(hbox);
+    private String getTooltipText(String type) {
+        switch (type) {
+            case "AND":
+                return "AND Gate";
+            case "OR":
+                return "OR Gate";
+            case "NOT":
+                return "NOT Gate";
+            case "BUFFER":
+                return "BUFFER Gate";
+            case "NAND":
+                return "NAND Gate";
+            case "NOR":
+                return "NOR Gate";
+            case "XOR":
+                return "XOR Gate";
+            case "XNOR":
+                return "XNOR Gate";
+            case "SWITCH":
+                return "Switch";
+            case "LIGHTBULB":
+                return "Lightbulb";
+            default:
+                return type + " Gate";
         }
     }
 
@@ -144,22 +181,14 @@ public class App extends Application {
         floatingImageView.setFitHeight(50);
         floatingImageView.setPreserveRatio(true);
         floatingImageView.setOpacity(0.5);
-
         floatingImageView.setX(
                 event.getScreenX() - scene.getWindow().getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
-        floatingImageView.setY(
-                event.getScreenY() - scene.getWindow().getY() - floatingImageView.getBoundsInLocal().getHeight() / 2
-                        - 28);
-
+        floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
+                - floatingImageView.getBoundsInLocal().getHeight() / 2 - 28);
         borderPane.getChildren().add(floatingImageView);
-    }
-
-    public VBox getSidebar() {
-        return sidebar;
     }
 
     public static void main(String[] args) {
         launch(args);
     }
-
 }
