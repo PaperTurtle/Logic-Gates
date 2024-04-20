@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -123,7 +124,9 @@ public class App extends Application {
 
             String tooltipText = getTooltipText(type);
             Tooltip tooltip = new Tooltip(tooltipText);
-            tooltip.setStyle("-fx-font-size: 12pt; -fx-background-color: #333333; -fx-text-fill: white;");
+            tooltip.getStyleClass().add("tooltip-style");
+            tooltip.setShowDelay(Duration.millis(100));
+
             Tooltip.install(imageView, tooltip);
 
             imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
