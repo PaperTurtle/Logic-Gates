@@ -46,6 +46,8 @@ public abstract class LogicGate {
      */
     public abstract boolean evaluate();
 
+    public abstract String getTruthTable();
+
     /**
      * Adds an input gate to this logic gate.
      * 
