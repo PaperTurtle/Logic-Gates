@@ -3,6 +3,7 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -235,25 +236,26 @@ public abstract class LogicGate {
     }
 
     public void propagateStateChange() {
-        boolean newState = evaluate();
+        boolean newState = evaluate(); // Re-evaluate the state based on current inputs
         if (newState != currentState) {
             currentState = newState;
-            updateOutputConnectionsColor(newState);
+            updateOutputConnectionsColor(newState); // Update connection colors based on the new state
 
             for (LogicGate gate : outputGates) {
-                gate.propagateStateChange();
+                gate.propagateStateChange(); // Propagate state change to connected gates
             }
             for (LogicGate gate : outputGates) {
                 if (gate instanceof Lightbulb) {
-                    ((Lightbulb) gate).toggleLight(currentState);
+                    ((Lightbulb) gate).toggleLight(currentState); // Specifically update lightbulb states
                 }
             }
         }
     }
 
-    private void updateOutputConnectionsColor(boolean state) {
+    public void updateOutputConnectionsColor(boolean state) {
+        Color newColor = state ? Color.RED : Color.BLACK; // Use RED for true, BLACK for false
         for (Line line : outputConnections) {
-            line.setStroke(state ? Color.RED : Color.BLACK);
+            Platform.runLater(() -> line.setStroke(newColor)); // Ensure UI update happens on the JavaFX thread
         }
     }
 
