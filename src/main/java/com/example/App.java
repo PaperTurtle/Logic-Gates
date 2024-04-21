@@ -136,6 +136,11 @@ public class App extends Application {
                 if (floatingImageView == null) {
                     createFloatingImage(imageView, event);
                 }
+                if (floatingImageView != null) {
+                    borderPane.getChildren().remove(floatingImageView);
+                    floatingImageView = null;
+                    createFloatingImage(imageView, event);
+                }
             });
 
             hbox.getChildren().add(imageView);
