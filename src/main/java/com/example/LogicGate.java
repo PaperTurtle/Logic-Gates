@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.util.Pair;
 
 public abstract class LogicGate {
     // List to hold input gates
@@ -46,7 +47,7 @@ public abstract class LogicGate {
      */
     public abstract boolean evaluate();
 
-    public abstract String getTruthTable();
+    public abstract List<Pair<Boolean[], Boolean>> getTruthTableData();
 
     /**
      * Adds an input gate to this logic gate.
