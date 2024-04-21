@@ -8,6 +8,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import java.util.List;
+import java.util.ArrayList;
+
+import javafx.util.Pair;
 
 public class Lightbulb extends LogicGate implements GateInterface {
     private boolean state = false;
@@ -114,10 +118,12 @@ public class Lightbulb extends LogicGate implements GateInterface {
     }
 
     @Override
-    public String getTruthTable() {
-        return "A | Q\n" +
-                "0 | OFF\n" +
-                "1 | ON";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        // Simple on/off state based on input
+        list.add(new Pair<>(new Boolean[] { false }, false));
+        list.add(new Pair<>(new Boolean[] { true }, true));
+        return list;
     }
 
 }

@@ -1,8 +1,11 @@
 package com.example;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 
 /**
  * The AndGate class extends the LogicGate class and represents an AND gate in
@@ -52,11 +55,13 @@ public class AndGate extends LogicGate {
     }
 
     @Override
-    public String getTruthTable() {
-        return "A B | Q\n" +
-                "0 0 | 0\n" +
-                "0 1 | 0\n" +
-                "1 0 | 0\n" +
-                "1 1 | 1";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] { false, false }, false));
+        list.add(new Pair<>(new Boolean[] { false, true }, false));
+        list.add(new Pair<>(new Boolean[] { true, false }, false));
+        list.add(new Pair<>(new Boolean[] { true, true }, true));
+        return list;
     }
+
 }

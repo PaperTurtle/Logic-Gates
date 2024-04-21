@@ -1,7 +1,11 @@
 package com.example;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 
 /**
  * The XnorGate class extends the LogicGate class and represents an XNOR gate in
@@ -46,12 +50,13 @@ public class XnorGate extends LogicGate {
     }
 
     @Override
-    public String getTruthTable() {
-        return "A B | Q\n" +
-                "0 0 | 1\n" +
-                "0 1 | 0\n" +
-                "1 0 | 0\n" +
-                "1 1 | 1";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] { false, false }, true));
+        list.add(new Pair<>(new Boolean[] { false, true }, false));
+        list.add(new Pair<>(new Boolean[] { true, false }, false));
+        list.add(new Pair<>(new Boolean[] { true, true }, true));
+        return list;
     }
 
 }

@@ -7,6 +7,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import java.util.List;
+import java.util.ArrayList;
+import javafx.util.Pair;
 
 public class SwitchGate extends LogicGate implements GateInterface {
     private boolean state = false;
@@ -84,9 +87,11 @@ public class SwitchGate extends LogicGate implements GateInterface {
     }
 
     @Override
-    public String getTruthTable() {
-        return "User Action | State\n" +
-                "Toggle | Changes";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] {}, false)); // Initially off
+        list.add(new Pair<>(new Boolean[] {}, true)); // Can be toggled on
+        return list;
     }
 
 }

@@ -1,7 +1,11 @@
 package com.example;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 
 /**
  * The NotGate class extends the LogicGate class and represents a NOT gate in
@@ -51,10 +55,11 @@ public class NotGate extends LogicGate {
     }
 
     @Override
-    public String getTruthTable() {
-        return "A | Q\n" +
-                "0 | 1\n" +
-                "1 | 0";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] { false }, true));
+        list.add(new Pair<>(new Boolean[] { true }, false));
+        return list;
     }
 
 }

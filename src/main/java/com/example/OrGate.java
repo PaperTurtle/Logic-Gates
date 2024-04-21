@@ -1,7 +1,11 @@
 package com.example;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 
 /**
  * The OrGate class extends the LogicGate class and represents an OR gate in
@@ -48,12 +52,13 @@ public class OrGate extends LogicGate {
     }
 
     @Override
-    public String getTruthTable() {
-        return "A B | Q\n" +
-                "0 0 | 0\n" +
-                "0 1 | 1\n" +
-                "1 0 | 1\n" +
-                "1 1 | 1";
+    public List<Pair<Boolean[], Boolean>> getTruthTableData() {
+        List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] { false, false }, false));
+        list.add(new Pair<>(new Boolean[] { false, true }, true));
+        list.add(new Pair<>(new Boolean[] { true, false }, true));
+        list.add(new Pair<>(new Boolean[] { true, true }, true));
+        return list;
     }
 
 }
