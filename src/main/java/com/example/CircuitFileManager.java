@@ -3,13 +3,17 @@ package com.example;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.geometry.Point2D;
 
 import java.io.FileWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CircuitFileManager {
@@ -46,11 +50,28 @@ public class CircuitFileManager {
      * @return A list of LogicGates reconstructed from the saved data.
      * @throws IOException If an I/O error occurs.
      */
-    public List<GateData> loadCircuit(String file) throws IOException {
-        Type type = new TypeToken<List<GateData>>() {
-        }.getType();
-        try (FileReader reader = new FileReader(file)) {
-            return gson.fromJson(reader, type);
+    public List<GateData> loadCircuit(String filePath) throws IOException, IllegalArgumentException {
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File(filePath);
+        JsonNode rootNode = mapper.readTree(file);
+
+        if (!rootNode.isArray()) {
+            throw new IllegalArgumentException("Invalid JSON: Expected an array of gate data.");
         }
+
+        List<GateData> gatesData = new ArrayList<>();
+        for (JsonNode node : rootNode) {
+            if (!isValidGateNode(node)) {
+                throw new IllegalArgumentException("Invalid gate data in JSON.");
+            }
+            GateData gate = mapper.treeToValue(node, GateData.class);
+            gatesData.add(gate);
+        }
+        return gatesData;
+    }
+
+    private boolean isValidGateNode(JsonNode node) {
+        return node.has("id") && node.has("type") && node.has("position") &&
+                node.get("position").has("x") && node.get("position").has("y");
     }
 }

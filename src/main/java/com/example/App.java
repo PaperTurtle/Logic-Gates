@@ -3,6 +3,7 @@ package com.example;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -14,6 +15,8 @@ import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -23,6 +26,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.ButtonBar.ButtonData;
 
 public class App extends Application {
 
@@ -67,22 +71,37 @@ public class App extends Application {
 
         // Set action for openItem
         openItem.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Circuit File");
-            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
-            File file = fileChooser.showOpenDialog(stage);
-            if (file != null) {
-                try {
-                    List<GateData> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
-                    circuitCanvas.loadGates(gatesData);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+            if (!circuitCanvas.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Open File");
+                alert.setHeaderText("Canvas is not empty");
+                alert.setContentText("Would you like to save your current work before opening a new file?");
+
+                ButtonType buttonSave = new ButtonType("Save");
+                ButtonType buttonContinue = new ButtonType("Continue without saving");
+                ButtonType buttonCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(buttonSave, buttonContinue, buttonCancel);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == buttonSave) {
+                    saveCurrentWork(stage);
+                } else if (result.isPresent() && result.get() == buttonCancel) {
+                    return;
                 }
             }
+
+            openNewFile(stage);
         });
 
         // Set action for saveItem
         saveItem.setOnAction(e -> {
+            List<GateData> gateData = circuitCanvas.getAllGateData();
+            if (gateData.isEmpty()) {
+                showAlert("Warning", "The canvas is empty. Nothing to save.", Alert.AlertType.WARNING);
+                return;
+            }
+
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Circuit File");
             fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
@@ -93,8 +112,7 @@ public class App extends Application {
                     if (!filePath.toLowerCase().endsWith(".json")) {
                         filePath += ".json";
                     }
-                    List<GateData> gateData = circuitCanvas.getAllGateData();
-                    new CircuitFileManager().saveCircuit(file.getPath(), gateData);
+                    new CircuitFileManager().saveCircuit(filePath, gateData);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -253,6 +271,52 @@ public class App extends Application {
         floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
                 - floatingImageView.getBoundsInLocal().getHeight() / 2 - 28);
         borderPane.getChildren().add(floatingImageView);
+    }
+
+    private void saveCurrentWork(Stage stage) {
+        List<GateData> gateData = circuitCanvas.getAllGateData();
+        if (!gateData.isEmpty()) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Circuit File");
+            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                try {
+                    String filePath = file.getPath();
+                    if (!filePath.toLowerCase().endsWith(".json")) {
+                        filePath += ".json";
+                    }
+                    new CircuitFileManager().saveCircuit(filePath, gateData);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        } else {
+            showAlert("Warning", "The canvas is empty. Nothing to save.", Alert.AlertType.WARNING);
+        }
+    }
+
+    private void openNewFile(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Circuit File");
+        fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                List<GateData> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
+                circuitCanvas.loadGates(gatesData);
+            } catch (IOException | IllegalArgumentException e) {
+                showAlert("Error", "Failed to load the file: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    private void showAlert(String title, String content, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {

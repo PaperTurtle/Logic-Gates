@@ -408,13 +408,14 @@ public class CircuitCanvas extends Pane {
     }
 
     public void loadGates(List<GateData> gatesData) {
+        clearCanvas();
         Map<String, LogicGate> createdGates = new HashMap<>();
         for (GateData data : gatesData) {
             String normalizedType = normalizeType(data.type);
             LogicGate gate = GateFactory.createGate(normalizedType);
             if (gate == null) {
                 System.out.println("Failed to create gate for type: " + data.type);
-                continue; // Skip this gate
+                continue;
             }
             gate.setPosition(data.position.getX(), data.position.getY());
             gate.setId(data.id);
@@ -422,18 +423,16 @@ public class CircuitCanvas extends Pane {
             drawGate(gate, data.position.getX(), data.position.getY());
         }
 
-        // Set up connections
         for (GateData data : gatesData) {
             LogicGate sourceGate = createdGates.get(data.id);
             if (sourceGate == null)
-                continue; // Skip if gate was not created
+                continue;
 
-            // Handle outputs
             for (ConnectionData output : data.outputs) {
                 LogicGate targetGate = createdGates.get(output.gateId);
                 if (targetGate == null) {
                     System.out.println("Output gate not found for ID: " + output.gateId);
-                    continue; // Skip if target gate was not found
+                    continue;
                 }
                 Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
                         sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
@@ -457,6 +456,20 @@ public class CircuitCanvas extends Pane {
             type = type.substring(0, type.length() - 4);
         }
         return type.toUpperCase();
+    }
+
+    public boolean isEmpty() {
+        return gateImageViews.isEmpty();
+    }
+
+    public void clearCanvas() {
+        for (LogicGate gate : new ArrayList<>(gateImageViews.values())) {
+            removeGate(gate.getImageView());
+        }
+        this.getChildren().clear();
+        gateImageViews.clear();
+        gateMarkers.clear();
+        lineToStartGateMap.clear();
     }
 
 }
