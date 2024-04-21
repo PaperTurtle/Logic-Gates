@@ -1,12 +1,15 @@
 package com.example;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -75,9 +78,19 @@ public class App extends Application {
         saveItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Circuit File");
+            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
             File file = fileChooser.showSaveDialog(stage);
             if (file != null) {
-                // Save the circuit to the file
+                try {
+                    String filePath = file.getPath();
+                    if (!filePath.toLowerCase().endsWith(".json")) {
+                        filePath += ".json";
+                    }
+                    List<GateData> gateData = circuitCanvas.getAllGateData();
+                    new CircuitFileManager().saveCircuit(file.getPath(), gateData);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             }
         });
 
