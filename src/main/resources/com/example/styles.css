@@ -17,3 +17,55 @@
 	-fx-border-width: 1px;
 	-fx-border-radius: 5px;
 }
+
+.truth-table {
+	-fx-font-size: 14px;
+	-fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+	-fx-border-color: #c1c1c1;
+	-fx-border-width: 1;
+	-fx-border-style: solid hidden hidden hidden;
+	-fx-padding: 10;
+	-fx-alignment: center;
+	-fx-background-color: white;
+}
+
+.truth-table-header {
+	-fx-background-color: #394867;
+	-fx-text-fill: white;
+	-fx-font-weight: bold;
+	-fx-padding: 5;
+	-fx-border-width: 0;
+	-fx-font-size: 12px;
+}
+
+.truth-table-cell {
+	-fx-padding: 5;
+	-fx-border-color: black;
+	-fx-border-width: 0 0 1 1;
+	-fx-border-style: solid;
+	-fx-alignment: center;
+}
+
+.table-row-cell:selected {
+	-fx-background-color: #b0c4de;
+	-fx-table-cell-border-color: transparent;
+}
+
+.table-view:focused .table-row-cell:focused:selected {
+	-fx-background-color: #9ac7fa;
+}
+
+.table-view .column-header-background {
+	-fx-background-color: transparent;
+}
+
+.table-view .column-header .label {
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+}
+
+.table-view .column-header {
+	-fx-background-color: #394867;
+	-fx-border-color: #c1c1c1;
+	-fx-border-width: 0 0 1 0;
+}
