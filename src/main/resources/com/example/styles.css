@@ -69,3 +69,9 @@
 	-fx-border-color: #c1c1c1;
 	-fx-border-width: 0 0 1 0;
 }
+
+.table-row-cell:empty {
+	-fx-background-color: -fx-control-inner-background;
+	-fx-background-insets: 0, 0 0 1 0;
+	-fx-padding: 0;
+}
