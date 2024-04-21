@@ -63,7 +63,6 @@ public abstract class LogicGate {
     public void removeInput(LogicGate input) {
         if (inputs.contains(input)) {
             inputs.remove(input);
-            System.out.println("Removed input gate: " + input.getClass().getSimpleName());
             evaluate();
             propagateStateChange();
         }
@@ -246,7 +245,6 @@ public abstract class LogicGate {
             }
             for (LogicGate gate : outputGates) {
                 if (gate instanceof Lightbulb) {
-                    System.out.println(inputConnections);
                     ((Lightbulb) gate).toggleLight(currentState);
                 }
             }
@@ -301,9 +299,21 @@ public abstract class LogicGate {
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
         for (LogicGate gate : outputGates) {
+            gate.removeInput(this);
             gate.removeInputConnection(line, gate.findInputConnectionIndex(line));
-            gate.evaluate(); // Re-evaluate the gate's state after removing the connection
+            gate.evaluate();
+            gate.propagateStateChange();
         }
+    }
+
+    public void removeInputConnection(Line line) {
+        inputConnections.stream()
+                .filter(connections -> connections.contains(line))
+                .forEach(connections -> {
+                    connections.remove(line);
+                    evaluate();
+                    propagateStateChange();
+                });
     }
 
     /**

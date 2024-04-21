@@ -128,7 +128,7 @@ public class CircuitCanvas extends Pane {
                         targetGate.evaluate();
                         targetGate.propagateStateChange();
                         scheduleUpdate(targetGate);
-                        lineToStartGateMap.remove(currentLine);
+                        // lineToStartGateMap.remove(currentLine);
                         startGate = null;
                     }
 
@@ -242,17 +242,6 @@ public class CircuitCanvas extends Pane {
     private void showPropertiesDialog(LogicGate gate) {
     }
 
-    private void updateMarkers(ImageView gate, double newX, double newY) {
-        List<Circle> markers = gateMarkers.get(gate);
-        if (markers != null) {
-            for (Circle marker : markers) {
-                Point2D offset = new Point2D(marker.getCenterX() - gate.getX(), marker.getCenterY() - gate.getY());
-                marker.setCenterX(newX + offset.getX());
-                marker.setCenterY(newY + offset.getY());
-            }
-        }
-    }
-
     public void removeGate(ImageView gate) {
         LogicGate logicGate = gateImageViews.get(gate);
         if (logicGate != null) {
@@ -291,7 +280,6 @@ public class CircuitCanvas extends Pane {
             this.getChildren().remove(line);
         });
 
-        // Handle input connections
         logicGate.getInputConnections().forEach(connections -> new ArrayList<>(connections).forEach(line -> {
             LogicGate sourceGate = lineToStartGateMap.get(line);
             if (sourceGate != null) {
@@ -304,17 +292,39 @@ public class CircuitCanvas extends Pane {
         }));
     }
 
-    private void removeMarkers(LogicGate logicGate) {
-        if (logicGate.getInputMarkers() != null) {
-            logicGate.getInputMarkers().forEach(this.getChildren()::remove);
-        }
-        if (logicGate.getOutputMarker() != null) {
-            this.getChildren().remove(logicGate.getOutputMarker());
+    public void removeConnection(Line connection) {
+        LogicGate sourceGate = lineToStartGateMap.get(connection);
+
+        if (sourceGate != null) {
+            sourceGate.removeOutputConnection(connection);
+
+            LogicGate targetGate = findTargetGate(connection);
+            if (targetGate != null) {
+                targetGate.removeInputConnection(connection);
+
+                targetGate.evaluate();
+                targetGate.propagateStateChange();
+                scheduleUpdate(targetGate);
+            }
+
+            this.getChildren().remove(connection);
+            lineToStartGateMap.remove(connection);
+
+            sourceGate.evaluate();
+            sourceGate.propagateStateChange();
+            scheduleUpdate(sourceGate);
+        } else {
+            System.out.println("No source gate found for the connection.");
         }
     }
 
-    public void removeConnection(Line connection) {
-        this.getChildren().remove(connection);
+    private LogicGate findTargetGate(Line connection) {
+        for (LogicGate gate : gateImageViews.values()) {
+            if (gate.getInputConnections().contains(connection)) {
+                return gate;
+            }
+        }
+        return null;
     }
 
     private void setupConnectionHandlers() {
@@ -334,7 +344,6 @@ public class CircuitCanvas extends Pane {
                 resetInteractionHandlers();
             }
         });
-
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() == MouseButton.SECONDARY && event.getTarget() instanceof Line) {
                 Line targetLine = (Line) event.getTarget();
@@ -343,13 +352,16 @@ public class CircuitCanvas extends Pane {
                 }
                 ContextMenu lineContextMenu = new ContextMenu();
                 MenuItem deleteLine = new MenuItem("Remove");
-                deleteLine.setOnAction(e -> removeConnection(targetLine));
+                deleteLine.setOnAction(e -> {
+                    removeConnection(targetLine);
+                    e.consume();
+                });
                 lineContextMenu.getItems().add(deleteLine);
                 lineContextMenu.show(targetLine, event.getScreenX(), event.getScreenY());
                 openContextMenu = lineContextMenu;
-                event.consume();
             }
         });
+
     }
 
     private void updateMarkersVisibility() {
