@@ -3,7 +3,7 @@ module com.example {
     requires transitive javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;
-    requires com.google.gson;
+    requires transitive com.google.gson;
 
     requires batik.transcoder;
     requires batik.svggen;
