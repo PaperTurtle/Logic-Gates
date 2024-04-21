@@ -1,14 +1,20 @@
 package com.example;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
@@ -43,8 +49,41 @@ public class App extends Application {
         circuitCanvas = new CircuitCanvas(600, 400, scrollPane);
         scrollPane.setContent(circuitCanvas);
 
+        MenuBar menuBar = new MenuBar();
+
+        // Create menus
+        Menu fileMenu = new Menu("File");
+        MenuItem openItem = new MenuItem("Open...");
+        MenuItem saveItem = new MenuItem("Save...");
+
+        // Add menu items to the File menu
+        fileMenu.getItems().addAll(openItem, saveItem);
+
+        // Add File menu to the menu bar
+        menuBar.getMenus().add(fileMenu);
+
+        // Set action for openItem
+        openItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Circuit File");
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+            }
+        });
+
+        // Set action for saveItem
+        saveItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Circuit File");
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                // Save the circuit to the file
+            }
+        });
+
         borderPane.setLeft(scrollableSidebar);
         borderPane.setCenter(circuitCanvas);
+        borderPane.setTop(menuBar);
 
         scene = new Scene(borderPane, 1000, 600);
         scene.getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());

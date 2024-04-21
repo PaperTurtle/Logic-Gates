@@ -376,4 +376,5 @@ public abstract class LogicGate {
     public void unhighlight() {
         imageView.setStyle("");
     }
+
 }
