@@ -295,13 +295,16 @@ public class CircuitCanvas extends Pane {
 
     public void removeConnection(Line connection) {
         LogicGate sourceGate = lineToStartGateMap.get(connection);
-
         if (sourceGate != null) {
             sourceGate.removeOutputConnection(connection);
 
             LogicGate targetGate = findTargetGate(connection);
             if (targetGate != null) {
-                targetGate.removeInputConnection(connection);
+                int index = targetGate.findInputConnectionIndex(connection);
+                if (index != -1) {
+                    targetGate.removeInputConnection(connection, index);
+                    targetGate.removeInput(sourceGate);
+                }
 
                 targetGate.evaluate();
                 targetGate.propagateStateChange();

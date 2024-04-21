@@ -16,8 +16,8 @@ public class Lightbulb extends LogicGate implements GateInterface {
 
     public Lightbulb() {
         super(null,
-                Arrays.asList(new Point2D(15,
-                        25)),
+                Arrays.asList(new Point2D(5,
+                        43)),
                 null);
         offImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ANSI_Labelled.svg");
         onImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ON_ANSI_Labelled.svg");
@@ -83,16 +83,19 @@ public class Lightbulb extends LogicGate implements GateInterface {
     @Override
     public void addInput(LogicGate input) {
         super.addInput(input);
-        this.evaluate(); // Immediately evaluate to reflect the current state of inputs
-        this.updateVisualState(); // Update visual state to reflect the change
+        this.evaluate();
+        this.updateVisualState();
     }
 
     @Override
     public void removeInput(LogicGate input) {
-        // Not used for Lightbulb
+        if (inputs.contains(input)) {
+            inputs.remove(input);
+            evaluate();
+            updateVisualState();
+        }
     }
 
-    // Getters for position and visual elements
     public ImageView getImageView() {
         return imageView;
     }

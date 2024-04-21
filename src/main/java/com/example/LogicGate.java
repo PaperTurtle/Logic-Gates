@@ -64,6 +64,13 @@ public abstract class LogicGate {
     public void removeInput(LogicGate input) {
         if (inputs.contains(input)) {
             inputs.remove(input);
+            int index = inputs.indexOf(input);
+            if (index != -1) {
+                List<Line> connectionsToRemove = new ArrayList<>(inputConnections.get(index));
+                for (Line line : connectionsToRemove) {
+                    this.removeInputConnection(line, index);
+                }
+            }
             evaluate();
             propagateStateChange();
         }
@@ -300,7 +307,7 @@ public abstract class LogicGate {
      */
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
-        for (LogicGate gate : outputGates) {
+        for (LogicGate gate : new ArrayList<>(outputGates)) {
             gate.removeInput(this);
             gate.removeInputConnection(line, gate.findInputConnectionIndex(line));
             gate.evaluate();
