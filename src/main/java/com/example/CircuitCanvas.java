@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.example.GateData.ConnectionData;
+
 import javafx.application.Platform;
 
 public class CircuitCanvas extends Pane {
@@ -404,4 +406,57 @@ public class CircuitCanvas extends Pane {
 
         return allData;
     }
+
+    public void loadGates(List<GateData> gatesData) {
+        Map<String, LogicGate> createdGates = new HashMap<>();
+        for (GateData data : gatesData) {
+            String normalizedType = normalizeType(data.type);
+            LogicGate gate = GateFactory.createGate(normalizedType);
+            if (gate == null) {
+                System.out.println("Failed to create gate for type: " + data.type);
+                continue; // Skip this gate
+            }
+            gate.setPosition(data.position.getX(), data.position.getY());
+            gate.setId(data.id);
+            createdGates.put(data.id, gate);
+            drawGate(gate, data.position.getX(), data.position.getY());
+        }
+
+        // Set up connections
+        for (GateData data : gatesData) {
+            LogicGate sourceGate = createdGates.get(data.id);
+            if (sourceGate == null)
+                continue; // Skip if gate was not created
+
+            // Handle outputs
+            for (ConnectionData output : data.outputs) {
+                LogicGate targetGate = createdGates.get(output.gateId);
+                if (targetGate == null) {
+                    System.out.println("Output gate not found for ID: " + output.gateId);
+                    continue; // Skip if target gate was not found
+                }
+                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+                Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                        targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                        targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+                Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+                connectionLine.setStrokeWidth(2);
+                connectionLine.setStroke(Color.BLACK);
+
+                this.getChildren().add(connectionLine);
+                sourceGate.addOutputConnection(connectionLine);
+                targetGate.addInputConnection(connectionLine, output.pointIndex);
+            }
+        }
+    }
+
+    private String normalizeType(String type) {
+        if (type.endsWith("Gate")) {
+            type = type.substring(0, type.length() - 4);
+        }
+        return type.toUpperCase();
+    }
+
 }
