@@ -1,7 +1,11 @@
 package com.example;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import javafx.geometry.Point2D;
+
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,6 +16,10 @@ public class CircuitFileManager {
 
     private Gson gson = new Gson();
 
+    public CircuitFileManager() {
+        this.gson = new GsonBuilder().registerTypeAdapter(Point2D.class, new Point2DSerializer()).create();
+    }
+
     /**
      * Saves the current circuit to a JSON file.
      * 
@@ -19,8 +27,8 @@ public class CircuitFileManager {
      * @param gates The list of LogicGates to save.
      * @throws IOException If an I/O error occurs.
      */
-    public void saveCircuit(String file, List<LogicGate> gates) throws IOException {
-        Type type = new TypeToken<List<LogicGate>>() {
+    public void saveCircuit(String file, List<GateData> gates) throws IOException {
+        Type type = new TypeToken<List<GateData>>() {
         }.getType();
         String json = gson.toJson(gates, type);
         try (FileWriter writer = new FileWriter(file)) {
