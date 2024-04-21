@@ -46,4 +46,14 @@ public class NorGate extends LogicGate {
         }
         return true; // If all inputs are false, NOR gate output is true.
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 1\n" +
+                "0 1 | 0\n" +
+                "1 0 | 0\n" +
+                "1 1 | 0";
+    }
+
 }

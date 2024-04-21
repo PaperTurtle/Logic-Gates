@@ -49,4 +49,12 @@ public class NotGate extends LogicGate {
         evaluate();
         propagateStateChange();
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A | Q\n" +
+                "0 | 1\n" +
+                "1 | 0";
+    }
+
 }

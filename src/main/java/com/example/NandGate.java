@@ -47,4 +47,14 @@ public class NandGate extends LogicGate {
         }
         return false; // If all inputs are true, NAND gate output is false.
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 1\n" +
+                "0 1 | 1\n" +
+                "1 0 | 1\n" +
+                "1 1 | 0";
+    }
+
 }

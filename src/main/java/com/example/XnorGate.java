@@ -44,4 +44,14 @@ public class XnorGate extends LogicGate {
         // XNOR is true only if an even number of inputs are true.
         return trueCount % 2 == 0;
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 1\n" +
+                "0 1 | 0\n" +
+                "1 0 | 0\n" +
+                "1 1 | 1";
+    }
+
 }

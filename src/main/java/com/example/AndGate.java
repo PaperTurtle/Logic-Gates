@@ -50,4 +50,13 @@ public class AndGate extends LogicGate {
         }
         return true;
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 0\n" +
+                "0 1 | 0\n" +
+                "1 0 | 0\n" +
+                "1 1 | 1";
+    }
 }

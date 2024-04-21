@@ -112,4 +112,12 @@ public class Lightbulb extends LogicGate implements GateInterface {
             }
         }
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A | Q\n" +
+                "0 | OFF\n" +
+                "1 | ON";
+    }
+
 }

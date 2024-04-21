@@ -44,4 +44,14 @@ public class XorGate extends LogicGate {
         // XOR is true only if an odd number of inputs are true.
         return trueCount % 2 == 1;
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 0\n" +
+                "0 1 | 1\n" +
+                "1 0 | 1\n" +
+                "1 1 | 0";
+    }
+
 }

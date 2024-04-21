@@ -82,4 +82,11 @@ public class SwitchGate extends LogicGate implements GateInterface {
             outputGate.propagateStateChange();
         }
     }
+
+    @Override
+    public String getTruthTable() {
+        return "User Action | State\n" +
+                "Toggle | Changes";
+    }
+
 }

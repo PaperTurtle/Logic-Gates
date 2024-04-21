@@ -46,4 +46,14 @@ public class OrGate extends LogicGate {
         }
         return false;
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A B | Q\n" +
+                "0 0 | 0\n" +
+                "0 1 | 1\n" +
+                "1 0 | 1\n" +
+                "1 1 | 1";
+    }
+
 }

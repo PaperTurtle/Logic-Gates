@@ -42,4 +42,12 @@ public class BufferGate extends LogicGate {
 
         return inputs.get(0).getOutput();
     }
+
+    @Override
+    public String getTruthTable() {
+        return "A | Q\n" +
+                "0 | 0\n" +
+                "1 | 1";
+    }
+
 }
