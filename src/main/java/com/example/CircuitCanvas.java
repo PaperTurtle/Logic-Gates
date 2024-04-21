@@ -395,4 +395,13 @@ public class CircuitCanvas extends Pane {
         gatesToBeUpdated.add(gate);
         Platform.runLater(this::propagateUpdates);
     }
+
+    public List<GateData> getAllGateData() {
+        List<GateData> allData = new ArrayList<>();
+        for (LogicGate gate : gateImageViews.values()) {
+            allData.add(gate.getGateData());
+        }
+
+        return allData;
+    }
 }

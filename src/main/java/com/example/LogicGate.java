@@ -26,12 +26,15 @@ public abstract class LogicGate {
     protected List<Line> outputConnections = new ArrayList<>();
     protected List<LogicGate> outputGates = new ArrayList<>();
     protected boolean currentState = false;
+    private static long idCounter = 0;
+    protected String id;
 
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
         this.inputs = new ArrayList<>();
         this.svgFilePath = svgFilePath;
         this.inputPoints = (inputPoints != null) ? inputPoints : new ArrayList<>();
         this.outputPoint = outputPoint;
+        this.id = "Gate" + idCounter++;
 
         for (int i = 0; i < this.inputPoints.size(); i++) {
             inputConnections.add(new ArrayList<>());
@@ -375,6 +378,30 @@ public abstract class LogicGate {
 
     public void unhighlight() {
         imageView.setStyle("");
+    }
+
+    public GateData getGateData() {
+        GateData data = new GateData();
+        data.id = this.getId();
+        data.type = this.getClass().getSimpleName();
+        data.position = new Point2D(imageView.getX(), imageView.getY());
+        data.state = currentState;
+
+        for (LogicGate input : inputs) {
+            data.inputs.add(
+                    new GateData.ConnectionData(input.getId(), input.outputGates.indexOf(this)));
+        }
+
+        for (LogicGate output : outputGates) {
+            data.outputs
+                    .add(new GateData.ConnectionData(output.getId(), output.inputs.indexOf(this)));
+        }
+
+        return data;
+    }
+
+    public String getId() {
+        return id;
     }
 
 }
