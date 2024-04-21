@@ -17,7 +17,10 @@ public class CircuitFileManager {
     private Gson gson = new Gson();
 
     public CircuitFileManager() {
-        this.gson = new GsonBuilder().registerTypeAdapter(Point2D.class, new Point2DSerializer()).create();
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(Point2D.class, new Point2DSerializer())
+                .registerTypeAdapter(Point2D.class, new Point2DDeserializer())
+                .create();
     }
 
     /**
@@ -43,8 +46,8 @@ public class CircuitFileManager {
      * @return A list of LogicGates reconstructed from the saved data.
      * @throws IOException If an I/O error occurs.
      */
-    public List<LogicGate> loadCircuit(String file) throws IOException {
-        Type type = new TypeToken<List<LogicGate>>() {
+    public List<GateData> loadCircuit(String file) throws IOException {
+        Type type = new TypeToken<List<GateData>>() {
         }.getType();
         try (FileReader reader = new FileReader(file)) {
             return gson.fromJson(reader, type);
