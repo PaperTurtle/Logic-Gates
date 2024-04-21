@@ -1,22 +1,29 @@
 package com.example;
 
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 
 import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +32,10 @@ import java.util.Set;
 import com.example.GateData.ConnectionData;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class CircuitCanvas extends Pane {
     private Line currentLine;
@@ -243,6 +254,60 @@ public class CircuitCanvas extends Pane {
     }
 
     private void showPropertiesDialog(LogicGate gate) {
+        if (openContextMenu != null) {
+            openContextMenu.hide();
+            openContextMenu = null;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Gate Properties");
+        alert.setHeaderText("Properties for " + gate.getClass().getSimpleName());
+
+        TableView<Boolean[]> table = new TableView<>();
+        List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
+        List<Boolean[]> dataList = new ArrayList<>();
+        for (Pair<Boolean[], Boolean> pair : pairList) {
+            Boolean[] row = new Boolean[pair.getKey().length + 1];
+            System.arraycopy(pair.getKey(), 0, row, 0, pair.getKey().length);
+            row[pair.getKey().length] = pair.getValue();
+            dataList.add(row);
+        }
+        ObservableList<Boolean[]> data = FXCollections.observableArrayList(dataList);
+        table.setItems(data);
+
+        TableColumn<Boolean[], String> input1Col = new TableColumn<>("Input 1");
+        input1Col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[0] ? "1" : "0"));
+        TableColumn<Boolean[], String> input2Col = new TableColumn<>("Input 2");
+        input2Col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[1] ? "1" : "0"));
+
+        TableColumn<Boolean[], String> outputCol = new TableColumn<>("Output");
+        outputCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[2] ? "1" : "0"));
+
+        table.getColumns().addAll(input1Col, input2Col, outputCol);
+
+        input1Col.setPrefWidth(USE_COMPUTED_SIZE);
+        input2Col.setPrefWidth(USE_COMPUTED_SIZE);
+        outputCol.setPrefWidth(USE_COMPUTED_SIZE);
+
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setMinWidth(Region.USE_PREF_SIZE);
+        table.setMinHeight(Region.USE_PREF_SIZE);
+
+        double rowHeight = 30.0;
+        double headerHeight = 27.0;
+
+        table.prefHeightProperty().bind(Bindings.size(table.getItems()).multiply(rowHeight).add(headerHeight));
+        table.maxHeightProperty().bind(table.prefHeightProperty());
+
+        table.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            final TableHeaderRow header = (TableHeaderRow) table.lookup("TableHeaderRow");
+            header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
+        });
+
+        alert.getDialogPane().setContent(table);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
+        table.getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
+        alert.showAndWait();
     }
 
     public void removeGate(ImageView gate) {
