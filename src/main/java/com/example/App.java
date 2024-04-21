@@ -69,8 +69,15 @@ public class App extends Application {
         openItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Circuit File");
+            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
             File file = fileChooser.showOpenDialog(stage);
             if (file != null) {
+                try {
+                    List<GateData> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
+                    circuitCanvas.loadGates(gatesData);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             }
         });
 
