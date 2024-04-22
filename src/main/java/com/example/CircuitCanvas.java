@@ -20,6 +20,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public class CircuitCanvas extends Pane {
     private LogicGate highlightedGate = null;
     private ContextMenu openContextMenu = null;
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
+    private Rectangle selectionRect = new Rectangle();
+    private boolean isSelecting = false;
 
     public enum Mode {
         PAN, WORK
@@ -61,6 +64,7 @@ public class CircuitCanvas extends Pane {
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
         setupModeChangeHandlers();
+        initializeSelectionMechanism();
 
         this.setOnMouseClicked(event -> {
             if (event.getTarget() instanceof Pane || !(event.getTarget() instanceof ImageView)) {
@@ -71,6 +75,56 @@ public class CircuitCanvas extends Pane {
             }
             this.requestFocus();
         });
+    }
+
+    private void initializeSelectionMechanism() {
+        selectionRect.setStroke(Color.BLUE);
+        selectionRect.setStrokeWidth(1);
+        selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
+        selectionRect.setVisible(false);
+        this.getChildren().add(selectionRect);
+
+        this.setOnMousePressed(event -> {
+            if (currentMode == Mode.WORK) {
+                lastMouseCoordinates = new Point2D(event.getX(), event.getY());
+                selectionRect.setX(lastMouseCoordinates.getX());
+                selectionRect.setY(lastMouseCoordinates.getY());
+                selectionRect.setWidth(0);
+                selectionRect.setHeight(0);
+                selectionRect.setVisible(true);
+                isSelecting = true;
+            }
+        });
+
+        this.setOnMouseDragged(event -> {
+            if (isSelecting && currentMode == Mode.WORK) {
+                double x = event.getX();
+                double y = event.getY();
+                selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
+                selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
+                selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
+                selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
+            }
+        });
+
+        this.setOnMouseReleased(event -> {
+            if (isSelecting && currentMode == Mode.WORK) {
+                selectGatesInRectangle();
+                selectionRect.setVisible(false);
+                isSelecting = false;
+            }
+        });
+    }
+
+    private void selectGatesInRectangle() {
+        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
+            ImageView gateView = entry.getKey();
+            if (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent())) {
+                gateView.getStyleClass().add("selected");
+            } else {
+                gateView.getStyleClass().remove("selected");
+            }
+        }
     }
 
     private void setupModeChangeHandlers() {
