@@ -272,21 +272,25 @@ public class CircuitCanvas extends Pane {
             row[pair.getKey().length] = pair.getValue();
             dataList.add(row);
         }
+
         ObservableList<Boolean[]> data = FXCollections.observableArrayList(dataList);
         table.setItems(data);
 
-        TableColumn<Boolean[], String> input1Col = new TableColumn<>("Input 1");
-        input1Col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[0] ? "1" : "0"));
-        TableColumn<Boolean[], String> input2Col = new TableColumn<>("Input 2");
-        input2Col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[1] ? "1" : "0"));
+        int numInputs = pairList.isEmpty() || pairList.get(0).getKey().length == 0 ? 0
+                : pairList.get(0).getKey().length;
+        for (int i = 0; i < numInputs; i++) {
+            TableColumn<Boolean[], String> inputCol = new TableColumn<>("Input " + (i + 1));
+            final int index = i;
+            inputCol.setCellValueFactory(param -> new SimpleStringProperty(
+                    param.getValue().length > index ? (param.getValue()[index] ? "1" : "0") : "N/A"));
+            table.getColumns().add(inputCol);
+            inputCol.setPrefWidth(USE_COMPUTED_SIZE);
+        }
 
         TableColumn<Boolean[], String> outputCol = new TableColumn<>("Output");
-        outputCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[2] ? "1" : "0"));
-
-        table.getColumns().addAll(input1Col, input2Col, outputCol);
-
-        input1Col.setPrefWidth(USE_COMPUTED_SIZE);
-        input2Col.setPrefWidth(USE_COMPUTED_SIZE);
+        outputCol.setCellValueFactory(param -> new SimpleStringProperty(
+                param.getValue()[param.getValue().length - 1] ? "1" : "0"));
+        table.getColumns().add(outputCol);
         outputCol.setPrefWidth(USE_COMPUTED_SIZE);
 
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
