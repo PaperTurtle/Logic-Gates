@@ -86,7 +86,8 @@ public class CircuitCanvas extends Pane {
 
         this.setOnMousePressed(event -> {
             if (currentMode == Mode.WORK) {
-                lastMouseCoordinates = new Point2D(event.getX(), event.getY());
+                lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(), getWidth())),
+                        Math.max(0, Math.min(event.getY(), getHeight())));
                 selectionRect.setX(lastMouseCoordinates.getX());
                 selectionRect.setY(lastMouseCoordinates.getY());
                 selectionRect.setWidth(0);
@@ -98,8 +99,8 @@ public class CircuitCanvas extends Pane {
 
         this.setOnMouseDragged(event -> {
             if (isSelecting && currentMode == Mode.WORK) {
-                double x = event.getX();
-                double y = event.getY();
+                double x = Math.max(0, Math.min(event.getX(), getWidth()));
+                double y = Math.max(0, Math.min(event.getY(), getHeight()));
                 selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
                 selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
                 selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
