@@ -120,7 +120,6 @@ public class Lightbulb extends LogicGate implements GateInterface {
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
         List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
-        // Simple on/off state based on input
         list.add(new Pair<>(new Boolean[] { false }, false));
         list.add(new Pair<>(new Boolean[] { true }, true));
         return list;

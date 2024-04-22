@@ -89,8 +89,8 @@ public class SwitchGate extends LogicGate implements GateInterface {
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
         List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
-        list.add(new Pair<>(new Boolean[] {}, false)); // Initially off
-        list.add(new Pair<>(new Boolean[] {}, true)); // Can be toggled on
+        list.add(new Pair<>(new Boolean[] {}, false));
+        list.add(new Pair<>(new Boolean[] {}, true));
         return list;
     }
 
