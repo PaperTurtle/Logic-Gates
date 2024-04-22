@@ -121,7 +121,9 @@ public class CircuitCanvas extends Pane {
         for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
             ImageView gateView = entry.getKey();
             if (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent())) {
-                gateView.getStyleClass().add("selected");
+                if (!gateView.getStyleClass().contains("selected")) {
+                    gateView.getStyleClass().add("selected");
+                }
             } else {
                 gateView.getStyleClass().remove("selected");
             }
