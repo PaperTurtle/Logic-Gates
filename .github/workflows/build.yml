@@ -25,11 +25,11 @@ jobs:
          - name: Maven Package
            run: mvn package
 
-         - name: Remove Unshaded JAR
-           run: rm -f ./target/logic_gates-1.0-SNAPSHOT.jar
-
          - name: Rename Shaded JAR
-           run: mv ./target/shaded/logic_gates-1.0-SNAPSHOT.jar ./target/ || true
+           run: |
+              if [ -f ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ]; then
+                mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
+              fi
 
          - name: Get Release by Tag
            id: get_release
