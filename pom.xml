@@ -6,8 +6,9 @@
     <version>1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.target>14</maven.compiler.target>
+        <javafx.path>"C:\Program Files\javafx-sdk-17.0.11\lib"</javafx.path>
     </properties>
     <dependencies>
         <dependency>
@@ -27,13 +28,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-dom</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svggen</artifactId>
-            <version>1.14</version>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
@@ -43,17 +39,17 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-codec</artifactId>
-            <version>1.14</version>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-util</artifactId>
-            <version>1.14</version>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-constants</artifactId>
-            <version>1.14</version>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
@@ -76,33 +72,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <release>11</release>
+                    <release>14</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
+                <configuration>
+                    <mainClass>com.paperturtle.Main</mainClass>
+                    <executable>${java.home}/bin/java</executable>
+                    <options>
+                        <option>--module-path</option>
+                        <option>${javafx.path}</option>
+                        <option>--add-modules</option>
+                        <option>javafx.controls,javafx.fxml</option>
+                    </options>
+                </configuration>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running -->
-                        <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
-                        <configuration>
-                            <mainClass>com.paperturtle.App</mainClass>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.2</version>
-                <executions>
-                    <execution>
-                        <phase>none</phase>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -117,31 +112,26 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <minimize>true</minimize>
+                            <finalName>${project.artifactId}-${project.version}-shaded</finalName>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>classworlds:classworlds</exclude>
+                                    <exclude>junit:junit</exclude>
+                                    <exclude>jmock:*</exclude>
+                                    <exclude>*:xml-apis</exclude>
+                                    <exclude>org.apache.maven:lib:tests</exclude>
+                                    <exclude>log4j:log4j:jar:</exclude>
+                                </excludes>
+                            </artifactSet>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.paperturtle.App</mainClass>
+                                    <mainClass>com.paperturtle.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jlink-plugin</artifactId>
-                <version>3.0.0-alpha-1</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <launcher>launch=com.paperturtle.App</launcher>
-                    <modulePaths>
-                        <modulePath>${java.home}/jmods</modulePath>
-                    </modulePaths>
-                    <modules>
-                        <module>com.paperturtle</module>
-                        <module>javafx.controls</module>
-                        <module>javafx.fxml</module>
-                    </modules>
-                </configuration>
             </plugin>
         </plugins>
     </build>
