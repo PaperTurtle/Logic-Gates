@@ -103,8 +103,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/shaded</outputDirectory>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
+                            <finalName>${project.build.directory}/${project.artifactId}-${project.version}</finalName>
                             <minimize>true</minimize>
                             <artifactSet>
                                 <excludes>
