@@ -19,11 +19,8 @@ jobs:
               java-version: "11"
               distribution: "zulu"
 
-         - name: Maven Clean
-           run: mvn clean
-
-         - name: Maven Package
-           run: mvn package
+         - name: Maven Clean and Package
+           run: mvn clean package
 
          - name: Rename Shaded JAR
            run: |
