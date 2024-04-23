@@ -13,11 +13,11 @@ jobs:
       steps:
          - uses: actions/checkout@v3
 
-         - name: Set up JDK 11 with JavaFX
+         - name: Set up JDK 16 with JavaFX
            uses: actions/setup-java@v3
            with:
-              java-version: "11"
-              distribution: "zulu"
+              java-version: "16"
+              distribution: "temurin"
 
          - name: Maven Clean and Package
            run: mvn clean package
@@ -27,6 +27,10 @@ jobs:
               if [ -f ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ]; then
                 mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
               fi
+
+         - name: Create Native Package with jpackage
+           run: |
+              jpackage --type app-image --input ./target/ --name LogicGates --main-jar logic_gates-1.0-SNAPSHOT.jar --main-class com.paperturtle.Main --dest ./package
 
          - name: Get Release by Tag
            id: get_release
@@ -57,7 +61,7 @@ jobs:
               prerelease: false
 
          - name: List output files
-           run: ls -lah ./target/
+           run: ls -lah ./target/ ./package/
 
          - name: Upload Release Asset
            id: upload-release-asset
@@ -66,6 +70,6 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            with:
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: ./target/logic_gates-1.0-SNAPSHOT.jar
-              asset_name: logic_gates-1.0-SNAPSHOT.jar
-              asset_content_type: application/java-archive
+              asset_path: ./package/LogicGates # Adjust the path according to your jpackage output
+              asset_name: LogicGates
+              asset_content_type: application/octet-stream
