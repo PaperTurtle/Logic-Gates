@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxtst6 \
     libxi6 \
+    unzip \
+    wget \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* 
 
 ADD https://download2.gluonhq.com/openjfx/16/openjfx-16_linux-x64_bin-sdk.zip /opt/javafx.zip
