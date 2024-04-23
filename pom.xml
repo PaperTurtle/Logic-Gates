@@ -102,21 +102,10 @@
                 <version>3.1.2</version>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>org.openjfx</includeGroupIds>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
@@ -124,13 +113,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>com.paperturtle.App</mainClass>
-                            <addModules>
-                                <module>javafx.controls</module>
-                                <module>javafx.fxml</module>
-                                <module>javafx.swing</module>
-                            </addModules>
                         </manifest>
                     </archive>
                     <descriptorRefs>
