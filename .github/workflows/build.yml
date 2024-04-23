@@ -24,13 +24,14 @@ jobs:
 
          - name: Maven Package (First Attempt)
            run: mvn package
-           continue-on-error: true  # Allows the workflow to continue even if this step fails
+           continue-on-error: true
 
          - name: Maven Package (Second Attempt)
-           run: mvn package
+           run: |
+             mvn package || (sleep 5 && mvn package)
 
          - name: Rename Shaded Jar
-           run: mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
+           run: mv ./target/shaded/logic_gates-1.0-SNAPSHOT.jar ./target/logic_gates-1.0-SNAPSHOT.jar
 
          - name: Get Release by Tag
            id: get_release
