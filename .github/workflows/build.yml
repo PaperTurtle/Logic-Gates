@@ -30,7 +30,6 @@ jobs:
               sudo apt-get update
               sudo apt-get install -y xvfb
               Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-              sleep 3
               echo "DISPLAY=:99" >> $GITHUB_ENV
               export DISPLAY=:99
 
@@ -38,7 +37,7 @@ jobs:
            run: sudo apt-get install fakeroot rpm
 
          - name: Maven Clean and Package
-           run: DISPLAY=:99 mvn clean package -Djava.awt.headless=true -Dprism.order=sw
+           run: DISPLAY=:99 mvn clean package -Djava.awt.headless=true
 
          - name: Rename Shaded JAR
            run: |
@@ -46,6 +45,8 @@ jobs:
                 mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
               fi
 
+         - name: List output files
+           run: ls -lah ./target/
          - name: JavaFX Diagnostics
            run: |
               java -Dprism.verbose=true -jar ./target/logic_gates-1.0-SNAPSHOT.jar
