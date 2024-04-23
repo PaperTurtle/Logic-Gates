@@ -75,12 +75,6 @@
                 <version>3.8.1</version>
                 <configuration>
                     <release>16</release>
-                    <compilerArgs>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
