@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class NotGate extends LogicGate {
      * output point.
      */
     public NotGate() {
-        super("/com/example/NOT_ANSI_Labelled.svg",
+        super("/com/paperturtle/NOT_ANSI_Labelled.svg",
                 Arrays.asList(new Point2D(15, 25)),
                 new Point2D(105, 25));
     }

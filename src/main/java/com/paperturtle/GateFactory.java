@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 /**
  * Factory class to create instances of LogicGate.

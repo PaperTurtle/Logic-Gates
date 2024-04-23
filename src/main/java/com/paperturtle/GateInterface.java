@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 /**
  * Interface for logic gates.

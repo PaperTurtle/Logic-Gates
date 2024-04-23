@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -24,13 +24,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.example.GateData.ConnectionData;
+import com.paperturtle.GateData.ConnectionData;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -123,6 +122,9 @@ public class CircuitCanvas extends Pane {
             if (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent())) {
                 if (!gateView.getStyleClass().contains("selected")) {
                     gateView.getStyleClass().add("selected");
+                    currentMode = Mode.PAN;
+                    this.setCursor(Cursor.OPEN_HAND);
+                    updateMarkersVisibility();
                 }
             } else {
                 gateView.getStyleClass().remove("selected");
@@ -366,8 +368,9 @@ public class CircuitCanvas extends Pane {
         });
 
         alert.getDialogPane().setContent(table);
-        alert.getDialogPane().getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
-        table.getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
+        alert.getDialogPane().getStylesheets()
+                .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
+        table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         alert.showAndWait();
     }
 

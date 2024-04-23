@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.util.Arrays;
 
@@ -23,8 +23,8 @@ public class Lightbulb extends LogicGate implements GateInterface {
                 Arrays.asList(new Point2D(5,
                         43)),
                 null);
-        offImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ANSI_Labelled.svg");
-        onImage = SvgUtil.loadSvgImage("/com/example/LIGHTBULB_ON_ANSI_Labelled.svg");
+        offImage = SvgUtil.loadSvgImage("/com/paperturtle/LIGHTBULB_ANSI_Labelled.svg");
+        onImage = SvgUtil.loadSvgImage("/com/paperturtle/LIGHTBULB_ON_ANSI_Labelled.svg");
         imageView = new javafx.scene.image.ImageView(offImage);
         for (Point2D point : inputPoints) {
             Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);

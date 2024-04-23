@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,7 @@ public class BufferGate extends LogicGate {
      * output point.
      */
     public BufferGate() {
-        super("/com/example/BUFFER_ANSI_Labelled.svg",
+        super("/com/paperturtle/BUFFER_ANSI_Labelled.svg",
                 Arrays.asList(new Point2D(15, 25)),
                 new Point2D(105, 25));
     }

@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.io.File;
 import java.io.IOException;
@@ -124,7 +124,7 @@ public class App extends Application {
         borderPane.setTop(menuBar);
 
         scene = new Scene(borderPane, 1000, 600);
-        scene.getStylesheets().add(getClass().getResource("/com/example/styles.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         scene.setOnMouseMoved(event -> {
             if (floatingImageView != null) {
                 floatingImageView.setX(event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
@@ -191,7 +191,8 @@ public class App extends Application {
         int count = 0;
 
         for (String type : types) {
-            ImageView imageView = new ImageView(SvgUtil.loadSvgImage("/com/example/" + type + "_ANSI_Labelled.svg"));
+            ImageView imageView = new ImageView(
+                    SvgUtil.loadSvgImage("/com/paperturtle/" + type + "_ANSI_Labelled.svg"));
             imageView.setId(type);
             imageView.setFitWidth(90);
             imageView.setFitHeight(40);

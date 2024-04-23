@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class OrGate extends LogicGate {
      * output point.
      */
     public OrGate() {
-        super("/com/example/OR_ANSI_Labelled.svg",
+        super("/com/paperturtle/OR_ANSI_Labelled.svg",
                 Arrays.asList(new Point2D(15, 15), new Point2D(15, 35)),
                 new Point2D(105, 25));
     }

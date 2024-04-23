@@ -1,4 +1,4 @@
-module com.example {
+module com.paperturtle {
     requires transitive javafx.graphics;
     requires transitive javafx.controls;
     requires javafx.fxml;
@@ -11,7 +11,7 @@ module com.example {
     requires batik.svggen;
     requires batik.util;
 
-    opens com.example to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
 
-    exports com.example;
+    exports com.paperturtle;
 }

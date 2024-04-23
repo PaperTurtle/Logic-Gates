@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
@@ -21,8 +21,8 @@ public class SwitchGate extends LogicGate implements GateInterface {
                 null,
                 new Point2D(70, 25));
 
-        offImage = SvgUtil.loadSvgImage("/com/example/SWITCH_ANSI_Labelled.svg");
-        onImage = SvgUtil.loadSvgImage("/com/example/SWITCH_ON_ANSI_Labelled.svg");
+        offImage = SvgUtil.loadSvgImage("/com/paperturtle/SWITCH_ANSI_Labelled.svg");
+        onImage = SvgUtil.loadSvgImage("/com/paperturtle/SWITCH_ON_ANSI_Labelled.svg");
         imageView = new javafx.scene.image.ImageView(offImage);
         outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
     }

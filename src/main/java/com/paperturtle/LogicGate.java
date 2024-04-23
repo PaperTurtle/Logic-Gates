@@ -1,4 +1,4 @@
-package com.example;
+package com.paperturtle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -409,6 +409,10 @@ public abstract class LogicGate {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Point2D getPosition() {
+        return new Point2D(imageView.getX(), imageView.getY());
     }
 
 }
