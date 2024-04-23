@@ -91,15 +91,6 @@
                         <option>javafx.controls,javafx.fxml</option>
                     </options>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
