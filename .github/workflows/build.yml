@@ -19,24 +19,35 @@ jobs:
               java-version: "16"
               distribution: "temurin"
 
+         - name: Download and Setup JavaFX SDK
+           run: |
+              wget https://download2.gluonhq.com/openjfx/16/openjfx-16_linux-x64_bin-sdk.zip
+              unzip openjfx-16_linux-x64_bin-sdk.zip -d javafx-sdk
+              echo "JavaFX SDK setup complete."
+
          - name: Setup Xvfb
            run: |
               sudo apt-get update
               sudo apt-get install -y xvfb
               Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
               echo "DISPLAY=:99" >> $GITHUB_ENV
+              export DISPLAY=:99
 
          - name: Install jpackage requirements
            run: sudo apt-get install fakeroot rpm
 
          - name: Maven Clean and Package
-           run: mvn clean package -Djava.awt.headless=true -Djavafx.platform=gtk
+           run: DISPLAY=:99 mvn clean package -Djava.awt.headless=true
 
          - name: Rename Shaded JAR
            run: |
               if [ -f ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ]; then
                 mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
               fi
+
+         - name: JavaFX Diagnostics
+           run: |
+              java -Dprism.verbose=true -jar ./target/logic_gates-1.0-SNAPSHOT.jar
 
          - name: Create Native Package with jpackage
            run: |
@@ -45,6 +56,8 @@ jobs:
                        --main-jar logic_gates-1.0-SNAPSHOT.jar \
                        --main-class com.paperturtle.Main \
                        --dest ./package \
+                       --module-path $JAVA_HOME/jmods:./javafx-sdk/lib \
+                       --add-modules javafx.controls,javafx.fxml,javafx.graphics \
                        --verbose
 
          - name: Get Release by Tag
