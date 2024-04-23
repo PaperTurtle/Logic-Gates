@@ -35,12 +35,22 @@ jobs:
               echo "DISPLAY=:99" >> $GITHUB_ENV
               export DISPLAY=:99
 
+         - name: Set Java and JavaFX Properties
+           run: |
+              echo "JAVA_OPTS=-Dprism.order=sw" >> $GITHUB_ENV
+              echo "DISPLAY=:99" >> $GITHUB_ENV
+
          - name: Install jpackage requirements
            run: sudo apt-get install fakeroot rpm
 
          - name: Maven Clean and Package
            run: |
               DISPLAY=:99 mvn clean package -Djava.awt.headless=true -Dprism.order=sw
+
+         - name: Disable Accessibility Tools
+           run: |
+             export NO_AT_BRIDGE=1
+             echo "NO_AT_BRIDGE=1" >> $GITHUB_ENV
 
          - name: Rename Shaded JAR
            run: |
