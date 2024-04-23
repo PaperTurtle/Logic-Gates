@@ -22,6 +22,9 @@ jobs:
          - name: Build with Maven
            run: mvn clean package
 
+         - name: Rename Shaded Jar
+           run: mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
+
          - name: Get Release by Tag
            id: get_release
            uses: octokit/request-action@v2.x
