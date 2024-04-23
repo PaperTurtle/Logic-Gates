@@ -27,7 +27,7 @@ jobs:
               echo "DISPLAY=:99" >> $GITHUB_ENV
 
          - name: Maven Clean and Package
-           run: mvn clean package -Djava.awt.headless=true
+           run: mvn clean package -Djava.awt.headless=true -Dprism.order=sw
 
          - name: Rename Shaded JAR
            run: |
