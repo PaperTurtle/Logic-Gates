@@ -25,45 +25,50 @@ jobs:
          - name: Maven Package
            run: mvn package
 
+         - name: Remove Unshaded JAR
+           run: rm -f ./target/logic_gates-1.0-SNAPSHOT.jar
+
+         - name: Rename Shaded JAR
+           run: mv ./target/shaded/logic_gates-1.0-SNAPSHOT.jar ./target/ || true
+
          - name: Get Release by Tag
            id: get_release
            uses: octokit/request-action@v2.x
            with:
-               route: GET /repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}
+              route: GET /repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}
            env:
-               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            continue-on-error: true
-        
+
          - name: Delete Release if Exists
            if: steps.get_release.outputs.status == 200
            uses: octokit/request-action@v2.x
            with:
-             route: DELETE /repos/${{ github.repository }}/releases/${{ fromJson(steps.get_release.outputs.data).id }}
+              route: DELETE /repos/${{ github.repository }}/releases/${{ fromJson(steps.get_release.outputs.data).id }}
            env:
-             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
          - name: Create Release
            id: create_release
            uses: actions/create-release@v1
            env:
-             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            with:
-             tag_name: ${{ github.ref_name }}
-             release_name: Release ${{ github.ref_name }} - ${{ github.sha }}
-             draft: false
-             prerelease: false
-        
+              tag_name: ${{ github.ref_name }}
+              release_name: Release ${{ github.ref_name }} - ${{ github.sha }}
+              draft: false
+              prerelease: false
+
          - name: List output files
            run: ls -lah ./target/
-        
+
          - name: Upload Release Asset
            id: upload-release-asset
            uses: actions/upload-release-asset@v1
            env:
-             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            with:
-             upload_url: ${{ steps.create_release.outputs.upload_url }}
-             asset_path: ./target/logic_gates-1.0-SNAPSHOT.jar
-             asset_name: logic_gates-1.0-SNAPSHOT.jar
-             asset_content_type: application/java-archive
-
+              upload_url: ${{ steps.create_release.outputs.upload_url }}
+              asset_path: ./target/logic_gates-1.0-SNAPSHOT.jar
+              asset_name: logic_gates-1.0-SNAPSHOT.jar
+              asset_content_type: application/java-archive
