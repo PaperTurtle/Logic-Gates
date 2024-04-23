@@ -103,7 +103,11 @@
                             </artifactSet>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.paperturtle.Main</mainClass>
+                                    <manifestEntries>
+                                        <Main-Class>com.paperturtle.Main</Main-Class>
+                                        <Class-Path>.</Class-Path>
+                                        <JavaFX-Version>16</JavaFX-Version>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
