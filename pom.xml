@@ -126,6 +126,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jlink-plugin</artifactId>
+                <version>3.0.0-alpha-1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <launcher>launch=com.paperturtle.App</launcher>
+                    <modulePaths>
+                        <modulePath>${java.home}/jmods</modulePath>
+                    </modulePaths>
+                    <modules>
+                        <module>com.paperturtle</module>
+                        <module>javafx.controls</module>
+                        <module>javafx.fxml</module>
+                    </modules>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
