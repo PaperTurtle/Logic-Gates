@@ -20,7 +20,7 @@ jobs:
          - name: Build with Maven
            run: mvn clean compile assembly:single
          - name: Copy JAR to root
-           run: cp target/*-jar-with-dependencies.jar ./logic-gates-simulator.jar
+           run: cp target/logic_gates-1.0-SNAPSHOT-jar-with-dependencies.jar ./logic-gates-simulator.jar
          - name: Upload JAR to GitHub Artifacts
            uses: actions/upload-artifact@v3
            with:
