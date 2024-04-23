@@ -25,9 +25,11 @@ jobs:
               sudo apt-get install -y xvfb
               Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
               echo "DISPLAY=:99" >> $GITHUB_ENV
+         - name: Install jpackage requirements
+           run: sudo apt-get install fakeroot rpm
 
          - name: Maven Clean and Package
-           run: mvn clean package -Djava.awt.headless=true -Dprism.order=sw
+           run: mvn clean package -Djava.awt.headless=true
 
          - name: Rename Shaded JAR
            run: |
@@ -37,7 +39,12 @@ jobs:
 
          - name: Create Native Package with jpackage
            run: |
-              jpackage --type app-image --input ./target/ --name LogicGates --main-jar logic_gates-1.0-SNAPSHOT.jar --main-class com.paperturtle.Main --dest ./package
+              jpackage --type app-image --input ./target/ \
+                       --name LogicGates \
+                       --main-jar logic_gates-1.0-SNAPSHOT.jar \
+                       --main-class com.paperturtle.Main \
+                       --dest ./package \
+                       --verbose
 
          - name: Get Release by Tag
            id: get_release
