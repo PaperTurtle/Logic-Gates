@@ -124,8 +124,8 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.paperturtle.App</mainClass>
                             <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.paperturtle.App</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -134,7 +134,6 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
