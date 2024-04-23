@@ -24,7 +24,9 @@ jobs:
               wget https://download2.gluonhq.com/openjfx/16/openjfx-16_linux-x64_bin-sdk.zip
               unzip openjfx-16_linux-x64_bin-sdk.zip -d javafx-sdk
               echo "JavaFX SDK setup complete."
-
+              echo "PRISM_ORDER=sw" >> $GITHUB_ENV
+              echo "JAVA_TOOL_OPTIONS=-Dprism.order=sw" >> $GITHUB_ENV
+              
          - name: Setup Xvfb
            run: |
               sudo apt-get update
@@ -37,19 +39,18 @@ jobs:
            run: sudo apt-get install fakeroot rpm
 
          - name: Maven Clean and Package
-           run: DISPLAY=:99 mvn clean package -Djava.awt.headless=true
+           run: |
+              DISPLAY=:99 mvn clean package -Djava.awt.headless=true -Dprism.order=sw
 
          - name: Rename Shaded JAR
            run: |
               if [ -f ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ]; then
                 mv ./target/logic_gates-1.0-SNAPSHOT-shaded.jar ./target/logic_gates-1.0-SNAPSHOT.jar
               fi
-
-         - name: List output files
-           run: ls -lah ./target/
+        
          - name: JavaFX Diagnostics
            run: |
-              java -Dprism.verbose=true -jar ./target/logic_gates-1.0-SNAPSHOT.jar
+              java -Dprism.verbose=true -Dprism.order=sw -jar ./target/logic_gates-1.0-SNAPSHOT.jar
 
          - name: Create Native Package with jpackage
            run: |
