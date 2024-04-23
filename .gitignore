@@ -25,4 +25,5 @@ target/
 # Gradle build directory
 build/
 
-./vscode/settings.json
+# VS Code settings
+.vscode/
