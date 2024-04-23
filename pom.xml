@@ -103,7 +103,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>logic_gates-1.0-SNAPSHOT</finalName>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <minimize>true</minimize>
                             <artifactSet>
                                 <excludes>
