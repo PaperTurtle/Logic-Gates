@@ -26,7 +26,7 @@ jobs:
            run: mvn package
 
          - name: Rename Shaded Jar
-           run: mv ./target/shaded/logic_gates-1.0-SNAPSHOT.jar ./target/logic_gates-1.0-SNAPSHOT.jar
+           run: mv ./target/shaded/original-logic_gates-1.0-SNAPSHOT.jar ./target/logic_gates-1.0-SNAPSHOT.jar
 
          - name: Get Release by Tag
            id: get_release
