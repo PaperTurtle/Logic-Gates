@@ -126,6 +126,11 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>com.paperturtle.App</mainClass>
+                            <addModules>
+                                <module>javafx.controls</module>
+                                <module>javafx.fxml</module>
+                                <module>javafx.swing</module>
+                            </addModules>
                         </manifest>
                     </archive>
                     <descriptorRefs>
