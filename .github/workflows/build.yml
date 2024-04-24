@@ -23,6 +23,16 @@ jobs:
          - name: Rename JAR file
            run: mv logic_gates-1.0-SNAPSHOT-shaded.jar logic_gate-1.0-SNAPSHOT.jar
 
+         - name: Delete tag if exists
+           run: |
+              if git fetch --tags && git tag -l "$TAG_NAME" | grep -q "$TAG_NAME"
+              then
+                git tag -d $TAG_NAME
+                git push --delete origin $TAG_NAME
+              fi
+           env:
+              TAG_NAME: ${{ github.ref_name }}
+
          - name: Create Release
            id: create_release
            uses: actions/create-release@v1
