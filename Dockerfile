@@ -44,5 +44,15 @@ RUN mvn clean package
 # Start a new stage for the final image to reduce size
 FROM eclipse-temurin:21-jdk
 COPY --from=builder /usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar /app/application.jar
+
+RUN apt-get update && apt-get install -y \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    libx11-6 \  # Ensure libX11 is installed
+    libgl1-mesa-glx \  # Ensure OpenGL libraries are installed
+    libgtk-3-0 \  # Ensure GTK libraries are installed
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 CMD ["java", "-jar", "/app/application.jar"]
