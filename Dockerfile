@@ -1,8 +1,7 @@
 # Use a base JDK image from Eclipse Temurin
 FROM eclipse-temurin:21-jdk as builder
 
-# Install required packages for the build
-# Ensure libX11, OpenGL, and GTK libraries are installed for JavaFX
+# Install required packages for the build, including X11 and related dependencies
 RUN apt-get update && apt-get install -y \
     xvfb \
     libxrender1 \
@@ -45,7 +44,7 @@ RUN mvn clean package
 FROM eclipse-temurin:21-jdk
 COPY --from=builder /usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar /app/application.jar
 
-# Install runtime dependencies for JavaFX
+# Install runtime dependencies for JavaFX and xvfb
 RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxtst6 \
@@ -53,6 +52,7 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libgl1-mesa-glx \
     libgtk-3-0 \
+    xvfb \  # Ensure xvfb is installed for virtual framebuffer support
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
