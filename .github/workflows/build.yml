@@ -20,7 +20,7 @@ jobs:
 
       - name: Run Docker Container
         run: |
-          docker run --name javafx-build javafx-builder
+          docker run --name javafx-build -it javafx-builder
 
       - name: Copy JAR file from Docker Container
         run: |
