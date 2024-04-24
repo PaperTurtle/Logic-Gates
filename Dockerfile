@@ -2,15 +2,14 @@
 FROM eclipse-temurin:21-jdk as builder
 
 # Install required packages for the build
-# Install required packages for the build
 RUN apt-get update && apt-get install -y \
     xvfb \
     libxrender1 \
     libxtst6 \
     libxi6 \
-    libx11-6 \ 
-    libgl1-mesa-glx \  
-    libgtk-3-0 \  
+    libx11-6 \  # Ensure libX11 is installed
+    libgl1-mesa-glx \  # Ensure OpenGL libraries are installed
+    libgtk-3-0 \  # Ensure GTK libraries are installed
     unzip \
     wget \
     ca-certificates \
@@ -45,14 +44,15 @@ RUN mvn clean package
 FROM eclipse-temurin:21-jdk
 COPY --from=builder /usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar /app/application.jar
 
+# Install runtime dependencies for JavaFX
 RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxtst6 \
     libxi6 \
-    libx11-6 \  # Ensure libX11 is installed
-    libgl1-mesa-glx \  # Ensure OpenGL libraries are installed
-    libgtk-3-0 \  # Ensure GTK libraries are installed
+    libx11-6 \
+    libgl1-mesa-glx \
+    libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-CMD ["java", "-jar", "/app/application.jar"]
+CMD ["xvfb-run", "java", "-jar", "/app/application.jar"]
