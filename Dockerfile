@@ -1,5 +1,5 @@
 # Use a base JDK image from Eclipse Temurin
-FROM eclipse-temurin:17-jdk as builder
+FROM eclipse-temurin:21-jdk as builder
 
 # Install required packages for the build
 RUN apt-get update && apt-get install -y \
@@ -38,7 +38,7 @@ WORKDIR /usr/src/app
 RUN mvn clean package
 
 # Start a new stage for the final image to reduce size
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 COPY --from=builder /usr/src/app/target/*.jar /app/application.jar
 WORKDIR /app
 CMD ["java", "-jar", "application.jar"]
