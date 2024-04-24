@@ -5,6 +5,7 @@ on:
       branches: [master]
    pull_request:
       branches: [master]
+   workflow_dispatch:
 
 jobs:
    build-and-release-jar:
@@ -20,6 +21,11 @@ jobs:
               distribution: "temurin"
               java-version: "21"
 
+         - name: Get number of changes
+           id: get_changes
+           run: |
+              echo "::set-output name=changes::$(git diff --shortstat ${{ github.event.before }}..${{ github.sha }} | awk '{print $1+$4}')"
+
          - name: Rename JAR file
            run: mv logic_gates-1.0-SNAPSHOT-shaded.jar logic_gate-1.0-SNAPSHOT.jar
 
@@ -33,7 +39,7 @@ jobs:
            continue-on-error: true
 
          - name: Delete Release if Exists
-           if: steps.get_release.outputs.status == 200
+           if: steps.get_release.outputs.status == 200 && (github.event_name == 'workflow_dispatch' || steps.get_changes.outputs.changes > 50)
            uses: octokit/request-action@v2.x
            with:
               route: DELETE /repos/${{ github.repository }}/releases/${{ fromJson(steps.get_release.outputs.data).id }}
@@ -42,6 +48,7 @@ jobs:
 
          - name: Create Release
            id: create_release
+           if: github.event_name == 'workflow_dispatch' || steps.get_changes.outputs.changes > 50
            uses: actions/create-release@v1
            env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
