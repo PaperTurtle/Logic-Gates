@@ -15,6 +15,7 @@ public class SwitchGate extends LogicGate implements GateInterface {
     private boolean state = false;
     private Image offImage;
     private Image onImage;
+    private boolean isSelected = false;
 
     public SwitchGate() {
         super(null,
@@ -75,7 +76,12 @@ public class SwitchGate extends LogicGate implements GateInterface {
     }
 
     private void handleMouseClicked(MouseEvent event) {
-        toggle();
+        if (!isSelected) {
+            isSelected = true;
+        } else {
+            toggle();
+        }
+        event.consume();
     }
 
     @Override
@@ -92,6 +98,14 @@ public class SwitchGate extends LogicGate implements GateInterface {
         list.add(new Pair<>(new Boolean[] {}, false));
         list.add(new Pair<>(new Boolean[] {}, true));
         return list;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 
 }
