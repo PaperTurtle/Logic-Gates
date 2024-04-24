@@ -2,14 +2,15 @@
 FROM eclipse-temurin:21-jdk as builder
 
 # Install required packages for the build
+# Ensure libX11, OpenGL, and GTK libraries are installed for JavaFX
 RUN apt-get update && apt-get install -y \
     xvfb \
     libxrender1 \
     libxtst6 \
     libxi6 \
-    libx11-6 \  # Ensure libX11 is installed
-    libgl1-mesa-glx \  # Ensure OpenGL libraries are installed
-    libgtk-3-0 \  # Ensure GTK libraries are installed
+    libx11-6 \
+    libgl1-mesa-glx \
+    libgtk-3-0 \
     unzip \
     wget \
     ca-certificates \
