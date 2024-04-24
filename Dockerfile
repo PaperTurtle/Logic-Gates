@@ -39,6 +39,6 @@ RUN mvn clean package
 
 # Start a new stage for the final image to reduce size
 FROM eclipse-temurin:21-jdk
-COPY --from=builder /usr/src/app/target/*.jar /app/application.jar
+COPY --from=builder /usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar /app/application.jar
 WORKDIR /app
-CMD ["java", "-jar", "application.jar"]
+CMD ["java", "-jar", "/app/application.jar"]
