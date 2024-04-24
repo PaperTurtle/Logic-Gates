@@ -247,7 +247,7 @@ public class CircuitCanvas extends Pane {
         imageView.setPickOnBounds(true);
 
         imageView.setOnMouseDragged(event -> {
-            if (imageView.getStyleClass().contains("selected")) {
+            if (event.getButton() == MouseButton.PRIMARY && imageView.getStyleClass().contains("selected")) {
                 Object[] userData = (Object[]) imageView.getUserData();
                 double baseX = (double) userData[0];
                 double baseY = (double) userData[1];
@@ -272,7 +272,22 @@ public class CircuitCanvas extends Pane {
         });
 
         imageView.setOnMousePressed(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                double offsetX = event.getSceneX() - imageView.getLayoutX();
+                double offsetY = event.getSceneY() - imageView.getLayoutY();
+                if (!event.isControlDown() && !imageView.getStyleClass().contains("selected")) {
+                    deselectAllGatesExcept(imageView);
+                }
+                imageView.getStyleClass().add("selected");
+                imageView.setUserData(new Object[] { offsetX, offsetY, gate });
+            }
             handleMousePressedForGate(imageView, gate, event);
+        });
+
+        imageView.setOnMouseReleased(event -> {
+            if (imageView.getStyleClass().contains("selected")) {
+                event.consume();
+            }
         });
 
         this.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
@@ -294,6 +309,17 @@ public class CircuitCanvas extends Pane {
                 this.requestFocus();
             }
         });
+    }
+
+    private void deselectAllGatesExcept(ImageView exceptImageView) {
+        gateImageViews.entrySet().stream()
+                .filter(entry -> entry.getKey() != exceptImageView)
+                .forEach(entry -> {
+                    entry.getKey().getStyleClass().remove("selected");
+                    if (entry.getValue() instanceof SwitchGate) {
+                        ((SwitchGate) entry.getValue()).setSelected(false);
+                    }
+                });
     }
 
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
