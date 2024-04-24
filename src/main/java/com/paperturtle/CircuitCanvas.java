@@ -50,6 +50,7 @@ public class CircuitCanvas extends Pane {
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
     private Rectangle selectionRect = new Rectangle();
     private boolean isSelecting = false;
+    private boolean justSelected = false;
 
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
@@ -57,7 +58,7 @@ public class CircuitCanvas extends Pane {
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
-        // initializeSelectionMechanism();
+        initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
     }
@@ -74,6 +75,10 @@ public class CircuitCanvas extends Pane {
 
     private void handleCanvasClick(MouseEvent event) {
         if (!(event.getTarget() instanceof ImageView)) {
+            if (justSelected) {
+                justSelected = false; 
+                return;
+            }
             deselectAllGates();
             this.requestFocus();
         } else {
@@ -94,64 +99,66 @@ public class CircuitCanvas extends Pane {
         }
     }
 
-    // private void initializeSelectionMechanism() {
-    // selectionRect.setStroke(Color.BLUE);
-    // selectionRect.setStrokeWidth(1);
-    // selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
-    // selectionRect.setVisible(false);
-    // this.getChildren().add(selectionRect);
+    private void initializeSelectionMechanism() {
+        selectionRect.setStroke(Color.BLUE);
+        selectionRect.setStrokeWidth(1);
+        selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
+        selectionRect.setVisible(false);
+        this.getChildren().add(selectionRect);
 
-    // this.setOnMousePressed(event -> {
-    // if (currentMode == Mode.WORK) {
-    // lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(),
-    // getWidth())),
-    // Math.max(0, Math.min(event.getY(), getHeight())));
-    // selectionRect.setX(lastMouseCoordinates.getX());
-    // selectionRect.setY(lastMouseCoordinates.getY());
-    // selectionRect.setWidth(0);
-    // selectionRect.setHeight(0);
-    // selectionRect.setVisible(true);
-    // isSelecting = true;
-    // }
-    // });
+        this.setOnMousePressed(event -> {
+            lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(),
+                    getWidth())),
+                    Math.max(0, Math.min(event.getY(), getHeight())));
+            selectionRect.setX(lastMouseCoordinates.getX());
+            selectionRect.setY(lastMouseCoordinates.getY());
+            selectionRect.setWidth(0);
+            selectionRect.setHeight(0);
+            selectionRect.setVisible(true);
+            isSelecting = true;
+        });
 
-    // this.setOnMouseDragged(event -> {
-    // if (isSelecting && currentMode == Mode.WORK) {
-    // double x = Math.max(0, Math.min(event.getX(), getWidth()));
-    // double y = Math.max(0, Math.min(event.getY(), getHeight()));
-    // selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
-    // selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
-    // selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
-    // selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
-    // }
-    // });
+        this.setOnMouseDragged(event -> {
+            if (isSelecting) {
+                double x = Math.max(0, Math.min(event.getX(), getWidth()));
+                double y = Math.max(0, Math.min(event.getY(), getHeight()));
+                selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
+                selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
+                selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
+                selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
+            }
+        });
 
-    // this.setOnMouseReleased(event -> {
-    // if (isSelecting && currentMode == Mode.WORK) {
-    // selectGatesInRectangle();
-    // selectionRect.setVisible(false);
-    // isSelecting = false;
-    // }
-    // });
-    // }
+        this.setOnMouseReleased(event -> {
+            if (isSelecting) {
+                selectGatesInRectangle();
+                selectionRect.setVisible(false);
+                isSelecting = false;
+                justSelected = true;
+            }
+        });
+    }
 
-    // private void selectGatesInRectangle() {
-    // for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-    // ImageView gateView = entry.getKey();
-    // if
-    // (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent()))
-    // {
-    // if (!gateView.getStyleClass().contains("selected")) {
-    // gateView.getStyleClass().add("selected");
-    // currentMode = Mode.PAN;
-    // this.setCursor(Cursor.OPEN_HAND);
-    // updateMarkersVisibility();
-    // }
-    // } else {
-    // gateView.getStyleClass().remove("selected");
-    // }
-    // }
-    // }
+    private void selectGatesInRectangle() {
+        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
+            ImageView gateView = entry.getKey();
+            LogicGate gate = entry.getValue();
+            boolean intersects = gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
+            boolean isSelected = gateView.getStyleClass().contains("selected");
+
+            if (intersects && !isSelected) {
+                gateView.getStyleClass().add("selected");
+                if (gate instanceof SwitchGate) {
+                    ((SwitchGate) gate).setSelected(true);
+                }
+            } else if (!intersects && isSelected) {
+                gateView.getStyleClass().remove("selected");
+                if (gate instanceof SwitchGate) {
+                    ((SwitchGate) gate).setSelected(false);
+                }
+            }
+        }
+    }
 
     public void drawGate(LogicGate gate, double x, double y) {
         gate.createVisualRepresentation(this);
