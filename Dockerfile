@@ -13,15 +13,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and extract JavaFX SDK
-ADD https://download2.gluonhq.com/openjfx/17/openjfx-17_linux-x64_bin-sdk.zip /opt/javafx.zip
+ADD https://download2.gluonhq.com/openjfx/21/openjfx-21_linux-x64_bin-sdk.zip /opt/javafx.zip
 RUN cd /opt && unzip javafx.zip && rm javafx.zip
 
 # Set environment variables to configure Java and Maven
 ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH="/opt/javafx-sdk-17/bin:$JAVA_HOME/bin:$PATH"
+ENV PATH="/opt/javafx-sdk-21/bin:$JAVA_HOME/bin:$PATH"
 ENV MAVEN_HOME=/usr/share/maven
 ENV MAVEN_CONFIG="/root/.m2"
-ENV MAVEN_OPTS="--module-path /opt/javafx-sdk-17/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -Dprism.order=sw"
+ENV MAVEN_OPTS="--module-path /opt/javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -Dprism.order=sw"
 
 # Install Maven
 ARG MAVEN_VERSION=3.9.6
