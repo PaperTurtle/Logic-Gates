@@ -52,7 +52,7 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libgl1-mesa-glx \
     libgtk-3-0 \
-    xvfb \  # Ensure xvfb is installed for virtual framebuffer support
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
