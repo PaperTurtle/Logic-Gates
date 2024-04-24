@@ -59,6 +59,7 @@ jobs:
               prerelease: false
 
          - name: Upload JAR file to Release
+           if: github.event_name == 'workflow_dispatch' || steps.get_changes.outputs.changes > 50
            uses: actions/upload-release-asset@v1
            env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
