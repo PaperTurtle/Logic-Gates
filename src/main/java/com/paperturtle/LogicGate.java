@@ -375,14 +375,6 @@ public abstract class LogicGate {
         return outputGates;
     }
 
-    public void highlight() {
-        imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0)");
-    }
-
-    public void unhighlight() {
-        imageView.setStyle("");
-    }
-
     public GateData getGateData() {
         GateData data = new GateData();
         data.id = this.getId();
