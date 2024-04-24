@@ -2,11 +2,15 @@
 FROM eclipse-temurin:21-jdk as builder
 
 # Install required packages for the build
+# Install required packages for the build
 RUN apt-get update && apt-get install -y \
     xvfb \
     libxrender1 \
     libxtst6 \
     libxi6 \
+    libx11-6 \ 
+    libgl1-mesa-glx \  
+    libgtk-3-0 \  
     unzip \
     wget \
     ca-certificates \
