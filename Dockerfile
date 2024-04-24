@@ -1,59 +1,53 @@
-# Use a base JDK image from Eclipse Temurin
-FROM eclipse-temurin:21-jdk as builder
+name: Build and Deploy Logic Gates Simulator
 
-# Install required packages for the build, including X11 and related dependencies
-RUN apt-get update && apt-get install -y \
-    xvfb \
-    libxrender1 \
-    libxtst6 \
-    libxi6 \
-    libx11-6 \
-    libgl1-mesa-glx \
-    libgtk-3-0 \
-    unzip \
-    wget \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+on:
+   push:
+      branches: [master]
+   pull_request:
+      branches: [master]
 
-# Download and extract JavaFX SDK
-ADD https://download2.gluonhq.com/openjfx/21/openjfx-21_linux-x64_bin-sdk.zip /opt/javafx.zip
-RUN cd /opt && unzip javafx.zip && rm javafx.zip
+jobs:
+   build-and-release-jar:
+      runs-on: ubuntu-latest
 
-# Set environment variables to configure Java and Maven
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH="/opt/javafx-sdk-21/bin:$JAVA_HOME/bin:$PATH"
-ENV MAVEN_HOME=/usr/share/maven
-ENV MAVEN_CONFIG="/root/.m2"
-ENV MAVEN_OPTS="--module-path /opt/javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics -Dprism.order=sw"
+      steps:
+         - name: Checkout Repository
+           uses: actions/checkout@v3
 
-# Install Maven
-ARG MAVEN_VERSION=3.9.6
-RUN mkdir -p $MAVEN_HOME /usr/share/maven/ref \
-  && curl -fsSL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-    | tar -xzC $MAVEN_HOME --strip-components=1 \
-  && ln -s $MAVEN_HOME/bin/mvn /usr/bin/mvn
+         - name: Build Docker Image
+           run: |
+              docker build -t javafx-builder .
 
-# Copy the project files into the image
-COPY . /usr/src/app
-WORKDIR /usr/src/app
+         - name: Run Docker Container
+           run: |
+              docker run it --name javafx-build javafx-builder
 
-# Build the application
-RUN mvn clean package
+         - name: Copy JAR file from Docker Container
+           run: |
+              docker cp javafx-build:/usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar .
 
-# Start a new stage for the final image to reduce size
-FROM eclipse-temurin:21-jdk
-COPY --from=builder /usr/src/app/target/logic_gates-1.0-SNAPSHOT-shaded.jar /app/application.jar
+         - name: Clean up Docker Container
+           run: |
+              docker rm javafx-build
 
-# Install runtime dependencies for JavaFX and xvfb
-RUN apt-get update && apt-get install -y \
-    libxrender1 \
-    libxtst6 \
-    libxi6 \
-    libx11-6 \
-    libgl1-mesa-glx \
-    libgtk-3-0 \
-    xvfb \
-    && rm -rf /var/lib/apt/lists/*
+         - name: Create Release
+           id: create_release
+           uses: actions/create-release@v1
+           env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           with:
+              tag_name: ${{ github.ref_name }}
+              release_name: Release ${{ github.ref_name }} - ${{ github.sha }}
+              draft: false
+              prerelease: false
 
-WORKDIR /app
-CMD ["xvfb-run", "java", "-jar", "/app/application.jar"]
+         - name: Upload Release Asset
+           id: upload-release-asset
+           uses: actions/upload-release-asset@v1
+           env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           with:
+              upload_url: ${{ steps.create_release.outputs.upload_url }}
+              asset_path: ./logic_gates-1.0-SNAPSHOT-shaded.jar
+              asset_name: logic_gates-1.0-SNAPSHOT-shaded.jar
+              asset_content_type: application/java-archive
