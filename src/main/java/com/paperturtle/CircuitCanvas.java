@@ -40,7 +40,6 @@ import javafx.collections.ObservableList;
 public class CircuitCanvas extends Pane {
     private Line currentLine;
     private LogicGate startGate;
-    private Mode currentMode = Mode.WORK;
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
     private Point2D lastMouseCoordinates;
@@ -52,106 +51,107 @@ public class CircuitCanvas extends Pane {
     private Rectangle selectionRect = new Rectangle();
     private boolean isSelecting = false;
 
-    public enum Mode {
-        PAN, WORK
-    }
-
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
         this.scrollPane = scrollPane;
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
-        setupModeChangeHandlers();
-        initializeSelectionMechanism();
+        // initializeSelectionMechanism();
 
-        this.setOnMouseClicked(event -> {
-            if (event.getTarget() instanceof Pane || !(event.getTarget() instanceof ImageView)) {
-                if (highlightedGate != null) {
-                    highlightedGate.unhighlight();
-                    highlightedGate = null;
-                }
+        this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
+    }
+
+    private void deselectAllGates() {
+        gateImageViews.values().forEach(gate -> {
+            gate.getImageView().getStyleClass().remove("selected");
+            if (gate instanceof SwitchGate) {
+                ((SwitchGate) gate).setSelected(false);
             }
+        });
+        highlightedGate = null;
+    }
+
+    private void handleCanvasClick(MouseEvent event) {
+        if (!(event.getTarget() instanceof ImageView)) {
+            deselectAllGates();
             this.requestFocus();
-        });
-    }
-
-    private void initializeSelectionMechanism() {
-        selectionRect.setStroke(Color.BLUE);
-        selectionRect.setStrokeWidth(1);
-        selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
-        selectionRect.setVisible(false);
-        this.getChildren().add(selectionRect);
-
-        this.setOnMousePressed(event -> {
-            if (currentMode == Mode.WORK) {
-                lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(), getWidth())),
-                        Math.max(0, Math.min(event.getY(), getHeight())));
-                selectionRect.setX(lastMouseCoordinates.getX());
-                selectionRect.setY(lastMouseCoordinates.getY());
-                selectionRect.setWidth(0);
-                selectionRect.setHeight(0);
-                selectionRect.setVisible(true);
-                isSelecting = true;
-            }
-        });
-
-        this.setOnMouseDragged(event -> {
-            if (isSelecting && currentMode == Mode.WORK) {
-                double x = Math.max(0, Math.min(event.getX(), getWidth()));
-                double y = Math.max(0, Math.min(event.getY(), getHeight()));
-                selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
-                selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
-                selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
-                selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
-            }
-        });
-
-        this.setOnMouseReleased(event -> {
-            if (isSelecting && currentMode == Mode.WORK) {
-                selectGatesInRectangle();
-                selectionRect.setVisible(false);
-                isSelecting = false;
-            }
-        });
-    }
-
-    private void selectGatesInRectangle() {
-        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-            ImageView gateView = entry.getKey();
-            if (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent())) {
-                if (!gateView.getStyleClass().contains("selected")) {
-                    gateView.getStyleClass().add("selected");
-                    currentMode = Mode.PAN;
-                    this.setCursor(Cursor.OPEN_HAND);
-                    updateMarkersVisibility();
+        } else {
+            ImageView clickedImageView = (ImageView) event.getTarget();
+            if (highlightedGate != null && !highlightedGate.getImageView().equals(clickedImageView)) {
+                deselectAllGates();
+                LogicGate clickedGate = gateImageViews.get(clickedImageView);
+                if (clickedGate != null) {
+                    highlightedGate = clickedGate;
+                    if (!clickedImageView.getStyleClass().contains("selected")) {
+                        clickedImageView.getStyleClass().add("selected");
+                    }
+                    if (clickedGate instanceof SwitchGate) {
+                        ((SwitchGate) clickedGate).setSelected(true);
+                    }
                 }
-            } else {
-                gateView.getStyleClass().remove("selected");
             }
         }
     }
 
-    private void setupModeChangeHandlers() {
-        this.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case P:
-                    currentMode = Mode.PAN;
-                    this.setCursor(Cursor.OPEN_HAND);
-                    updateMarkersVisibility();
-                    System.out.println("Switched to Pan Mode");
-                    break;
-                case W:
-                    currentMode = Mode.WORK;
-                    this.setCursor(Cursor.DEFAULT);
-                    updateMarkersVisibility();
-                    System.out.println("Switched to Work Mode");
-                    break;
-                default:
-                    break;
-            }
-        });
-    }
+    // private void initializeSelectionMechanism() {
+    // selectionRect.setStroke(Color.BLUE);
+    // selectionRect.setStrokeWidth(1);
+    // selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
+    // selectionRect.setVisible(false);
+    // this.getChildren().add(selectionRect);
+
+    // this.setOnMousePressed(event -> {
+    // if (currentMode == Mode.WORK) {
+    // lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(),
+    // getWidth())),
+    // Math.max(0, Math.min(event.getY(), getHeight())));
+    // selectionRect.setX(lastMouseCoordinates.getX());
+    // selectionRect.setY(lastMouseCoordinates.getY());
+    // selectionRect.setWidth(0);
+    // selectionRect.setHeight(0);
+    // selectionRect.setVisible(true);
+    // isSelecting = true;
+    // }
+    // });
+
+    // this.setOnMouseDragged(event -> {
+    // if (isSelecting && currentMode == Mode.WORK) {
+    // double x = Math.max(0, Math.min(event.getX(), getWidth()));
+    // double y = Math.max(0, Math.min(event.getY(), getHeight()));
+    // selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
+    // selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
+    // selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
+    // selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
+    // }
+    // });
+
+    // this.setOnMouseReleased(event -> {
+    // if (isSelecting && currentMode == Mode.WORK) {
+    // selectGatesInRectangle();
+    // selectionRect.setVisible(false);
+    // isSelecting = false;
+    // }
+    // });
+    // }
+
+    // private void selectGatesInRectangle() {
+    // for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
+    // ImageView gateView = entry.getKey();
+    // if
+    // (gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent()))
+    // {
+    // if (!gateView.getStyleClass().contains("selected")) {
+    // gateView.getStyleClass().add("selected");
+    // currentMode = Mode.PAN;
+    // this.setCursor(Cursor.OPEN_HAND);
+    // updateMarkersVisibility();
+    // }
+    // } else {
+    // gateView.getStyleClass().remove("selected");
+    // }
+    // }
+    // }
 
     public void drawGate(LogicGate gate, double x, double y) {
         gate.createVisualRepresentation(this);
@@ -165,7 +165,7 @@ public class CircuitCanvas extends Pane {
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
-            if (currentMode == Mode.WORK && currentLine == null) {
+            if (currentLine == null) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
@@ -240,23 +240,33 @@ public class CircuitCanvas extends Pane {
         imageView.setPickOnBounds(true);
 
         imageView.setOnMouseDragged(event -> {
-            if (currentMode == Mode.PAN) {
+            if (imageView.getStyleClass().contains("selected")) {
                 Object[] data = (Object[]) imageView.getUserData();
-                double[] offset = new double[] { (double) data[0], (double) data[1] };
-                LogicGate draggedGate = (LogicGate) data[2];
-                double newX = event.getSceneX() - offset[0];
-                double newY = event.getSceneY() - offset[1];
-                draggedGate.handleDrag(newX, newY);
+                if (data != null) {
+                    double offsetX = (double) data[0];
+                    double offsetY = (double) data[1];
+                    LogicGate draggedGate = (LogicGate) data[2];
+                    double newX = event.getSceneX() - offsetX;
+                    double newY = event.getSceneY() - offsetY;
+                    draggedGate.handleDrag(newX, newY);
+                }
+                event.consume();
             }
-            event.consume();
         });
 
         imageView.setOnMousePressed(event -> {
             if (highlightedGate != null && highlightedGate != gate) {
-                highlightedGate.unhighlight();
+                highlightedGate.getImageView().getStyleClass().remove("selected");
             }
             highlightedGate = gate;
-            gate.highlight();
+
+            if (!gate.getImageView().getStyleClass().contains("selected")) {
+                gate.getImageView().getStyleClass().add("selected");
+            }
+
+            double offsetX = event.getSceneX() - imageView.getX();
+            double offsetY = event.getSceneY() - imageView.getY();
+            imageView.setUserData(new Object[] { offsetX, offsetY, gate });
 
             if (event.getButton() == MouseButton.SECONDARY) {
                 if (openContextMenu != null) {
@@ -282,25 +292,18 @@ public class CircuitCanvas extends Pane {
                 event.consume();
             }
 
-            if (event.getButton() == MouseButton.PRIMARY && currentMode == Mode.PAN) {
-                double offsetX = event.getSceneX() - imageView.getX();
-                double offsetY = event.getSceneY() - imageView.getY();
-                imageView.setUserData(new Object[] { offsetX, offsetY, gate });
-                imageView.setCursor(Cursor.CLOSED_HAND);
-                event.consume();
-            }
         });
 
-        imageView.setOnMouseReleased(event -> {
-            if (currentMode == Mode.PAN && event.getButton() == MouseButton.PRIMARY) {
-                imageView.setCursor(Cursor.HAND);
+        this.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
+            if (e.getTarget() instanceof Pane) {
+                deselectAllGates();
             }
         });
 
         this.setOnMouseClicked(event -> {
             if (!(event.getTarget() instanceof ImageView)) {
                 if (highlightedGate != null) {
-                    highlightedGate.unhighlight();
+                    highlightedGate.getImageView().getStyleClass().remove("selected");
                     highlightedGate = null;
                 }
                 if (openContextMenu != null) {
@@ -465,14 +468,14 @@ public class CircuitCanvas extends Pane {
 
     private void setupConnectionHandlers() {
         this.setOnMouseMoved(mouseMoveEvent -> {
-            if (currentMode == Mode.WORK && currentLine != null) {
+            if (currentLine != null) {
                 currentLine.setEndX(mouseMoveEvent.getX());
                 currentLine.setEndY(mouseMoveEvent.getY());
             }
         });
 
         this.setOnMouseClicked(mouseClickEvent -> {
-            if (currentMode == Mode.WORK && currentLine != null && mouseClickEvent.getClickCount() == 1) {
+            if (currentLine != null && mouseClickEvent.getClickCount() == 1) {
                 if (!finalizeConnection(mouseClickEvent.getX(), mouseClickEvent.getY(), null)) {
                     this.getChildren().remove(currentLine);
                 }
@@ -498,21 +501,6 @@ public class CircuitCanvas extends Pane {
             }
         });
 
-    }
-
-    private void updateMarkersVisibility() {
-        boolean showMarkers = currentMode == Mode.WORK;
-        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-            List<Circle> markers = entry.getValue().getInputMarkers();
-            if (markers != null) {
-                for (Circle marker : markers) {
-                    marker.setVisible(showMarkers);
-                }
-            }
-            if (entry.getValue().outputMarker != null) {
-                entry.getValue().outputMarker.setVisible(showMarkers);
-            }
-        }
     }
 
     public void propagateUpdates() {
