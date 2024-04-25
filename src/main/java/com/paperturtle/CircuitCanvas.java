@@ -270,10 +270,17 @@ public class CircuitCanvas extends Pane {
                     ImageView otherImageView = entry.getKey();
                     if (otherImageView.getStyleClass().contains("selected")) {
                         LogicGate otherGate = entry.getValue();
+
                         double newX = otherGate.getImageView().getX() + deltaX;
                         double newY = otherGate.getImageView().getY() + deltaY;
-                        otherGate.setPosition(newX, newY);
-                        otherImageView.relocate(newX, newY);
+
+                        double clampedX = Math.max(0,
+                                Math.min(newX, getWidth() - otherImageView.getBoundsInLocal().getWidth()));
+                        double clampedY = Math.max(0,
+                                Math.min(newY, getHeight() - otherImageView.getBoundsInLocal().getHeight()));
+
+                        otherGate.setPosition(clampedX, clampedY);
+                        otherImageView.relocate(clampedX, clampedY);
                     }
                 }
 
