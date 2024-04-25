@@ -203,7 +203,7 @@ public class CircuitCanvas extends Pane {
 
                     LogicGate targetGate = findGateForInputMarker(inputMarker);
                     LogicGate sourceGate = lineToStartGateMap.get(currentLine);
-                    if (targetGate != null && sourceGate != null) {
+                    if (targetGate != null && sourceGate != null && targetGate != sourceGate) {
                         int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
                         targetGate.addInputConnection(currentLine, inputIndex);
                         targetGate.addInput(sourceGate);
@@ -214,6 +214,13 @@ public class CircuitCanvas extends Pane {
                         sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
                         scheduleUpdate(targetGate);
                         startGate = null;
+                    } else {
+                        if (currentLine != null && startGate != null) {
+                            this.getChildren().remove(currentLine);
+                            startGate.removeOutputConnection(currentLine);
+                            currentLine = null;
+                        }
+                        return false;
                     }
 
                     return true;
