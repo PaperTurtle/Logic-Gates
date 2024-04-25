@@ -81,7 +81,8 @@ public class CircuitCanvas extends Pane {
             }
             deselectAllGates();
             this.requestFocus();
-        } else {
+            return;
+        } else if (event.getTarget() instanceof ImageView) {
             ImageView clickedImageView = (ImageView) event.getTarget();
             if (highlightedGate != null && !highlightedGate.getImageView().equals(clickedImageView)) {
                 deselectAllGates();
@@ -89,6 +90,7 @@ public class CircuitCanvas extends Pane {
                 if (clickedGate != null) {
                     highlightedGate = clickedGate;
                     if (!clickedImageView.getStyleClass().contains("selected")) {
+                        System.out.println("This runs");
                         clickedImageView.getStyleClass().add("selected");
                     }
                     if (clickedGate instanceof SwitchGate) {
@@ -105,6 +107,7 @@ public class CircuitCanvas extends Pane {
         selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
         selectionRect.setVisible(false);
         this.getChildren().add(selectionRect);
+        final double dragThreshold = 10.0;
 
         this.setOnMousePressed(event -> {
             lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(),
@@ -130,12 +133,13 @@ public class CircuitCanvas extends Pane {
         });
 
         this.setOnMouseReleased(event -> {
-            if (isSelecting) {
+            if (isSelecting
+                    && (selectionRect.getWidth() > dragThreshold || selectionRect.getHeight() > dragThreshold)) {
                 selectGatesInRectangle();
-                selectionRect.setVisible(false);
-                isSelecting = false;
-                justSelected = true;
             }
+            selectionRect.setVisible(false);
+            isSelecting = false;
+            justSelected = true;
         });
     }
 
@@ -172,7 +176,7 @@ public class CircuitCanvas extends Pane {
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
-            if (currentLine == null) {
+            if (event.getButton() == MouseButton.PRIMARY && currentLine == null) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 currentLine = new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY());
                 Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;

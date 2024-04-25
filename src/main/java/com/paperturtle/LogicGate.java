@@ -14,9 +14,7 @@ import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
 public abstract class LogicGate {
-    // List to hold input gates
     protected List<LogicGate> inputs;
-    // Path to the SVG file for this gate type
     protected String svgFilePath;
     protected List<Point2D> inputPoints;
     protected Point2D outputPoint;
@@ -249,26 +247,26 @@ public abstract class LogicGate {
     }
 
     public void propagateStateChange() {
-        boolean newState = evaluate(); // Re-evaluate the state based on current inputs
+        boolean newState = evaluate();
         if (newState != currentState) {
             currentState = newState;
-            updateOutputConnectionsColor(newState); // Update connection colors based on the new state
+            updateOutputConnectionsColor(newState);
 
             for (LogicGate gate : outputGates) {
-                gate.propagateStateChange(); // Propagate state change to connected gates
+                gate.propagateStateChange();
             }
             for (LogicGate gate : outputGates) {
                 if (gate instanceof Lightbulb) {
-                    ((Lightbulb) gate).toggleLight(currentState); // Specifically update lightbulb states
+                    ((Lightbulb) gate).toggleLight(currentState);
                 }
             }
         }
     }
 
     public void updateOutputConnectionsColor(boolean state) {
-        Color newColor = state ? Color.RED : Color.BLACK; // Use RED for true, BLACK for false
+        Color newColor = state ? Color.RED : Color.BLACK;
         for (Line line : outputConnections) {
-            Platform.runLater(() -> line.setStroke(newColor)); // Ensure UI update happens on the JavaFX thread
+            Platform.runLater(() -> line.setStroke(newColor));
         }
     }
 
