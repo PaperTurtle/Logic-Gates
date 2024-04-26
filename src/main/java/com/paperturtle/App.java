@@ -45,15 +45,19 @@ public class App extends Application {
         scrollableSidebar.setFitToWidth(true);
         scrollableSidebar.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollableSidebar.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollableSidebar.setMinWidth(200);
+        scrollableSidebar.setMaxWidth(200);
+        scrollableSidebar.setPannable(false);
 
         initializeSidebar(sidebar);
 
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setPannable(false);
+        scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background-color: white;");
 
-        circuitCanvas = new CircuitCanvas(600, 400, scrollPane);
+        circuitCanvas = new CircuitCanvas(2000, 2000, scrollPane);
         scrollPane.setContent(circuitCanvas);
 
         MenuBar menuBar = new MenuBar();
@@ -63,13 +67,21 @@ public class App extends Application {
         MenuItem openItem = new MenuItem("Open...");
         MenuItem saveItem = new MenuItem("Save...");
 
-        // Add menu items to the File menu
+        Menu cursorMenu = new Menu("Cursor");
+        MenuItem pointerItem = new MenuItem("Use Pointer");
+        MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
+
+        pointerItem.setOnAction(e -> scene.setCursor(Cursor.DEFAULT));
+        grabbyItem.setOnAction(e -> {
+            scene.setCursor(Cursor.HAND);
+            circuitCanvas.setCursor(Cursor.HAND);
+        });
+
         fileMenu.getItems().addAll(openItem, saveItem);
+        cursorMenu.getItems().addAll(pointerItem, grabbyItem);
 
-        // Add File menu to the menu bar
-        menuBar.getMenus().add(fileMenu);
+        menuBar.getMenus().addAll(fileMenu, cursorMenu);
 
-        // Set action for openItem
         openItem.setOnAction(e -> {
             if (!circuitCanvas.isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -119,8 +131,8 @@ public class App extends Application {
             }
         });
 
-        borderPane.setLeft(scrollableSidebar);
         borderPane.setCenter(circuitCanvas);
+        borderPane.setLeft(scrollableSidebar);
         borderPane.setTop(menuBar);
 
         scene = new Scene(borderPane, 1000, 600);

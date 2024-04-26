@@ -17,6 +17,7 @@ import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -51,6 +52,8 @@ public class CircuitCanvas extends Pane {
     private Rectangle selectionRect = new Rectangle();
     private boolean isSelecting = false;
     private boolean justSelected = false;
+    private double lastX = 0;
+    private double lastY = 0;
 
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
@@ -59,9 +62,46 @@ public class CircuitCanvas extends Pane {
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
         initializeSelectionMechanism();
-
+        // initializeZoomHandling();
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
+        this.setOnMousePressed(this::handleMousePressed);
+        this.setOnMouseDragged(this::handleMouseDragged);
     }
+
+    private void handleMousePressed(MouseEvent event) {
+        lastX = event.getX();
+        lastY = event.getY();
+    }
+
+    private void handleMouseDragged(MouseEvent event) {
+        double dampingFactor = 0.2;
+        double deltaX = (event.getX() - lastX) * dampingFactor;
+        double deltaY = (event.getY() - lastY) * dampingFactor;
+
+        this.setTranslateX(this.getTranslateX() + deltaX);
+        this.setTranslateY(this.getTranslateY() + deltaY);
+
+        lastX = event.getX();
+        lastY = event.getY();
+    }
+    // ! TODO Make dragging around canvas work
+
+    // private void initializeZoomHandling() {
+    // this.addEventFilter(ScrollEvent.SCROLL, event -> {
+    // if (event.isControlDown()) {
+    // double scaleFactor = 1.1;
+    // double deltaY = event.getDeltaY();
+    // if (deltaY > 0) {
+    // this.setScaleX(this.getScaleX() * scaleFactor);
+    // this.setScaleY(this.getScaleY() * scaleFactor);
+    // } else if (deltaY < 0) {
+    // this.setScaleX(this.getScaleX() / scaleFactor);
+    // this.setScaleY(this.getScaleY() / scaleFactor);
+    // }
+    // event.consume();
+    // }
+    // });
+    // }
 
     private void deselectAllGates() {
         gateImageViews.values().forEach(gate -> {
