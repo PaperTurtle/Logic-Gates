@@ -4,6 +4,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
 import java.util.List;
+
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -78,19 +80,29 @@ public class CircuitCanvas extends Pane {
         double deltaX = (event.getX() - lastX) * dampingFactor;
         double deltaY = (event.getY() - lastY) * dampingFactor;
 
-        this.setTranslateX(this.getTranslateX() + deltaX);
-        this.setTranslateY(this.getTranslateY() + deltaY);
+        double newTranslateX = this.getTranslateX() + deltaX;
+        double newTranslateY = this.getTranslateY() + deltaY;
 
-        double newWidth = Math.max(this.getPrefWidth(),
-                this.getTranslateX() + scrollPane.getViewportBounds().getWidth());
-        double newHeight = Math.max(this.getPrefHeight(),
-                this.getTranslateY() + scrollPane.getViewportBounds().getHeight());
-
-        this.setPrefSize(newWidth, newHeight);
-        this.layout();
-
+        this.setTranslateX(newTranslateX);
+        this.setTranslateY(newTranslateY);
+        ensureCanvasSize();
         lastX = event.getX();
         lastY = event.getY();
+    }
+
+    private void ensureCanvasSize() {
+        double requiredWidth = getWidth() + Math.abs(getTranslateX());
+        double requiredHeight = getHeight() + Math.abs(getTranslateY());
+
+        System.out.println("Required Width: " + requiredWidth);
+        System.out.println("Required Height: " + requiredHeight);
+
+        setPrefSize(requiredWidth, requiredHeight);
+        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
+        requestLayout();
+        scrollPane.layout();
     }
 
     // ! TODO Make dragging around canvas work
