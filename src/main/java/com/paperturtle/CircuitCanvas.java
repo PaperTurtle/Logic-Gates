@@ -61,7 +61,7 @@ public class CircuitCanvas extends Pane {
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
-        initializeSelectionMechanism();
+        // initializeSelectionMechanism();
         // initializeZoomHandling();
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
         this.setOnMousePressed(this::handleMousePressed);
@@ -81,9 +81,18 @@ public class CircuitCanvas extends Pane {
         this.setTranslateX(this.getTranslateX() + deltaX);
         this.setTranslateY(this.getTranslateY() + deltaY);
 
+        double newWidth = Math.max(this.getPrefWidth(),
+                this.getTranslateX() + scrollPane.getViewportBounds().getWidth());
+        double newHeight = Math.max(this.getPrefHeight(),
+                this.getTranslateY() + scrollPane.getViewportBounds().getHeight());
+
+        this.setPrefSize(newWidth, newHeight);
+        this.layout();
+
         lastX = event.getX();
         lastY = event.getY();
     }
+
     // ! TODO Make dragging around canvas work
 
     // private void initializeZoomHandling() {
