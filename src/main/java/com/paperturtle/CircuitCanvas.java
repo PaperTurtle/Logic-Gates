@@ -59,6 +59,11 @@ public class CircuitCanvas extends Pane {
     private double lastX = 0;
     private double lastY = 0;
     private Point2D virtualOrigin = new Point2D(0, 0);
+    private CursorMode currentCursorMode = CursorMode.POINTER;
+
+    public enum CursorMode {
+        POINTER, GRABBY
+    }
 
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
@@ -82,22 +87,43 @@ public class CircuitCanvas extends Pane {
     private void handleMousePressed(MouseEvent event) {
         lastX = event.getX();
         lastY = event.getY();
-        System.out.println(lastX + " " + lastY);
+        if (currentCursorMode == CursorMode.GRABBY) {
+            isSelecting = false;
+        } else if (currentCursorMode == CursorMode.POINTER) {
+            isSelecting = true;
+            lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(), getWidth())),
+                    Math.max(0, Math.min(event.getY(), getHeight())));
+            selectionRect.setX(lastMouseCoordinates.getX());
+            selectionRect.setY(lastMouseCoordinates.getY());
+            selectionRect.setWidth(0);
+            selectionRect.setHeight(0);
+            selectionRect.setVisible(true);
+        }
     }
 
     private void handleMouseDragged(MouseEvent event) {
-        double dampingFactor = 0.2;
-        double deltaX = (event.getX() - lastX) * dampingFactor;
-        double deltaY = (event.getY() - lastY) * dampingFactor;
+        if (currentCursorMode == CursorMode.GRABBY) {
+            double dampingFactor = 0.2;
+            double deltaX = (event.getX() - lastX) * dampingFactor;
+            double deltaY = (event.getY() - lastY) * dampingFactor;
 
-        if (deltaX != 0 || deltaY != 0) {
-            virtualOrigin = virtualOrigin.subtract(deltaX, deltaY);
-            for (Node child : getChildren()) {
-                child.setTranslateX(child.getTranslateX() + deltaX);
-                child.setTranslateY(child.getTranslateY() + deltaY);
+            if (deltaX != 0 || deltaY != 0) {
+                virtualOrigin = virtualOrigin.subtract(deltaX, deltaY);
+                for (Node child : getChildren()) {
+                    child.setTranslateX(child.getTranslateX() + deltaX);
+                    child.setTranslateY(child.getTranslateY() + deltaY);
+                }
+
+                updateScrollPaneViewport(-deltaX, -deltaY);
             }
 
-            updateScrollPaneViewport(-deltaX, -deltaY);
+        } else if (currentCursorMode == CursorMode.POINTER && isSelecting) {
+            double x = Math.max(0, Math.min(event.getX(), getWidth()));
+            double y = Math.max(0, Math.min(event.getY(), getHeight()));
+            selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
+            selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
+            selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
+            selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
         }
 
         lastX = event.getX();
@@ -199,7 +225,7 @@ public class CircuitCanvas extends Pane {
         });
 
         this.setOnMouseReleased(event -> {
-            if (isSelecting
+            if (currentCursorMode == CursorMode.POINTER && isSelecting
                     && (selectionRect.getWidth() > dragThreshold || selectionRect.getHeight() > dragThreshold)) {
                 selectGatesInRectangle();
             }
@@ -728,6 +754,10 @@ public class CircuitCanvas extends Pane {
         gateImageViews.clear();
         gateMarkers.clear();
         lineToStartGateMap.clear();
+    }
+
+    public void setCurrentCursorMode(CursorMode mode) {
+        this.currentCursorMode = mode;
     }
 
 }
