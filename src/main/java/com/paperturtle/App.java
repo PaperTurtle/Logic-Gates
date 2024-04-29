@@ -71,10 +71,16 @@ public class App extends Application {
         MenuItem pointerItem = new MenuItem("Use Pointer");
         MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
 
-        pointerItem.setOnAction(e -> scene.setCursor(Cursor.DEFAULT));
+        pointerItem.setOnAction(e -> {
+            scene.setCursor(Cursor.DEFAULT);
+            circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.POINTER);
+            circuitCanvas.setCursor(Cursor.DEFAULT);
+        });
+
         grabbyItem.setOnAction(e -> {
-            scene.setCursor(Cursor.HAND);
-            circuitCanvas.setCursor(Cursor.HAND);
+            scene.setCursor(Cursor.OPEN_HAND);
+            circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
+            circuitCanvas.setCursor(Cursor.OPEN_HAND);
         });
 
         fileMenu.getItems().addAll(openItem, saveItem);
