@@ -17,6 +17,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.paperturtle.GateData.ConnectionData;
 
@@ -64,11 +66,17 @@ public class CircuitCanvas extends Pane {
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
-        // initializeSelectionMechanism();
+        initializeSelectionMechanism();
         initializeZoomHandling();
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
-        this.setOnMousePressed(this::handleMousePressed);
-        this.setOnMouseDragged(this::handleMouseDragged);
+        // this.setOnMousePressed(this::handleMousePressed);
+        // this.setOnMouseDragged(this::handleMouseDragged);
+        this.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.X && event.isControlDown()) {
+                removeSelectedGates();
+                event.consume();
+            }
+        });
     }
 
     private void handleMousePressed(MouseEvent event) {
@@ -220,6 +228,15 @@ public class CircuitCanvas extends Pane {
                 }
             }
         }
+    }
+
+    private void removeSelectedGates() {
+        List<ImageView> selectedGates = gateImageViews.entrySet().stream()
+                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        selectedGates.forEach(this::removeGate);
     }
 
     public void drawGate(LogicGate gate, double x, double y) {
