@@ -69,8 +69,8 @@ public class CircuitCanvas extends Pane {
         initializeSelectionMechanism();
         initializeZoomHandling();
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
-        // this.setOnMousePressed(this::handleMousePressed);
-        // this.setOnMouseDragged(this::handleMouseDragged);
+        this.setOnMousePressed(this::handleMousePressed);
+        this.setOnMouseDragged(this::handleMouseDragged);
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 removeSelectedGates();
