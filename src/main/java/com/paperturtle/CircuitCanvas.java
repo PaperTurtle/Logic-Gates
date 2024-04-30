@@ -98,6 +98,8 @@ public class CircuitCanvas extends Pane {
     }
 
     private void pasteGatesFromClipBoard() {
+        deselectAllGates();
+
         for (ClipboardData data : clipboard) {
             LogicGate gate = GateFactory.createGate(normalizeType(data.getType()));
             if (gate == null) {
@@ -105,10 +107,12 @@ public class CircuitCanvas extends Pane {
                 continue;
             }
 
-            double newX = data.getPosition().getX() + 50;
-            double newY = data.getPosition().getY() + 50;
+            double newX = data.getPosition().getX() + 30;
+            double newY = data.getPosition().getY() + 30;
 
             drawGate(gate, newX, newY);
+
+            gate.getImageView().getStyleClass().add("selected");
         }
     }
 
