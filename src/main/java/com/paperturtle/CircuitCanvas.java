@@ -60,6 +60,7 @@ public class CircuitCanvas extends Pane {
     private double lastY = 0;
     private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
+    private List<ClipboardData> clipboard = new ArrayList<>();
 
     public enum CursorMode {
         POINTER, GRABBY
@@ -77,11 +78,48 @@ public class CircuitCanvas extends Pane {
         this.setOnMousePressed(this::handleMousePressed);
         this.setOnMouseDragged(this::handleMouseDragged);
         this.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.X && event.isControlDown()) {
+            if (event.getCode() == KeyCode.C && event.isControlDown()) {
+                copySelectedGatesToClipboard();
+                System.out.println("Clipboard contents:");
+                for (ClipboardData data : clipboard) {
+                    System.out.println("Type: " + data.getType() + ", Position: " + data.getPosition());
+                }
+                event.consume();
+            } else if (event.getCode() == KeyCode.V && event.isControlDown()) {
+                pasteGatesFromClipBoard();
+                event.consume();
+            }
+
+            else if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 removeSelectedGates();
                 event.consume();
             }
         });
+    }
+
+    private void pasteGatesFromClipBoard() {
+        for (ClipboardData data : clipboard) {
+            LogicGate gate = GateFactory.createGate(normalizeType(data.getType()));
+            if (gate == null) {
+                System.out.println("Unable to create gate of type: " + data.getType());
+                continue;
+            }
+
+            double newX = data.getPosition().getX() + 50;
+            double newY = data.getPosition().getY() + 50;
+
+            drawGate(gate, newX, newY);
+        }
+    }
+
+    private void copySelectedGatesToClipboard() {
+        clipboard.clear();
+        gateImageViews.entrySet().stream().filter(entry -> entry.getKey().getStyleClass().contains("selected"))
+                .forEach(entry -> {
+                    LogicGate gate = entry.getValue();
+                    Point2D position = new Point2D(gate.getImageView().getX(), gate.getImageView().getY());
+                    clipboard.add(new ClipboardData(gate.getClass().getSimpleName(), position));
+                });
     }
 
     private void handleMousePressed(MouseEvent event) {
