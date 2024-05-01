@@ -82,24 +82,45 @@ public class CircuitCanvas extends Pane {
                 copySelectedGatesToClipboard();
                 System.out.println("Clipboard contents:");
                 for (ClipboardData data : clipboard) {
-                    System.out.println("Type: " + data.getType() + ", Position: " + data.getPosition());
+                    System.out.println("Gate ID: " + data.getId() + ", Type: " + data.getType() +
+                            ", Position: (" + data.getPosition().getX() + ", " + data.getPosition().getY() + ")" +
+                            ", State: " + data.getState() +
+                            ", Inputs: " + formatConnections(data.getInputs()) +
+                            ", Outputs: " + formatConnections(data.outputs));
                 }
                 event.consume();
             } else if (event.getCode() == KeyCode.V && event.isControlDown()) {
-                pasteGatesFromClipBoard();
+                pasteGatesFromClipboard();
                 event.consume();
-            }
-
-            else if (event.getCode() == KeyCode.X && event.isControlDown()) {
+            } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 removeSelectedGates();
                 event.consume();
             }
         });
     }
 
-    private void pasteGatesFromClipBoard() {
-        deselectAllGates();
+    private String formatConnections(List<ClipboardData.ConnectionData> connections) {
+        if (connections.isEmpty()) {
+            return "None";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (ClipboardData.ConnectionData connection : connections) {
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+            builder.append("{Gate ID: ").append(connection.gateId)
+                    .append(", Point Index: ").append(connection.pointIndex).append("}");
+        }
+        return builder.toString();
+    }
 
+    private void pasteGatesFromClipboard() {
+        deselectAllGates();
+        Map<String, LogicGate> createdGates = new HashMap<>();
+        double offsetX = 30; 
+        double offsetY = 30;
+
+        // First, create and position all gates
         for (ClipboardData data : clipboard) {
             LogicGate gate = GateFactory.createGate(normalizeType(data.getType()));
             if (gate == null) {
@@ -107,22 +128,51 @@ public class CircuitCanvas extends Pane {
                 continue;
             }
 
-            double newX = data.getPosition().getX() + 30;
-            double newY = data.getPosition().getY() + 30;
+            double newX = data.getPosition().getX() + offsetX;
+            double newY = data.getPosition().getY() + offsetY;
 
+            gate.setPosition(newX, newY);
+            gate.setId(data.getId()); 
+            createdGates.put(data.getId(), gate);
             drawGate(gate, newX, newY);
-
             gate.getImageView().getStyleClass().add("selected");
+        }
+
+        for (ClipboardData data : clipboard) {
+            LogicGate sourceGate = createdGates.get(data.getId());
+            if (sourceGate == null)
+                continue;
+
+            for (ClipboardData.ConnectionData output : data.getOutputs()) {
+                LogicGate targetGate = createdGates.get(output.gateId);
+                if (targetGate == null) {
+                    System.out.println("Output gate not found for ID: " + output.gateId);
+                    continue;
+                }
+                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+                Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                        targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                        targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+                Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+                connectionLine.setStrokeWidth(3.5);
+                connectionLine.setStroke(Color.BLACK);
+
+                this.getChildren().add(connectionLine);
+                sourceGate.addOutputConnection(connectionLine);
+                targetGate.addInputConnection(connectionLine, output.pointIndex);
+            }
         }
     }
 
     private void copySelectedGatesToClipboard() {
         clipboard.clear();
-        gateImageViews.entrySet().stream().filter(entry -> entry.getKey().getStyleClass().contains("selected"))
+        gateImageViews.entrySet().stream()
+                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
                 .forEach(entry -> {
                     LogicGate gate = entry.getValue();
-                    Point2D position = new Point2D(gate.getImageView().getX(), gate.getImageView().getY());
-                    clipboard.add(new ClipboardData(gate.getClass().getSimpleName(), position));
+                    clipboard.add(gate.getGateClipboardData());
                 });
     }
 
