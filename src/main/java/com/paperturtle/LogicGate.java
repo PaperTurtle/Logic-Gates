@@ -393,6 +393,26 @@ public abstract class LogicGate {
         return data;
     }
 
+    public ClipboardData getGateClipboardData() {
+        ClipboardData data = new ClipboardData();
+        data.id = this.getId();
+        data.type = this.getClass().getSimpleName();
+        data.position = new Point2D(imageView.getX(), imageView.getY());
+        data.state = currentState;
+
+        for (LogicGate input : inputs) {
+            data.inputs.add(
+                    new ClipboardData.ConnectionData(input.getId(), input.outputGates.indexOf(this)));
+        }
+
+        for (LogicGate output : outputGates) {
+            data.outputs
+                    .add(new ClipboardData.ConnectionData(output.getId(), output.inputs.indexOf(this)));
+        }
+
+        return data;
+    }
+
     public String getId() {
         return id;
     }
