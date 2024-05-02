@@ -353,7 +353,7 @@ public class CircuitCanvas extends Pane {
         textLabel.setOnMousePressed(event -> {
             double offsetX = event.getSceneX() - textLabel.getLayoutX();
             double offsetY = event.getSceneY() - textLabel.getLayoutY();
-            textLabel.setUserData(new Object[] { offsetX, offsetY }); // Storing initial offset
+            textLabel.setUserData(new Object[] { offsetX, offsetY });
 
             textLabel.setOnMouseDragged(dragEvent -> {
                 double newX = dragEvent.getSceneX() - offsetX;
