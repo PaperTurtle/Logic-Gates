@@ -250,7 +250,6 @@ public class CircuitCanvas extends Pane {
                 if (clickedGate != null) {
                     highlightedGate = clickedGate;
                     if (!clickedImageView.getStyleClass().contains("selected")) {
-                        System.out.println("This runs");
                         clickedImageView.getStyleClass().add("selected");
                     }
                     if (clickedGate instanceof SwitchGate) {
@@ -347,7 +346,6 @@ public class CircuitCanvas extends Pane {
         this.getChildren().add(textLabel);
         textLabel.setLayoutX(x);
         textLabel.setLayoutY(y);
-
         setupDragHandlersForLabel(textLabel);
     }
 

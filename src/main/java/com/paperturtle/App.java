@@ -8,12 +8,14 @@ import java.util.Optional;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -22,6 +24,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
@@ -162,9 +165,14 @@ public class App extends Application {
                 double sidebarWidth = sidebar.getWidth();
                 double x = event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2 - sidebarWidth;
                 double y = event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2;
-                LogicGate gate = GateFactory.createGate(floatingImageView.getId());
-                if (gate != null) {
-                    circuitCanvas.drawGate(gate, x, y);
+                if ("TextLabel".equals(floatingImageView.getId())) {
+                    TextLabel gateLabel = new TextLabel("Label", 90, 40);
+                    circuitCanvas.drawTextLabel(gateLabel, x, y);
+                } else {
+                    LogicGate gate = GateFactory.createGate(floatingImageView.getId());
+                    if (gate != null) {
+                        circuitCanvas.drawGate(gate, x, y);
+                    }
                 }
                 borderPane.getChildren().remove(floatingImageView);
                 floatingImageView = null;
@@ -181,20 +189,25 @@ public class App extends Application {
         VBox inputsSection = new VBox(5);
         VBox outputsSection = new VBox(5);
         VBox gatesSection = new VBox(5);
+        VBox utilitiesSection = new VBox(5);
         inputsSection.getStyleClass().add("section");
         outputsSection.getStyleClass().add("section");
         gatesSection.getStyleClass().add("section");
+        utilitiesSection.getStyleClass().add("section");
 
         sidebar.getChildren().addAll(createSectionLabel("Inputs"), inputsSection, createSectionLabel("Outputs"),
-                outputsSection, createSectionLabel("Logic Gates"), gatesSection);
+                outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Utilities"),
+                utilitiesSection);
 
         String[] inputTypes = { "SWITCH" };
         String[] outputTypes = { "LIGHTBULB" };
         String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR" };
+        String[] utilityTypes = { "TextLabel" };
 
         addItemsToSection(inputsSection, inputTypes);
         addItemsToSection(outputsSection, outputTypes);
         addItemsToSection(gatesSection, gateTypes);
+        addItemsToSection(utilitiesSection, utilityTypes);
     }
 
     private Label createSectionLabel(String text) {
@@ -203,14 +216,34 @@ public class App extends Application {
         return label;
     }
 
+    private ImageView createImageViewFromTextLabel(TextLabel textLabel) {
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(Color.TRANSPARENT);
+        WritableImage writableImage = textLabel.snapshot(parameters, null);
+
+        ImageView imageView = new ImageView(writableImage);
+        imageView.setFitWidth(90);
+        imageView.setFitHeight(40);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        return imageView;
+    }
+
     private void addItemsToSection(VBox section, String[] types) {
         HBox hbox = new HBox(10);
         hbox.setPadding(new Insets(5, 0, 5, 0));
         int count = 0;
 
         for (String type : types) {
-            ImageView imageView = new ImageView(
-                    SvgUtil.loadSvgImage("/com/paperturtle/" + type + "_ANSI_Labelled.svg"));
+            ImageView imageView;
+            if (type.equals("TextLabel")) {
+                TextLabel textLabel = new TextLabel("Label", 90, 40);
+                imageView = createImageViewFromTextLabel(textLabel);
+            } else {
+                imageView = new ImageView(
+                        SvgUtil.loadSvgImage("/com/paperturtle/" + type + "_ANSI_Labelled.svg"));
+            }
             imageView.setId(type);
             imageView.setFitWidth(90);
             imageView.setFitHeight(40);
@@ -289,6 +322,7 @@ public class App extends Application {
                 event.getScreenX() - scene.getWindow().getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
         floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
                 - floatingImageView.getBoundsInLocal().getHeight() / 2 - 28);
+        floatingImageView.setMouseTransparent(true);
         borderPane.getChildren().add(floatingImageView);
     }
 
