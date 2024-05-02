@@ -17,6 +17,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -89,6 +90,10 @@ public class TextLabel extends Group {
         ComboBox<String> fontPicker = new ComboBox<>();
         fontPicker.getItems().addAll(Font.getFamilies());
         fontPicker.setValue(labelText.getFont().getFamily());
+
+        ComboBox<String> alignmentComboBox = new ComboBox<>();
+        alignmentComboBox.getItems().addAll("Left", "Center", "Right");
+        alignmentComboBox.setValue("Center");
 
         TextField widthField = new TextField(String.valueOf(width));
         TextField heightField = new TextField(String.valueOf(height));
@@ -163,10 +168,35 @@ public class TextLabel extends Group {
             grid.add(heightField, 0, 13);
         }
 
-        grid.add(previewBox, 0, 14);
+        grid.add(alignmentComboBox, 0, 14);
+
+        grid.add(previewBox, 0, 15);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(() -> textField.requestFocus());
+
+        alignmentComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double padding = 10;
+            switch (newVal) {
+                case "Left":
+                    previewText.setTextAlignment(TextAlignment.LEFT);
+                    previewText.setLayoutX(padding);
+                    break;
+                case "Center":
+                    previewText.setTextAlignment(TextAlignment.CENTER);
+                    previewText
+                            .setLayoutX((previewBackground.getWidth() - previewText.getBoundsInLocal().getWidth()) / 2);
+                    break;
+                case "Right":
+                    previewText.setTextAlignment(TextAlignment.RIGHT);
+                    previewText.setLayoutX(
+                            previewBackground.getWidth() - previewText.getBoundsInLocal().getWidth() - padding);
+                    break;
+            }
+            if (isAutoSize) {
+                adjustPreviewSize(previewText, previewBackground);
+            }
+        });
 
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == autoSizeButton) {
@@ -175,7 +205,14 @@ public class TextLabel extends Group {
                 double newHeight = previewText.getBoundsInLocal().getHeight() + 20;
                 previewBackground.setWidth(newWidth);
                 previewBackground.setHeight(newHeight);
-                previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+                switch (alignmentComboBox.getValue()) {
+                    case "Left":
+                        previewText.setLayoutX(10);
+                        break;
+                    case "Right":
+                        previewText.setLayoutX(newWidth - previewText.getBoundsInLocal().getWidth() - 10);
+                        break;
+                }
                 previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
                 widthField.setText(String.valueOf(newWidth));
                 heightField.setText(String.valueOf(newHeight));
@@ -249,7 +286,22 @@ public class TextLabel extends Group {
                 background.setWidth(width);
                 background.setHeight(height);
 
-                labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
+                double padding = 10;
+                switch (alignmentComboBox.getValue()) {
+                    case "Left":
+                        labelText.setTextAlignment(TextAlignment.LEFT);
+                        labelText.setLayoutX(padding);
+                        break;
+                    case "Center":
+                        labelText.setTextAlignment(TextAlignment.CENTER);
+                        labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
+                        break;
+                    case "Right":
+                        labelText.setTextAlignment(TextAlignment.RIGHT);
+                        labelText.setLayoutX(width - labelText.getBoundsInLocal().getWidth() - padding);
+                        break;
+                }
+
                 labelText.setLayoutY((height / 2) + (labelText.getBoundsInLocal().getHeight()) / 4);
             }
             return null;
