@@ -4,11 +4,13 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
@@ -84,28 +86,24 @@ public class TextLabel extends Group {
         autoSizeButton.setToggleGroup(sizeGroup);
         fixedSizeButton.setToggleGroup(sizeGroup);
 
+        ComboBox<String> fontPicker = new ComboBox<>();
+        fontPicker.getItems().addAll(Font.getFamilies());
+        fontPicker.setValue(labelText.getFont().getFamily());
+
         TextField widthField = new TextField(String.valueOf(width));
         TextField heightField = new TextField(String.valueOf(height));
+
+        ComboBox<Integer> fontSizeComboBox = new ComboBox<>();
+        for (int i = 1; i <= 48; i++) {
+            fontSizeComboBox.getItems().add(i);
+        }
+        fontSizeComboBox.setValue((int) labelText.getFont().getSize());
 
         Label widthLabel = new Label("Width:");
         Label heightLabel = new Label("Height:");
 
         if (isAutoSize) {
             autoSizeButton.setSelected(true);
-        } else {
-            fixedSizeButton.setSelected(true);
-            if (!grid.getChildren().contains(widthLabel)) {
-                grid.add(widthLabel, 0, 6);
-            }
-            if (!grid.getChildren().contains(widthField)) {
-                grid.add(widthField, 0, 7);
-            }
-            if (!grid.getChildren().contains(heightLabel)) {
-                grid.add(heightLabel, 0, 8);
-            }
-            if (!grid.getChildren().contains(heightField)) {
-                grid.add(heightField, 0, 9);
-            }
         }
 
         Text previewText = new Text(labelText.getText());
@@ -116,8 +114,26 @@ public class TextLabel extends Group {
 
         StackPane previewBox = new StackPane(previewBackground, previewText);
 
+        fontSizeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                Font newFont = new Font(labelText.getFont().getFamily(), newVal);
+                previewText.setFont(newFont);
+                if (isAutoSize) {
+                    adjustPreviewSize(previewText, previewBackground);
+                }
+            }
+        });
+
         textField.textProperty().addListener((obs, oldVal, newVal) -> {
             previewText.setText(newVal);
+        });
+
+        fontPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Font newFont = new Font(newVal, labelText.getFont().getSize());
+            previewText.setFont(newFont);
+            if (isAutoSize) {
+                adjustPreviewSize(previewText, previewBackground);
+            }
         });
 
         backgroundColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -131,10 +147,23 @@ public class TextLabel extends Group {
         grid.add(textField, 0, 0);
         grid.add(backgroundColorPicker, 0, 1);
         grid.add(textColorPicker, 0, 2);
-        grid.add(new Label("Size:"), 0, 3);
-        grid.add(autoSizeButton, 0, 4);
-        grid.add(fixedSizeButton, 0, 5);
-        grid.add(previewBox, 0, 10);
+        grid.add(new Label("Font:"), 0, 3);
+        grid.add(fontPicker, 0, 4);
+        grid.add(new Label("Font size:"), 0, 5);
+        grid.add(fontSizeComboBox, 0, 6);
+        grid.add(new Label("Size:"), 0, 7);
+        grid.add(autoSizeButton, 0, 8);
+        grid.add(fixedSizeButton, 0, 9);
+
+        if (!isAutoSize) {
+            fixedSizeButton.setSelected(true);
+            grid.add(widthLabel, 0, 10);
+            grid.add(widthField, 0, 11);
+            grid.add(heightLabel, 0, 12);
+            grid.add(heightField, 0, 13);
+        }
+
+        grid.add(previewBox, 0, 14);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(() -> textField.requestFocus());
@@ -202,7 +231,8 @@ public class TextLabel extends Group {
                 labelText.setText(textField.getText());
                 labelText.setFill(textColorPicker.getValue());
                 background.setFill(backgroundColorPicker.getValue());
-
+                Font newFont = new Font(fontPicker.getValue(), fontSizeComboBox.getValue());
+                labelText.setFont(newFont);
                 if (fixedSizeButton.isSelected()) {
                     try {
                         width = Double.parseDouble(widthField.getText());
@@ -238,5 +268,14 @@ public class TextLabel extends Group {
 
     public double getWidth() {
         return width;
+    }
+
+    private void adjustPreviewSize(Text previewText, Rectangle previewBackground) {
+        double newWidth = previewText.getBoundsInLocal().getWidth() + 20;
+        double newHeight = previewText.getBoundsInLocal().getHeight() + 20;
+        previewBackground.setWidth(newWidth);
+        previewBackground.setHeight(newHeight);
+        previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+        previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
     }
 }
