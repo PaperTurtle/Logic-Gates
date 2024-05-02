@@ -80,14 +80,6 @@ public class CircuitCanvas extends Pane {
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.C && event.isControlDown()) {
                 copySelectedGatesToClipboard();
-                System.out.println("Clipboard contents:");
-                for (ClipboardData data : clipboard) {
-                    System.out.println("Gate ID: " + data.getId() + ", Type: " + data.getType() +
-                            ", Position: (" + data.getPosition().getX() + ", " + data.getPosition().getY() + ")" +
-                            ", State: " + data.getState() +
-                            ", Inputs: " + formatConnections(data.getInputs()) +
-                            ", Outputs: " + formatConnections(data.outputs));
-                }
                 event.consume();
             } else if (event.getCode() == KeyCode.V && event.isControlDown()) {
                 pasteGatesFromClipboard();
@@ -99,28 +91,12 @@ public class CircuitCanvas extends Pane {
         });
     }
 
-    private String formatConnections(List<ClipboardData.ConnectionData> connections) {
-        if (connections.isEmpty()) {
-            return "None";
-        }
-        StringBuilder builder = new StringBuilder();
-        for (ClipboardData.ConnectionData connection : connections) {
-            if (builder.length() > 0) {
-                builder.append(", ");
-            }
-            builder.append("{Gate ID: ").append(connection.gateId)
-                    .append(", Point Index: ").append(connection.pointIndex).append("}");
-        }
-        return builder.toString();
-    }
-
     private void pasteGatesFromClipboard() {
         deselectAllGates();
         Map<String, LogicGate> createdGates = new HashMap<>();
-        double offsetX = 30; 
+        double offsetX = 30;
         double offsetY = 30;
 
-        // First, create and position all gates
         for (ClipboardData data : clipboard) {
             LogicGate gate = GateFactory.createGate(normalizeType(data.getType()));
             if (gate == null) {
@@ -132,7 +108,7 @@ public class CircuitCanvas extends Pane {
             double newY = data.getPosition().getY() + offsetY;
 
             gate.setPosition(newX, newY);
-            gate.setId(data.getId()); 
+            gate.setId(data.getId());
             createdGates.put(data.getId(), gate);
             drawGate(gate, newX, newY);
             gate.getImageView().getStyleClass().add("selected");
@@ -365,6 +341,26 @@ public class CircuitCanvas extends Pane {
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
         }
+    }
+
+    public void drawTextLabel(TextLabel textLabel, double x, double y) {
+        this.getChildren().add(textLabel);
+        textLabel.setLayoutX(x);
+        textLabel.setLayoutY(y);
+
+        setupDragHandlersForLabel(textLabel);
+    }
+
+    private void setupDragHandlersForLabel(TextLabel textLabel) {
+        textLabel.setOnMousePressed(event -> {
+            double offsetX = event.getSceneX() - textLabel.getLayoutX();
+            double offsetY = event.getSceneY() - textLabel.getLayoutY();
+
+            textLabel.setOnMouseDragged(dragEvent -> {
+                textLabel.setLayoutX(dragEvent.getSceneX() - offsetX);
+                textLabel.setLayoutY(dragEvent.getSceneY() - offsetY);
+            });
+        });
     }
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
