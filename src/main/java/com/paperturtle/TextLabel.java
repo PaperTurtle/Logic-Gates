@@ -9,18 +9,31 @@ import javafx.scene.paint.Color;
 public class TextLabel extends Group {
     private Rectangle background;
     private Text labelText;
+    private double width;
+    private double height;
 
     public TextLabel(String label, double width, double height) {
+        this.width = width;
+        this.height = height;
+
         background = new Rectangle(width, height);
-        background.setFill(Color.BLACK);  
+        background.setFill(Color.BLACK);
 
         labelText = new Text(label);
-        labelText.setFill(Color.WHITE);  
-        labelText.setFont(new Font("Arial", 16));  
+        labelText.setFill(Color.WHITE);
+        labelText.setFont(new Font("Arial", 16));
 
         labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
         labelText.setLayoutY((height / 2) + (labelText.getBoundsInLocal().getHeight() / 4));
 
         this.getChildren().addAll(background, labelText);
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public double getWidth() {
+        return width;
     }
 }
