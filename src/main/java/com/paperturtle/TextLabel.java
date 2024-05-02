@@ -26,10 +26,12 @@ public class TextLabel extends Group {
     private Text labelText;
     private double width;
     private double height;
+    private boolean isAutoSize;
 
     public TextLabel(String label, double width, double height) {
         this.width = width;
         this.height = height;
+        this.isAutoSize = width == -1 && height == -1;
 
         background = new Rectangle(width, height);
         background.setFill(Color.BLACK);
@@ -85,22 +87,25 @@ public class TextLabel extends Group {
         TextField widthField = new TextField(String.valueOf(width));
         TextField heightField = new TextField(String.valueOf(height));
 
-        sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == autoSizeButton) {
-                widthField.setDisable(true);
-                heightField.setDisable(true);
-            } else {
-                widthField.setDisable(false);
-                heightField.setDisable(false);
-            }
-        });
+        Label widthLabel = new Label("Width:");
+        Label heightLabel = new Label("Height:");
 
-        if (width == -1 && height == -1) {
+        if (isAutoSize) {
             autoSizeButton.setSelected(true);
-            widthField.setDisable(true);
-            heightField.setDisable(true);
         } else {
             fixedSizeButton.setSelected(true);
+            if (!grid.getChildren().contains(widthLabel)) {
+                grid.add(widthLabel, 0, 6);
+            }
+            if (!grid.getChildren().contains(widthField)) {
+                grid.add(widthField, 0, 7);
+            }
+            if (!grid.getChildren().contains(heightLabel)) {
+                grid.add(heightLabel, 0, 8);
+            }
+            if (!grid.getChildren().contains(heightField)) {
+                grid.add(heightField, 0, 9);
+            }
         }
 
         Text previewText = new Text(labelText.getText());
@@ -129,14 +134,68 @@ public class TextLabel extends Group {
         grid.add(new Label("Size:"), 0, 3);
         grid.add(autoSizeButton, 0, 4);
         grid.add(fixedSizeButton, 0, 5);
-        grid.add(new Label("Width:"), 0, 6);
-        grid.add(widthField, 0, 7);
-        grid.add(new Label("Height:"), 0, 8);
-        grid.add(heightField, 0, 9);
         grid.add(previewBox, 0, 10);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(() -> textField.requestFocus());
+
+        sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == autoSizeButton) {
+                grid.getChildren().removeAll(widthLabel, widthField, heightLabel, heightField);
+                double newWidth = previewText.getBoundsInLocal().getWidth() + 20;
+                double newHeight = previewText.getBoundsInLocal().getHeight() + 20;
+                previewBackground.setWidth(newWidth);
+                previewBackground.setHeight(newHeight);
+                previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+                previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
+                widthField.setText(String.valueOf(newWidth));
+                heightField.setText(String.valueOf(newHeight));
+            } else {
+                if (!grid.getChildren().contains(widthLabel)) {
+                    grid.add(widthLabel, 0, 6);
+                }
+                if (!grid.getChildren().contains(widthField)) {
+                    grid.add(widthField, 0, 7);
+                }
+                if (!grid.getChildren().contains(heightLabel)) {
+                    grid.add(heightLabel, 0, 8);
+                }
+                if (!grid.getChildren().contains(heightField)) {
+                    grid.add(heightField, 0, 9);
+                }
+                try {
+                    double newWidth = Double.parseDouble(widthField.getText());
+                    double newHeight = Double.parseDouble(heightField.getText());
+                    previewBackground.setWidth(newWidth);
+                    previewBackground.setHeight(newHeight);
+                    previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+                    previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
+                } catch (NumberFormatException e) {
+                }
+            }
+        });
+
+        widthField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (fixedSizeButton.isSelected()) {
+                try {
+                    double newWidth = Double.parseDouble(newVal);
+                    previewBackground.setWidth(newWidth);
+                    previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+                } catch (NumberFormatException e) {
+                }
+            }
+        });
+
+        heightField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (fixedSizeButton.isSelected()) {
+                try {
+                    double newHeight = Double.parseDouble(newVal);
+                    previewBackground.setHeight(newHeight);
+                    previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
+                } catch (NumberFormatException e) {
+                }
+            }
+        });
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
@@ -148,11 +207,13 @@ public class TextLabel extends Group {
                     try {
                         width = Double.parseDouble(widthField.getText());
                         height = Double.parseDouble(heightField.getText());
+                        isAutoSize = false;
                     } catch (NumberFormatException e) {
                     }
                 } else {
                     width = labelText.getBoundsInLocal().getWidth() + 20;
                     height = labelText.getBoundsInLocal().getHeight() + 20;
+                    isAutoSize = true;
                 }
 
                 background.setWidth(width);
