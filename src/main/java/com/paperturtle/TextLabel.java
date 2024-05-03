@@ -10,7 +10,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
@@ -21,7 +20,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 
 public class TextLabel extends Group {
@@ -174,29 +172,6 @@ public class TextLabel extends Group {
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(() -> textField.requestFocus());
-
-        alignmentComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            double padding = 10;
-            switch (newVal) {
-                case "Left":
-                    previewText.setTextAlignment(TextAlignment.LEFT);
-                    previewText.setLayoutX(padding);
-                    break;
-                case "Center":
-                    previewText.setTextAlignment(TextAlignment.CENTER);
-                    previewText
-                            .setLayoutX((previewBackground.getWidth() - previewText.getBoundsInLocal().getWidth()) / 2);
-                    break;
-                case "Right":
-                    previewText.setTextAlignment(TextAlignment.RIGHT);
-                    previewText.setLayoutX(
-                            previewBackground.getWidth() - previewText.getBoundsInLocal().getWidth() - padding);
-                    break;
-            }
-            if (isAutoSize) {
-                adjustPreviewSize(previewText, previewBackground);
-            }
-        });
 
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == autoSizeButton) {
