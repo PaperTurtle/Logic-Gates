@@ -201,7 +201,7 @@ public class App extends Application {
 
         String[] inputTypes = { "SWITCH" };
         String[] outputTypes = { "LIGHTBULB" };
-        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR" };
+        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "TRISTATE" };
         String[] utilityTypes = { "TextLabel" };
 
         addItemsToSection(inputsSection, inputTypes);
