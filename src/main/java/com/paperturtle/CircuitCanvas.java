@@ -566,7 +566,14 @@ public class CircuitCanvas extends Pane {
         });
         MenuItem propertiesItem = new MenuItem("Properties");
         propertiesItem.setOnAction(e -> showPropertiesDialog(gate));
-        contextMenu.getItems().addAll(deleteItem, propertiesItem);
+
+        if (gate instanceof ClockGate) {
+            MenuItem editItem = new MenuItem("Edit time");
+            editItem.setOnAction(e -> ((ClockGate) gate).showTimeEditDialog());
+            contextMenu.getItems().addAll(deleteItem, propertiesItem, editItem);
+        } else {
+            contextMenu.getItems().addAll(deleteItem, propertiesItem);
+        }
 
         contextMenu.show(imageView, event.getScreenX(), event.getScreenY());
         openContextMenu = contextMenu;
