@@ -199,7 +199,7 @@ public class App extends Application {
                 outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Utilities"),
                 utilitiesSection);
 
-        String[] inputTypes = { "SWITCH", "HIGHCONSTANT", "LOWCONSTANT" };
+        String[] inputTypes = { "SWITCH", "CLOCK", "HIGHCONSTANT", "LOWCONSTANT" };
         String[] outputTypes = { "LIGHTBULB" };
         String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "TRISTATE" };
         String[] utilityTypes = { "TextLabel" };
