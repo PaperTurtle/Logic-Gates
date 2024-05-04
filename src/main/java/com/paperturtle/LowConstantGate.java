@@ -1,11 +1,9 @@
 package com.paperturtle;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 
 public class LowConstantGate extends LogicGate {
@@ -18,12 +16,12 @@ public class LowConstantGate extends LogicGate {
 
     @Override
     public boolean evaluate() {
-        throw new UnsupportedOperationException("Unimplemented method 'evaluate'");
+        return false;
     }
 
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTruthTableData'");
+        return Collections.singletonList(new Pair<>(new Boolean[] {}, true));
     }
 
 }

@@ -1,6 +1,6 @@
 package com.paperturtle;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.geometry.Point2D;
@@ -16,12 +16,12 @@ public class HighConstantGate extends LogicGate {
 
     @Override
     public boolean evaluate() {
-        throw new UnsupportedOperationException("Unimplemented method 'evaluate'");
+        return true;
     }
 
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTruthTableData'");
+        return Collections.singletonList(new Pair<>(new Boolean[] {}, false));
     }
 
 }
