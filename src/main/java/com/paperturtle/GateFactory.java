@@ -41,8 +41,14 @@ public class GateFactory {
                 return new XorGate();
             case "XNOR":
                 return new XnorGate();
+            case "TRISTATE":
+                return new TriStateGate();
             case "SWITCH":
                 return new SwitchGate();
+            case "HIGHCONSTANT":
+                return new HighConstantGate();
+            case "LOWCONSTANT":
+                return new LowConstantGate();
             case "LIGHTBULB":
                 return new Lightbulb();
             default:
