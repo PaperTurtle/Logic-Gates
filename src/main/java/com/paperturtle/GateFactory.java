@@ -45,6 +45,8 @@ public class GateFactory {
                 return new TriStateGate();
             case "SWITCH":
                 return new SwitchGate();
+            case "CLOCK":
+                return new ClockGate();
             case "HIGHCONSTANT":
                 return new HighConstantGate();
             case "LOWCONSTANT":
