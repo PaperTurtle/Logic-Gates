@@ -5,9 +5,7 @@ import javafx.scene.layout.Region;
 
 import java.util.List;
 
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
