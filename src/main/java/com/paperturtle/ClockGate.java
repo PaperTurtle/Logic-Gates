@@ -3,8 +3,14 @@ package com.paperturtle;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -101,4 +107,58 @@ public class ClockGate extends LogicGate {
             timeline.play();
         }
     }
+
+    public double getSignalDuration() {
+        return signalDuration;
+    }
+
+    public void setSignalDuration(double duration) {
+        signalDuration = duration;
+        if (timeline != null) {
+            timeline.stop();
+            timeline.getKeyFrames().set(0, new KeyFrame(Duration.seconds(duration), event -> toggle()));
+            timeline.play();
+        }
+    }
+
+    public void showTimeEditDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Edit Clock Signal Duration");
+        alert.setHeaderText("Adjust the duration for the clock signal.");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField durationField = new TextField(String.valueOf(this.getSignalDuration()));
+        durationField.setPromptText("Enter signal duration in seconds");
+
+        grid.add(new Label("Signal Duration (seconds):"), 0, 0);
+        grid.add(durationField, 1, 0);
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(e -> {
+            try {
+                double duration = Double.parseDouble(durationField.getText());
+                if (duration > 0) {
+                    this.setSignalDuration(duration);
+                    alert.close();
+                } else {
+                    durationField.setText("Enter a positive number!");
+                }
+            } catch (NumberFormatException nfe) {
+                durationField.setText("Invalid input!");
+            }
+        });
+
+        grid.add(saveButton, 1, 1);
+        alert.getDialogPane().setContent(grid);
+
+        String css = getClass().getResource("/com/paperturtle/styles.css").toExternalForm();
+        alert.getDialogPane().getStylesheets().add(css);
+
+        alert.showAndWait();
+    }
+
 }
