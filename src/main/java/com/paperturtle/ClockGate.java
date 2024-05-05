@@ -21,6 +21,7 @@ import javafx.animation.Timeline;
 
 public class ClockGate extends LogicGate {
     private boolean state = false;
+    private boolean isRunning = true;
     private Image offImage;
     private Image onImage;
     private Timeline timeline;
@@ -99,12 +100,14 @@ public class ClockGate extends LogicGate {
     public void stopClock() {
         if (timeline != null) {
             timeline.stop();
+            isRunning = false;
         }
     }
 
     public void startClock() {
         if (timeline != null) {
             timeline.play();
+            isRunning = true;
         }
     }
 
@@ -137,28 +140,31 @@ public class ClockGate extends LogicGate {
         grid.add(new Label("Signal Duration (seconds):"), 0, 0);
         grid.add(durationField, 1, 0);
 
-        Button saveButton = new Button("Save");
-        saveButton.setOnAction(e -> {
-            try {
-                double duration = Double.parseDouble(durationField.getText());
-                if (duration > 0) {
-                    this.setSignalDuration(duration);
-                    alert.close();
-                } else {
-                    durationField.setText("Enter a positive number!");
-                }
-            } catch (NumberFormatException nfe) {
-                durationField.setText("Invalid input!");
+        Button toggleButton = new Button(isRunning ? "Pause" : "Resume");
+        toggleButton.setOnAction(e -> {
+            if (isRunning) {
+                stopClock();
+                toggleButton.setText("Resume");
+            } else {
+                startClock();
+                toggleButton.setText("Pause");
             }
         });
+        grid.add(toggleButton, 1, 1);
 
-        grid.add(saveButton, 1, 1);
         alert.getDialogPane().setContent(grid);
-
-        String css = getClass().getResource("/com/paperturtle/styles.css").toExternalForm();
-        alert.getDialogPane().getStylesheets().add(css);
-
         alert.showAndWait();
-    }
 
+        try {
+            double duration = Double.parseDouble(durationField.getText());
+            if (duration > 0) {
+                this.setSignalDuration(duration);
+                alert.close();
+            } else {
+                durationField.setText("Enter a positive number!");
+            }
+        } catch (NumberFormatException nfe) {
+            durationField.setText("Invalid input!");
+        }
+    }
 }
