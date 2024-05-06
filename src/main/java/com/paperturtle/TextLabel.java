@@ -22,7 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
-public class TextLabel extends Group {
+public class TextLabel extends Group implements CircuitComponent {
     private Rectangle background;
     private Text labelText;
     private double width;
@@ -305,4 +305,72 @@ public class TextLabel extends Group {
         previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
         previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
     }
+
+    @Override
+    public String getComponentType() {
+        return "textLabel";
+    }
+
+    public String getLabel() {
+        return labelText.getText();
+    }
+
+    public void setLabel(String label) {
+        labelText.setText(label);
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+        background.setWidth(width);
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+        background.setHeight(height);
+    }
+
+    public void setAutoSize(boolean isAutoSize) {
+        this.isAutoSize = isAutoSize;
+    }
+
+    public boolean isAutoSize() {
+        return isAutoSize;
+    }
+
+    public void setFontFamily(String fontFamily) {
+        labelText.setFont(new Font(fontFamily, labelText.getFont().getSize()));
+    }
+
+    public String getFontFamily() {
+        return labelText.getFont().getFamily();
+    }
+
+    public void setFontSize(int fontSize) {
+        labelText.setFont(new Font(labelText.getFont().getFamily(), fontSize));
+    }
+
+    public int getFontSize() {
+        return (int) labelText.getFont().getSize();
+    }
+
+    public void setFillColor(Color color) {
+        labelText.setFill(color);
+    }
+
+    public void setFillColor(String color) {
+        setFillColor(Color.web(color));
+    }
+
+    public Color getFillColor() {
+        return (Color) labelText.getFill();
+    }
+
+    public void setTextAlignment(TextAlignment alignment) {
+        labelText.setTextAlignment(alignment);
+    }
+
+    public TextAlignment getTextAlignment() {
+        return labelText.getTextAlignment();
+    }
+
 }
