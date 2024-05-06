@@ -200,7 +200,7 @@ public class App extends Application {
                 utilitiesSection);
 
         String[] inputTypes = { "SWITCH", "CLOCK", "HIGHCONSTANT", "LOWCONSTANT" };
-        String[] outputTypes = { "LIGHTBULB" };
+        String[] outputTypes = { "LIGHTBULB", "FOURBITDIGIT" };
         String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "TRISTATE" };
         String[] utilityTypes = { "TextLabel" };
 
