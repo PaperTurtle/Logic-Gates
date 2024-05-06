@@ -56,6 +56,8 @@ public class CircuitCanvas extends Pane {
     private boolean justSelected = false;
     private double lastX = 0;
     private double lastY = 0;
+    private double viewOffsetX = 0;
+    private double viewOffsetY = 0;
     private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
     private List<ClipboardData> clipboard = new ArrayList<>();
@@ -74,7 +76,7 @@ public class CircuitCanvas extends Pane {
         initializeZoomHandling();
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
         this.setOnMousePressed(this::handleMousePressed);
-        this.setOnMouseDragged(this::handleMouseDragged);
+        // this.setOnMouseDragged(this::handleMouseDragged);
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.C && event.isControlDown()) {
                 copySelectedGatesToClipboard();
@@ -151,14 +153,19 @@ public class CircuitCanvas extends Pane {
     }
 
     private void handleMousePressed(MouseEvent event) {
-        lastX = event.getX();
-        lastY = event.getY();
+        double transformedX = scrollPane.getHvalue()
+                * (scrollPane.getContent().getBoundsInLocal().getWidth() - scrollPane.getViewportBounds().getWidth());
+        double transformedY = scrollPane.getVvalue()
+                * (scrollPane.getContent().getBoundsInLocal().getHeight() - scrollPane.getViewportBounds().getHeight());
+
+        lastX = event.getX() + transformedX - virtualOrigin.getX();
+        lastY = event.getY() + transformedY - virtualOrigin.getY();
+
         if (currentCursorMode == CursorMode.GRABBY) {
             isSelecting = false;
         } else if (currentCursorMode == CursorMode.POINTER) {
             isSelecting = true;
-            lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(), getWidth())),
-                    Math.max(0, Math.min(event.getY(), getHeight())));
+            lastMouseCoordinates = new Point2D(lastX, lastY);
             selectionRect.setX(lastMouseCoordinates.getX());
             selectionRect.setY(lastMouseCoordinates.getY());
             selectionRect.setWidth(0);
@@ -184,16 +191,22 @@ public class CircuitCanvas extends Pane {
             }
 
         } else if (currentCursorMode == CursorMode.POINTER && isSelecting) {
-            double x = Math.max(0, Math.min(event.getX(), getWidth()));
-            double y = Math.max(0, Math.min(event.getY(), getHeight()));
+            double transformedX = scrollPane.getHvalue() * (scrollPane.getContent().getBoundsInLocal().getWidth()
+                    - scrollPane.getViewportBounds().getWidth());
+            double transformedY = scrollPane.getVvalue() * (scrollPane.getContent().getBoundsInLocal().getHeight()
+                    - scrollPane.getViewportBounds().getHeight());
+
+            double x = event.getX() + transformedX - virtualOrigin.getX();
+            double y = event.getY() + transformedY - virtualOrigin.getY();
+
             selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
             selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
             selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
             selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
         }
 
-        lastX = event.getX();
-        lastY = event.getY();
+        lastX = event.getX() + viewOffsetX;
+        lastY = event.getY() + viewOffsetY;
     }
 
     private void updateScrollPaneViewport(double deltaX, double deltaY) {
@@ -790,46 +803,68 @@ public class CircuitCanvas extends Pane {
         return allData;
     }
 
-    public void loadGates(List<GateData> gatesData) {
+    public List<TextLabel> getAllTextLabels() {
+        List<TextLabel> allLabels = new ArrayList<>();
+        for (Node node : this.getChildren()) {
+            if (node instanceof TextLabel) {
+                allLabels.add((TextLabel) node);
+            }
+        }
+        return allLabels;
+    }
+
+    public void loadComponents(List<CircuitComponent> components) {
         clearCanvas();
         Map<String, LogicGate> createdGates = new HashMap<>();
-        for (GateData data : gatesData) {
-            String normalizedType = normalizeType(data.type);
-            LogicGate gate = GateFactory.createGate(normalizedType);
-            if (gate == null) {
-                System.out.println("Failed to create gate for type: " + data.type);
-                continue;
-            }
-            gate.setPosition(data.position.getX(), data.position.getY());
-            gate.setId(data.id);
-            createdGates.put(data.id, gate);
-            drawGate(gate, data.position.getX(), data.position.getY());
-        }
 
-        for (GateData data : gatesData) {
-            LogicGate sourceGate = createdGates.get(data.id);
-            if (sourceGate == null)
-                continue;
-
-            for (ConnectionData output : data.outputs) {
-                LogicGate targetGate = createdGates.get(output.gateId);
-                if (targetGate == null) {
-                    System.out.println("Output gate not found for ID: " + output.gateId);
+        for (CircuitComponent component : components) {
+            if (component instanceof GateData) {
+                GateData gateData = (GateData) component;
+                String normalizedType = normalizeType(gateData.type);
+                LogicGate gate = GateFactory.createGate(normalizedType);
+                if (gate == null) {
+                    System.out.println("Failed to create gate for type: " + gateData.type);
                     continue;
                 }
-                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-                Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+                gate.setPosition(gateData.position.getX(), gateData.position.getY());
+                gate.setId(gateData.id);
+                createdGates.put(gateData.id, gate);
+                drawGate(gate, gateData.position.getX(), gateData.position.getY());
+            }
+        }
 
-                Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
-                connectionLine.setStrokeWidth(2);
-                connectionLine.setStroke(Color.BLACK);
+        for (CircuitComponent component : components) {
+            if (component instanceof GateData) {
+                GateData gateData = (GateData) component;
 
-                this.getChildren().add(connectionLine);
-                sourceGate.addOutputConnection(connectionLine);
-                targetGate.addInputConnection(connectionLine, output.pointIndex);
+                LogicGate sourceGate = createdGates.get(gateData.id);
+                if (sourceGate == null)
+                    continue;
+
+                for (ConnectionData output : gateData.outputs) {
+                    LogicGate targetGate = createdGates.get(output.gateId);
+                    if (targetGate == null) {
+                        System.out.println("Output gate not found for ID: " + output.gateId);
+                        continue;
+                    }
+                    Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                            sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+                    Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                            targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                            targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+                    Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(),
+                            targetPos.getY());
+                    connectionLine.setStrokeWidth(2);
+                    connectionLine.setStroke(Color.BLACK);
+
+                    this.getChildren().add(connectionLine);
+                    sourceGate.addOutputConnection(connectionLine);
+                    targetGate.addInputConnection(connectionLine, output.pointIndex);
+                }
+            } else if (component instanceof TextLabel) {
+                TextLabel textLabel = (TextLabel) component;
+                drawTextLabel(textLabel, textLabel.getLayoutX(), textLabel.getLayoutY());
             }
         }
     }
