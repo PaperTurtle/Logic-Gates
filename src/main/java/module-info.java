@@ -4,8 +4,6 @@ module com.paperturtle {
     requires javafx.fxml;
     requires javafx.swing;
     requires transitive com.google.gson;
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
 
     requires batik.transcoder;
     requires batik.svggen;
