@@ -4,7 +4,7 @@ import javafx.geometry.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GateData {
+public class GateData implements CircuitComponent {
     public String id;
     public String type;
     public Point2D position;
@@ -20,5 +20,10 @@ public class GateData {
             this.gateId = gateId;
             this.pointIndex = pointIndex;
         }
+    }
+
+    @Override
+    public String getComponentType() {
+        return "gate";
     }
 }
