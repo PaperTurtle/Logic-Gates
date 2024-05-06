@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.ArrayList;
 import javafx.util.Pair;
 
-public class SwitchGate extends LogicGate implements GateInterface {
+public class SwitchGate extends LogicGate {
     private boolean state = false;
     private Image offImage;
     private Image onImage;
@@ -33,7 +33,6 @@ public class SwitchGate extends LogicGate implements GateInterface {
         return state;
     }
 
-    @Override
     public void toggle() {
         state = !state;
         updateVisualState();
