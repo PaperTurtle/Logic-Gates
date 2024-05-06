@@ -2,6 +2,7 @@ package com.paperturtle;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,7 +120,12 @@ public class App extends Application {
         // Set action for saveItem
         saveItem.setOnAction(e -> {
             List<GateData> gateData = circuitCanvas.getAllGateData();
-            if (gateData.isEmpty()) {
+            List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
+            List<CircuitComponent> components = new ArrayList<>();
+            components.addAll(gateData);
+            components.addAll(textLabels);
+
+            if (gateData.isEmpty() && textLabels.isEmpty()) {
                 showAlert("Warning", "The canvas is empty. Nothing to save.", Alert.AlertType.WARNING);
                 return;
             }
@@ -134,7 +140,7 @@ public class App extends Application {
                     if (!filePath.toLowerCase().endsWith(".json")) {
                         filePath += ".json";
                     }
-                    new CircuitFileManager().saveCircuit(filePath, gateData);
+                    new CircuitFileManager().saveCircuit(filePath, components);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -329,10 +335,17 @@ public class App extends Application {
 
     private void saveCurrentWork(Stage stage) {
         List<GateData> gateData = circuitCanvas.getAllGateData();
-        if (!gateData.isEmpty()) {
+        List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
+        List<CircuitComponent> components = new ArrayList<>();
+        System.out.println(textLabels);
+        System.out.println("Triggered");
+        components.addAll(gateData);
+        components.addAll(textLabels);
+
+        if (!components.isEmpty()) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Circuit File");
-            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
             File file = fileChooser.showSaveDialog(stage);
             if (file != null) {
                 try {
@@ -340,7 +353,7 @@ public class App extends Application {
                     if (!filePath.toLowerCase().endsWith(".json")) {
                         filePath += ".json";
                     }
-                    new CircuitFileManager().saveCircuit(filePath, gateData);
+                    new CircuitFileManager().saveCircuit(filePath, components);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -359,8 +372,8 @@ public class App extends Application {
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             try {
-                List<GateData> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
-                circuitCanvas.loadGates(gatesData);
+                List<CircuitComponent> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
+                circuitCanvas.loadComponents(gatesData);
             } catch (IOException | IllegalArgumentException e) {
                 showAlert("Error", "Failed to load the file: " + e.getMessage(), Alert.AlertType.ERROR);
             }
