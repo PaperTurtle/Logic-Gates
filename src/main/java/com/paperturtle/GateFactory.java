@@ -53,6 +53,8 @@ public class GateFactory {
                 return new LowConstantGate();
             case "LIGHTBULB":
                 return new Lightbulb();
+            case "FOURBITDIGIT":
+                return new FourBitDigitGate();
             default:
                 return null;
         }
