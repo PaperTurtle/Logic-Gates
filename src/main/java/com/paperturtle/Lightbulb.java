@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 import javafx.util.Pair;
 
-public class Lightbulb extends LogicGate implements GateInterface {
+public class Lightbulb extends LogicGate {
     private boolean state = false;
     private Image offImage;
     private Image onImage;
@@ -30,7 +30,6 @@ public class Lightbulb extends LogicGate implements GateInterface {
             Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
             inputMarkers.add(marker);
         }
-
     }
 
     public void toggle() {
