@@ -72,7 +72,7 @@ public class App extends Application {
 
         Menu cursorMenu = new Menu("Cursor");
         MenuItem pointerItem = new MenuItem("Use Pointer");
-        MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
+        // MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
 
         pointerItem.setOnAction(e -> {
             scene.setCursor(Cursor.DEFAULT);
@@ -80,14 +80,15 @@ public class App extends Application {
             circuitCanvas.setCursor(Cursor.DEFAULT);
         });
 
-        grabbyItem.setOnAction(e -> {
-            scene.setCursor(Cursor.OPEN_HAND);
-            circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
-            circuitCanvas.setCursor(Cursor.OPEN_HAND);
-        });
+        // grabbyItem.setOnAction(e -> {
+        // scene.setCursor(Cursor.OPEN_HAND);
+        // circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
+        // circuitCanvas.setCursor(Cursor.OPEN_HAND);
+        // });
 
         fileMenu.getItems().addAll(openItem, saveItem);
-        cursorMenu.getItems().addAll(pointerItem, grabbyItem);
+        // cursorMenu.getItems().addAll(pointerItem, grabbyItem);
+        cursorMenu.getItems().addAll(pointerItem);
 
         menuBar.getMenus().addAll(fileMenu, cursorMenu);
 
@@ -353,6 +354,8 @@ public class App extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Circuit File");
         fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
+        File desktop = new File(System.getProperty("user.home"), "Desktop");
+        fileChooser.setInitialDirectory(desktop);
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             try {
