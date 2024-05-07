@@ -14,9 +14,14 @@ import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The CircuitFileManager class is responsible for saving and loading circuits
+ * 
+ * The class uses the Gson library to serialize and deserialize the circuit data
+ * to and from JSON format.
+ */
 public class CircuitFileManager {
 
     private Gson gson = new Gson();
@@ -60,18 +65,5 @@ public class CircuitFileManager {
         try (FileReader reader = new FileReader(filePath)) {
             return gson.fromJson(reader, type);
         }
-    }
-
-    /**
-     * Checks if the given JSON object is a valid gate node.
-     * 
-     * @param node The JSON object to check.
-     * @return True if the JSON object is a valid gate node, false otherwise.
-     */
-    private boolean isValidGateNode(JsonObject node) {
-        return node.has("id") && node.has("type") && node.has("position") &&
-                node.get("position").isJsonObject() &&
-                node.getAsJsonObject("position").has("x") &&
-                node.getAsJsonObject("position").has("y");
     }
 }
