@@ -26,12 +26,15 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
+import com.paperturtle.Action.ActionType;
 import com.paperturtle.GateData.ConnectionData;
 
 import javafx.application.Platform;
@@ -61,6 +64,9 @@ public class CircuitCanvas extends Pane {
     private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
     private List<ClipboardData> clipboard = new ArrayList<>();
+    private Stack<Action> undoStack = new Stack<>();
+    private Stack<Action> redoStack = new Stack<>();
+    private boolean isUndoOrRedo = false;
 
     public enum CursorMode {
         POINTER, GRABBY
@@ -87,8 +93,121 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 removeSelectedGates();
                 event.consume();
+            } else if (event.getCode() == KeyCode.Z && event.isControlDown()) {
+                undo();
+                event.consume();
+            } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
+                redo();
+                event.consume();
             }
         });
+    }
+
+    public void logAction(Action action, boolean fromUserAction) {
+        if (fromUserAction) {
+            undoStack.push(action);
+            redoStack.clear();
+        }
+    }
+
+    public void undo() {
+        if (!undoStack.isEmpty()) {
+            Action lastAction = undoStack.pop();
+            isUndoOrRedo = true;
+            boolean actionApplied = applyAction(lastAction, true);
+            if (actionApplied) {
+                redoStack.push(lastAction);
+            }
+            isUndoOrRedo = false;
+        }
+    }
+
+    public void redo() {
+        if (!redoStack.isEmpty()) {
+            Action nextAction = redoStack.pop();
+            isUndoOrRedo = true;
+            boolean actionApplied = applyAction(nextAction, false);
+            if (actionApplied) {
+                undoStack.push(nextAction);
+            }
+            isUndoOrRedo = false;
+        }
+    }
+
+    private boolean applyAction(Action action, boolean isUndo) {
+        boolean stateChanged = false;
+        switch (action.type) {
+            case ADD:
+                if (isUndo) {
+                    removeComponents(action.affectedComponents);
+                    stateChanged = true;
+                } else {
+                    addComponents(action.affectedComponents);
+                    stateChanged = true;
+                }
+                break;
+            case MOVE:
+                moveComponents(action.affectedComponents, isUndo ? action.oldPositions : action.newPositions);
+                stateChanged = true;
+                break;
+            case REMOVE:
+                if (isUndo) {
+                    addComponents(action.affectedComponents);
+                    stateChanged = true;
+                } else {
+                    removeComponents(action.affectedComponents);
+                    stateChanged = true;
+                }
+                break;
+        }
+        return stateChanged;
+    }
+
+    private void addComponents(List<CircuitComponent> components) {
+        for (CircuitComponent component : components) {
+            if (component instanceof LogicGate) {
+                LogicGate gate = (LogicGate) component;
+
+                drawGate(gate, gate.getPosition().getX(), gate.getPosition().getY());
+            } else if (component instanceof TextLabel) {
+                TextLabel label = (TextLabel) component;
+                drawTextLabel(label, label.getLayoutX(), label.getLayoutY());
+            }
+        }
+    }
+
+    // Method to remove components from the canvas
+    private void removeComponents(List<CircuitComponent> components) {
+        for (CircuitComponent component : components) {
+            if (component instanceof LogicGate) {
+                LogicGate gate = (LogicGate) component;
+                removeGate(gate.getImageView());
+            } else if (component instanceof TextLabel) {
+                TextLabel label = (TextLabel) component;
+                this.getChildren().remove(label);
+            }
+        }
+    }
+
+    private void moveComponents(List<CircuitComponent> components, List<Point2D> newPositions) {
+        List<Point2D> oldPositions = new ArrayList<>();
+        for (int i = 0; i < components.size(); i++) {
+            CircuitComponent component = components.get(i);
+            Point2D newPosition = newPositions.get(i);
+            if (component instanceof LogicGate) {
+                LogicGate gate = (LogicGate) component;
+                oldPositions.add(gate.getPosition());
+                gate.setPosition(newPosition.getX(), newPosition.getY());
+                gate.getImageView().relocate(newPosition.getX(), newPosition.getY());
+            } else if (component instanceof TextLabel) {
+                TextLabel label = (TextLabel) component;
+                oldPositions.add(new Point2D(label.getLayoutX(), label.getLayoutY()));
+                label.setLayoutX(newPosition.getX());
+                label.setLayoutY(newPosition.getY());
+            }
+        }
+        Action moveAction = new Action(ActionType.MOVE, components, oldPositions, newPositions);
+        logAction(moveAction, !isUndoOrRedo);
     }
 
     private void pasteGatesFromClipboard() {
@@ -351,6 +470,8 @@ public class CircuitCanvas extends Pane {
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
         }
+        Action addAction = new Action(ActionType.ADD, Collections.singletonList((CircuitComponent) gate));
+        logAction(addAction, !isUndoOrRedo);
     }
 
     public void drawTextLabel(TextLabel textLabel, double x, double y) {
@@ -678,6 +799,11 @@ public class CircuitCanvas extends Pane {
                 outputGate.evaluate();
                 outputGate.propagateStateChange();
             });
+            logicGate.getInputMarkers().clear();
+
+            Action removeAction = new Action(ActionType.REMOVE,
+                    Collections.singletonList((CircuitComponent) logicGate));
+            logAction(removeAction, !isUndoOrRedo);
         }
         propagateUpdates();
     }
