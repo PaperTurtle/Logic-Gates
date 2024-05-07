@@ -13,7 +13,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
-public abstract class LogicGate {
+public abstract class LogicGate implements CircuitComponent {
     protected List<LogicGate> inputs;
     protected String svgFilePath;
     protected List<Point2D> inputPoints;
@@ -246,6 +246,9 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Propagates the state change to the output gates.
+     */
     public void propagateStateChange() {
         boolean newState = evaluate();
         if (newState != currentState) {
@@ -263,6 +266,11 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Updates the color of the output connections based on the state.
+     * 
+     * @param state the state of the output.
+     */
     public void updateOutputConnectionsColor(boolean state) {
         Color newColor = state ? Color.RED : Color.BLACK;
         for (Line line : outputConnections) {
@@ -295,6 +303,12 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Finds the index of the input connection for the given line.
+     * 
+     * @param line the Line to find the index for.
+     * @return the index of the input connection.
+     */
     public int findInputConnectionIndex(Line line) {
         for (List<Line> connections : inputConnections) {
             if (connections.contains(line)) {
@@ -319,6 +333,11 @@ public abstract class LogicGate {
         }
     }
 
+    /**
+     * Removes an input connection from this gate.
+     * 
+     * @param line the Line to be removed.
+     */
     public void removeInputConnection(Line line) {
         inputConnections.stream()
                 .filter(connections -> connections.contains(line))
@@ -347,6 +366,11 @@ public abstract class LogicGate {
         return inputConnections;
     }
 
+    /**
+     * Returns the output marker for this gate.
+     * 
+     * @return the output marker.
+     */
     public Circle getOutputMarker() {
         return outputMarker;
     }
@@ -373,6 +397,11 @@ public abstract class LogicGate {
         return outputGates;
     }
 
+    /**
+     * Returns the data for this gate.
+     * 
+     * @return the GateData object.
+     */
     public GateData getGateData() {
         GateData data = new GateData();
         data.id = this.getId();
@@ -393,6 +422,11 @@ public abstract class LogicGate {
         return data;
     }
 
+    /**
+     * Returns the data for this gate to be copied to the clipboard.
+     * 
+     * @return the ClipboardData object.
+     */
     public ClipboardData getGateClipboardData() {
         ClipboardData data = new ClipboardData();
         data.id = this.getId();
@@ -423,6 +457,10 @@ public abstract class LogicGate {
 
     public Point2D getPosition() {
         return new Point2D(imageView.getX(), imageView.getY());
+    }
+
+    public String getComponentType() {
+        return "gate";
     }
 
 }
