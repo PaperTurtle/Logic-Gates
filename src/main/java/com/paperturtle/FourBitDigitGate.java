@@ -12,6 +12,30 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 
+/**
+ * The FourBitDigitGate class extends the LogicGate class and represents a
+ * four-bit digit gate in a digital circuit.
+ * 
+ * A FourBitDigitGate is a digital logic gate that handles four bits of input
+ * and output.
+ * 
+ * The class constructor sets the SVG image representing the gate, the list of
+ * input points, and the output point.
+ * 
+ * The evaluate method overrides the abstract method in the LogicGate class. It
+ * checks the inputs and returns the corresponding four-bit output.
+ * 
+ * The state field represents the current state of the gate (true or false).
+ * 
+ * The images field is a list of images that represent the different states of
+ * the gate.
+ * 
+ * The previousActiveCount field keeps track of the number of active inputs from
+ * the previous state of the gate.
+ * 
+ * @see LogicGate
+ * @author Seweryn Czabanowski
+ */
 public class FourBitDigitGate extends LogicGate {
     private boolean state = false;
     private List<Image> images;
