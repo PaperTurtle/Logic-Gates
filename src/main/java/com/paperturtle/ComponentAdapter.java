@@ -10,7 +10,22 @@ import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
 
+/**
+ * The ComponentAdapter class is responsible for serializing and deserializing
+ * CircuitComponent objects.
+ * 
+ * The class is used by the CircuitFileManager class to serialize and
+ * deserialize CircuitComponent objects.
+ */
 public class ComponentAdapter implements JsonSerializer<CircuitComponent>, JsonDeserializer<CircuitComponent> {
+    /**
+     * Serializes a CircuitComponent object to a JSON element.
+     * 
+     * @param src       The CircuitComponent object to serialize.
+     * @param typeOfSrc The type of the source object.
+     * @param context   The serialization context.
+     * @return A JSON element representing the serialized CircuitComponent object.
+     */
     @Override
     public JsonElement serialize(CircuitComponent src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
@@ -26,6 +41,13 @@ public class ComponentAdapter implements JsonSerializer<CircuitComponent>, JsonD
         return result;
     }
 
+    /**
+     * Deserializes a JSON element to a CircuitComponent object.
+     * 
+     * @param json    The JSON element to deserialize.
+     * @param typeOfT The type of the target object.
+     * @param context The deserialization context.
+     */
     @Override
     public CircuitComponent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
