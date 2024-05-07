@@ -346,6 +346,8 @@ public class App extends Application {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Circuit File");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+            File desktop = new File(System.getProperty("user.home"), "Desktop");
+            fileChooser.setInitialDirectory(desktop);
             File file = fileChooser.showSaveDialog(stage);
             if (file != null) {
                 try {
