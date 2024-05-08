@@ -196,24 +196,30 @@ public class App extends Application {
         VBox inputsSection = new VBox(5);
         VBox outputsSection = new VBox(5);
         VBox gatesSection = new VBox(5);
+        VBox flipflopsSection = new VBox(5);
         VBox utilitiesSection = new VBox(5);
         inputsSection.getStyleClass().add("section");
         outputsSection.getStyleClass().add("section");
         gatesSection.getStyleClass().add("section");
+        flipflopsSection.getStyleClass().add("section");
         utilitiesSection.getStyleClass().add("section");
 
         sidebar.getChildren().addAll(createSectionLabel("Inputs"), inputsSection, createSectionLabel("Outputs"),
-                outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Utilities"),
+                outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Flip Flops"),
+                flipflopsSection, createSectionLabel("Utilities"),
                 utilitiesSection);
 
         String[] inputTypes = { "SWITCH", "CLOCK", "HIGHCONSTANT", "LOWCONSTANT" };
         String[] outputTypes = { "LIGHTBULB", "FOURBITDIGIT" };
         String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "TRISTATE" };
+        String[] flipflopTypes = { "ASYNC_RS_FLIPFLOP", "SYNC_RS_FLIPFLOP", "EDGE_JK_FLIPFLOP", "SYNC_T_FLIPFLOP",
+                "EDGE_D_FLIPFLOP", "LEVEL_D_FLIPFLOP" };
         String[] utilityTypes = { "TextLabel" };
 
         addItemsToSection(inputsSection, inputTypes);
         addItemsToSection(outputsSection, outputTypes);
         addItemsToSection(gatesSection, gateTypes);
+        addItemsToSection(flipflopsSection, flipflopTypes);
         addItemsToSection(utilitiesSection, utilityTypes);
     }
 

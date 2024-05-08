@@ -55,6 +55,19 @@ public class GateFactory {
                 return new Lightbulb();
             case "FOURBITDIGIT":
                 return new FourBitDigitGate();
+            case "ASYNC_RS_FLIPFLOP":
+                return new AsynchronousRSFlipFlop();
+            case "SYNC_RS_FLIPFLOP":
+                return new SyncRSFlipFlop();
+            case "EDGE_JK_FLIPFLOP":
+                return new EdgeJKFlipFlop();
+            case "SYNC_T_FLIPFLOP":
+                return new SyncTFlipFlop();
+            case "EDGE_D_FLIPFLOP":
+                return new EdgeDFlipFlop();
+            case "LEVEL_D_FLIPFLOP":
+                return new LevelDFlipFlop();
+
             default:
                 return null;
         }
