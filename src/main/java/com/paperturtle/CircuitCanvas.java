@@ -4,34 +4,28 @@ import javafx.scene.layout.Pane;
 
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
-import com.paperturtle.Action.ActionType;
 import com.paperturtle.GateData.ConnectionData;
-
-import javafx.application.Platform;
 
 public class CircuitCanvas extends Pane {
     private Line currentLine;
@@ -49,12 +43,12 @@ public class CircuitCanvas extends Pane {
     private boolean justSelected = false;
     private double lastX = 0;
     private double lastY = 0;
-    private double viewOffsetX = 0;
-    private double viewOffsetY = 0;
     private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
     private List<ClipboardData> clipboard = new ArrayList<>();
     private InteractionManager interactionManager;
+    private ConnectionManager connectionManager;
+    private GateManager gateManager;
 
     public enum CursorMode {
         POINTER, GRABBY
@@ -66,14 +60,16 @@ public class CircuitCanvas extends Pane {
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
+
         this.interactionManager = new InteractionManager(this);
+        this.connectionManager = new ConnectionManager(this);
+        this.gateManager = new GateManager(this);
 
         interactionManager.initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
         this.setOnMousePressed(interactionManager::handleMousePressed);
 
-        // this.setOnMouseDragged(this::handleMouseDragged);
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.C && event.isControlDown()) {
                 copySelectedGatesToClipboard();
@@ -165,7 +161,7 @@ public class CircuitCanvas extends Pane {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        selectedGates.forEach(this::removeGate);
+        selectedGates.forEach(gateManager::removeGate);
     }
 
     public void drawGate(LogicGate gate, double x, double y) {
@@ -203,108 +199,9 @@ public class CircuitCanvas extends Pane {
         });
     }
 
-    public LogicGate findGateForInputMarker(Circle inputMarker) {
-        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-            LogicGate gate = entry.getValue();
-            if (gate.getInputMarkers().contains(inputMarker)) {
-                return gate;
-            }
-        }
-        return null;
-    }
-
-    public int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
-        return gate.getInputMarkers().indexOf(inputMarker);
-    }
-
-    public void removeGate(ImageView gate) {
-        LogicGate logicGate = gateImageViews.get(gate);
-        if (logicGate != null) {
-            removeAllConnections(logicGate);
-            this.getChildren().removeAll(logicGate.getInputMarkers());
-            if (logicGate.getOutputMarker() != null) {
-                this.getChildren().remove(logicGate.getOutputMarker());
-            }
-            this.getChildren().remove(gate);
-            gateImageViews.remove(gate);
-            gateMarkers.remove(gate);
-            logicGate.inputs.forEach(inputGate -> {
-                inputGate.getOutputGates().remove(logicGate);
-                inputGate.evaluate();
-                inputGate.propagateStateChange();
-            });
-
-            logicGate.outputGates.forEach(outputGate -> {
-                outputGate.inputs.remove(logicGate);
-                outputGate.evaluate();
-                outputGate.propagateStateChange();
-            });
-            logicGate.getInputMarkers().clear();
-
-        }
-        propagateUpdates();
-    }
-
-    private void removeAllConnections(LogicGate logicGate) {
-        new ArrayList<>(logicGate.getOutputConnections()).forEach(line -> {
-            LogicGate targetGate = lineToStartGateMap.get(line);
-            if (targetGate != null) {
-                targetGate.removeInput(logicGate);
-                targetGate.evaluate();
-                targetGate.propagateStateChange();
-            }
-            lineToStartGateMap.remove(line);
-            this.getChildren().remove(line);
-        });
-
-        logicGate.getInputConnections().forEach(connections -> new ArrayList<>(connections).forEach(line -> {
-            LogicGate sourceGate = lineToStartGateMap.get(line);
-            if (sourceGate != null) {
-                sourceGate.getOutputConnections().remove(line);
-                sourceGate.evaluate();
-                sourceGate.propagateStateChange();
-            }
-            lineToStartGateMap.remove(line);
-            this.getChildren().remove(line);
-        }));
-    }
-
-    public void removeConnection(Line connection) {
-        LogicGate sourceGate = lineToStartGateMap.get(connection);
-        if (sourceGate != null) {
-            sourceGate.removeOutputConnection(connection);
-
-            LogicGate targetGate = findTargetGate(connection);
-            if (targetGate != null) {
-                int index = targetGate.findInputConnectionIndex(connection);
-                if (index != -1) {
-                    targetGate.removeInputConnection(connection, index);
-                    targetGate.removeInput(sourceGate);
-                }
-
-                targetGate.evaluate();
-                targetGate.propagateStateChange();
-                scheduleUpdate(targetGate);
-            }
-
-            this.getChildren().remove(connection);
-            lineToStartGateMap.remove(connection);
-
-            sourceGate.evaluate();
-            sourceGate.propagateStateChange();
-            scheduleUpdate(sourceGate);
-        } else {
-            System.out.println("No source gate found for the connection.");
-        }
-    }
-
-    private LogicGate findTargetGate(Line connection) {
-        for (LogicGate gate : gateImageViews.values()) {
-            if (gate.getInputConnections().contains(connection)) {
-                return gate;
-            }
-        }
-        return null;
+    public void scheduleUpdate(LogicGate gate) {
+        gatesToBeUpdated.add(gate);
+        Platform.runLater(this::propagateUpdates);
     }
 
     public void propagateUpdates() {
@@ -313,11 +210,6 @@ public class CircuitCanvas extends Pane {
             gatesToBeUpdated.clear();
             currentBatch.forEach(LogicGate::propagateStateChange);
         }
-    }
-
-    public void scheduleUpdate(LogicGate gate) {
-        gatesToBeUpdated.add(gate);
-        Platform.runLater(this::propagateUpdates);
     }
 
     public List<GateData> getAllGateData() {
@@ -408,7 +300,7 @@ public class CircuitCanvas extends Pane {
 
     public void clearCanvas() {
         for (LogicGate gate : new ArrayList<>(gateImageViews.values())) {
-            removeGate(gate.getImageView());
+            gateManager.removeGate(gate.getImageView());
         }
         this.getChildren().clear();
         gateImageViews.clear();
@@ -516,6 +408,10 @@ public class CircuitCanvas extends Pane {
         this.currentLine = currentLine;
     }
 
+    public Map<ImageView, List<Circle>> getGateMarkers() {
+        return gateMarkers;
+    }
+
     public LogicGate getStartGate() {
         return startGate;
     }
@@ -530,6 +426,18 @@ public class CircuitCanvas extends Pane {
 
     public Set<LogicGate> getGatesToBeUpdated() {
         return gatesToBeUpdated;
+    }
+
+    public InteractionManager getInteractionManager() {
+        return interactionManager;
+    }
+
+    public ConnectionManager getConnectionManager() {
+        return connectionManager;
+    }
+
+    public GateManager getGateManager() {
+        return gateManager;
     }
 
 }

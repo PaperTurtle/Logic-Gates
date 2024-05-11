@@ -252,7 +252,7 @@ public class InteractionManager {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> {
-            canvas.removeGate(imageView);
+            canvas.getGateManager().removeGate(imageView);
             if (canvas.getHighlightedGate() == gate) {
                 canvas.setHighlightedGate(null);
             }
@@ -336,49 +336,6 @@ public class InteractionManager {
         alert.showAndWait();
     }
 
-    public boolean finalizeConnection(double x, double y, Circle outputMarker) {
-        for (Node node : canvas.getChildren()) {
-            if (node instanceof Circle && node != outputMarker) {
-                Circle inputMarker = (Circle) node;
-                if (inputMarker.contains(x, y) && inputMarker.getOpacity() == 1.0) {
-                    Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
-                    canvas.getCurrentLine().setEndX(inputPos.getX());
-                    canvas.getCurrentLine().setEndY(inputPos.getY());
-
-                    LogicGate targetGate = canvas.findGateForInputMarker(inputMarker);
-                    LogicGate sourceGate = canvas.getLineToStartGateMap().get(canvas.getCurrentLine());
-                    if (targetGate != null && sourceGate != null && targetGate != sourceGate) {
-                        int inputIndex = canvas.findInputMarkerIndex(targetGate, inputMarker);
-                        targetGate.addInputConnection(canvas.getCurrentLine(), inputIndex);
-                        targetGate.addInput(sourceGate);
-                        sourceGate.addOutputConnection(canvas.getCurrentLine());
-                        sourceGate.addOutputGate(targetGate);
-                        targetGate.evaluate();
-                        targetGate.propagateStateChange();
-                        sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
-                        scheduleUpdate(targetGate);
-                        canvas.setStartGate(null);
-                    } else {
-                        if (canvas.getCurrentLine() != null && canvas.getStartGate() != null) {
-                            canvas.getChildren().remove(canvas.getCurrentLine());
-                            canvas.getStartGate().removeOutputConnection(canvas.getCurrentLine());
-                            canvas.setCurrentLine(null);
-                        }
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-        }
-        if (canvas.getCurrentLine() != null && canvas.getStartGate() != null) {
-            canvas.getChildren().remove(canvas.getCurrentLine());
-            canvas.getStartGate().removeOutputConnection(canvas.getCurrentLine());
-            canvas.setCurrentLine(null);
-        }
-        return false;
-    }
-
     public void setupConnectionHandlers() {
         canvas.setOnMouseMoved(mouseMoveEvent -> {
             if (canvas.getCurrentLine() != null) {
@@ -389,7 +346,8 @@ public class InteractionManager {
 
         canvas.setOnMouseClicked(mouseClickEvent -> {
             if (canvas.getCurrentLine() != null && mouseClickEvent.getClickCount() == 1) {
-                if (!finalizeConnection(mouseClickEvent.getX(), mouseClickEvent.getY(), null)) {
+                if (!canvas.getConnectionManager().finalizeConnection(mouseClickEvent.getX(), mouseClickEvent.getY(),
+                        null)) {
                     canvas.getChildren().remove(canvas.getCurrentLine());
                 }
                 canvas.setCurrentLine(null);
@@ -405,7 +363,7 @@ public class InteractionManager {
                 ContextMenu lineContextMenu = new ContextMenu();
                 MenuItem deleteLine = new MenuItem("Remove");
                 deleteLine.setOnAction(e -> {
-                    canvas.removeConnection(targetLine);
+                    canvas.getConnectionManager().removeConnection(targetLine);
                     e.consume();
                 });
                 lineContextMenu.getItems().add(deleteLine);
@@ -419,11 +377,6 @@ public class InteractionManager {
     private void resetInteractionHandlers() {
         canvas.setOnMouseMoved(null);
         canvas.setOnMouseClicked(null);
-    }
-
-    public void scheduleUpdate(LogicGate gate) {
-        canvas.getGatesToBeUpdated().add(gate);
-        Platform.runLater(canvas::propagateUpdates);
     }
 
     public void initializeSelectionMechanism() {
@@ -458,7 +411,7 @@ public class InteractionManager {
         });
 
         canvas.setOnMouseReleased(event -> {
-            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && canvas.isJustSelected()
+            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && canvas.isSelecting()
                     && (canvas.getSelectionRect().getWidth() > dragThreshold
                             || canvas.getSelectionRect().getHeight() > dragThreshold)) {
                 this.selectGatesInRectangle();
