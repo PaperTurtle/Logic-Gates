@@ -201,12 +201,11 @@ public class App extends Application {
         inputsSection.getStyleClass().add("section");
         outputsSection.getStyleClass().add("section");
         gatesSection.getStyleClass().add("section");
-        // flipflopsSection.getStyleClass().add("section");
+        flipflopsSection.getStyleClass().add("section");
         utilitiesSection.getStyleClass().add("section");
 
         sidebar.getChildren().addAll(createSectionLabel("Inputs"), inputsSection, createSectionLabel("Outputs"),
-                outputsSection, createSectionLabel("Logic Gates"),
-                flipflopsSection, createSectionLabel("Utilities"),
+                outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Utilities"),
                 utilitiesSection);
 
         String[] inputTypes = { "SWITCH", "CLOCK", "HIGHCONSTANT", "LOWCONSTANT" };
