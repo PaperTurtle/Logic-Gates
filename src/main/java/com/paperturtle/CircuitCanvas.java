@@ -1,19 +1,14 @@
 package com.paperturtle;
 
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 
 import java.util.List;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -23,7 +18,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,10 +32,6 @@ import com.paperturtle.Action.ActionType;
 import com.paperturtle.GateData.ConnectionData;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class CircuitCanvas extends Pane {
     private Line currentLine;
@@ -67,6 +57,7 @@ public class CircuitCanvas extends Pane {
     private Stack<Action> undoStack = new Stack<>();
     private Stack<Action> redoStack = new Stack<>();
     private boolean isUndoOrRedo = false;
+    private InteractionManager interactionManager;
 
     public enum CursorMode {
         POINTER, GRABBY
@@ -78,10 +69,14 @@ public class CircuitCanvas extends Pane {
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
+        this.interactionManager = new InteractionManager(this);
+
         initializeSelectionMechanism();
         initializeZoomHandling();
-        this.addEventFilter(MouseEvent.MOUSE_CLICKED, this::handleCanvasClick);
-        this.setOnMousePressed(this::handleMousePressed);
+
+        this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
+        this.setOnMousePressed(interactionManager::handleMousePressed);
+
         // this.setOnMouseDragged(this::handleMouseDragged);
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.C && event.isControlDown()) {
@@ -271,28 +266,6 @@ public class CircuitCanvas extends Pane {
                 });
     }
 
-    private void handleMousePressed(MouseEvent event) {
-        double transformedX = scrollPane.getHvalue()
-                * (scrollPane.getContent().getBoundsInLocal().getWidth() - scrollPane.getViewportBounds().getWidth());
-        double transformedY = scrollPane.getVvalue()
-                * (scrollPane.getContent().getBoundsInLocal().getHeight() - scrollPane.getViewportBounds().getHeight());
-
-        lastX = event.getX() + transformedX - virtualOrigin.getX();
-        lastY = event.getY() + transformedY - virtualOrigin.getY();
-
-        if (currentCursorMode == CursorMode.GRABBY) {
-            isSelecting = false;
-        } else if (currentCursorMode == CursorMode.POINTER) {
-            isSelecting = true;
-            lastMouseCoordinates = new Point2D(lastX, lastY);
-            selectionRect.setX(lastMouseCoordinates.getX());
-            selectionRect.setY(lastMouseCoordinates.getY());
-            selectionRect.setWidth(0);
-            selectionRect.setHeight(0);
-            selectionRect.setVisible(true);
-        }
-    }
-
     private void handleMouseDragged(MouseEvent event) {
         if (currentCursorMode == CursorMode.GRABBY) {
             double dampingFactor = 0.2;
@@ -424,7 +397,7 @@ public class CircuitCanvas extends Pane {
         this.setOnMouseReleased(event -> {
             if (currentCursorMode == CursorMode.POINTER && isSelecting
                     && (selectionRect.getWidth() > dragThreshold || selectionRect.getHeight() > dragThreshold)) {
-                selectGatesInRectangle();
+                interactionManager.selectGatesInRectangle();
             }
             selectionRect.setVisible(false);
             isSelecting = false;
@@ -465,7 +438,7 @@ public class CircuitCanvas extends Pane {
     public void drawGate(LogicGate gate, double x, double y) {
         gate.createVisualRepresentation(this);
         gate.setPosition(x, y);
-        setupDragHandlers(gate.imageView, gate);
+        interactionManager.setupDragHandlers(gate.imageView, gate);
         gateImageViews.put(gate.getImageView(), gate);
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
@@ -478,27 +451,7 @@ public class CircuitCanvas extends Pane {
         this.getChildren().add(textLabel);
         textLabel.setLayoutX(x);
         textLabel.setLayoutY(y);
-        setupDragHandlersForLabel(textLabel);
-    }
-
-    private void setupDragHandlersForLabel(TextLabel textLabel) {
-        textLabel.setOnMousePressed(event -> {
-            double offsetX = event.getSceneX() - textLabel.getLayoutX();
-            double offsetY = event.getSceneY() - textLabel.getLayoutY();
-            textLabel.setUserData(new Object[] { offsetX, offsetY });
-
-            textLabel.setOnMouseDragged(dragEvent -> {
-                double newX = dragEvent.getSceneX() - offsetX;
-                double newY = dragEvent.getSceneY() - offsetY;
-
-                newX = Math.max(0, Math.min(newX, getWidth() - textLabel.getWidth()));
-                newY = Math.max(0, Math.min(newY, getHeight() - textLabel.getHeight()));
-
-                textLabel.setLayoutX(newX);
-                textLabel.setLayoutY(newY);
-            });
-            event.consume();
-        });
+        interactionManager.setupDragHandlersForLabel(textLabel);
     }
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
@@ -562,7 +515,7 @@ public class CircuitCanvas extends Pane {
         return false;
     }
 
-    private LogicGate findGateForInputMarker(Circle inputMarker) {
+    public LogicGate findGateForInputMarker(Circle inputMarker) {
         for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
             LogicGate gate = entry.getValue();
             if (gate.getInputMarkers().contains(inputMarker)) {
@@ -572,209 +525,13 @@ public class CircuitCanvas extends Pane {
         return null;
     }
 
-    private int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
+    public int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
         return gate.getInputMarkers().indexOf(inputMarker);
     }
 
     private void resetInteractionHandlers() {
         this.setOnMouseMoved(null);
         this.setOnMouseClicked(null);
-    }
-
-    private void setupDragHandlers(ImageView imageView, LogicGate gate) {
-        imageView.setPickOnBounds(true);
-
-        imageView.setOnMouseDragged(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && imageView.getStyleClass().contains("selected")) {
-                Object[] userData = (Object[]) imageView.getUserData();
-                double baseX = (double) userData[0];
-                double baseY = (double) userData[1];
-
-                double deltaX = event.getSceneX() - baseX;
-                double deltaY = event.getSceneY() - baseY;
-
-                for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-                    ImageView otherImageView = entry.getKey();
-                    if (otherImageView.getStyleClass().contains("selected")) {
-                        LogicGate otherGate = entry.getValue();
-
-                        double newX = otherGate.getImageView().getX() + deltaX;
-                        double newY = otherGate.getImageView().getY() + deltaY;
-
-                        double clampedX = Math.max(0,
-                                Math.min(newX, getWidth() - otherImageView.getBoundsInLocal().getWidth()));
-                        double clampedY = Math.max(0,
-                                Math.min(newY, getHeight() - otherImageView.getBoundsInLocal().getHeight()));
-
-                        otherGate.setPosition(clampedX, clampedY);
-                        otherImageView.relocate(clampedX, clampedY);
-                    }
-                }
-
-                imageView.setUserData(new Object[] { event.getSceneX(), event.getSceneY(), gate });
-                event.consume();
-            }
-        });
-
-        imageView.setOnMousePressed(event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
-                double offsetX = event.getSceneX() - imageView.getLayoutX();
-                double offsetY = event.getSceneY() - imageView.getLayoutY();
-                if (!event.isControlDown() && !imageView.getStyleClass().contains("selected")) {
-                    deselectAllGatesExcept(imageView);
-                }
-                imageView.getStyleClass().add("selected");
-                imageView.setUserData(new Object[] { offsetX, offsetY, gate });
-            }
-            handleMousePressedForGate(imageView, gate, event);
-        });
-
-        imageView.setOnMouseReleased(event -> {
-            if (imageView.getStyleClass().contains("selected")) {
-                event.consume();
-            }
-        });
-
-        this.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
-            if (e.getTarget() instanceof Pane) {
-                deselectAllGates();
-            }
-        });
-
-        this.setOnMouseClicked(event -> {
-            if (!(event.getTarget() instanceof ImageView)) {
-                if (highlightedGate != null) {
-                    highlightedGate.getImageView().getStyleClass().remove("selected");
-                    highlightedGate = null;
-                }
-                if (openContextMenu != null) {
-                    openContextMenu.hide();
-                    openContextMenu = null;
-                }
-                this.requestFocus();
-            }
-        });
-    }
-
-    private void deselectAllGatesExcept(ImageView exceptImageView) {
-        gateImageViews.entrySet().stream()
-                .filter(entry -> entry.getKey() != exceptImageView)
-                .forEach(entry -> {
-                    entry.getKey().getStyleClass().remove("selected");
-                    if (entry.getValue() instanceof SwitchGate) {
-                        ((SwitchGate) entry.getValue()).setSelected(false);
-                    }
-                });
-    }
-
-    private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
-        if (highlightedGate != null && highlightedGate != gate) {
-            highlightedGate.getImageView().getStyleClass().remove("selected");
-        }
-        highlightedGate = gate;
-
-        if (!imageView.getStyleClass().contains("selected")) {
-            imageView.getStyleClass().add("selected");
-        }
-
-        double offsetX = event.getSceneX() - imageView.getLayoutX();
-        double offsetY = event.getSceneY() - imageView.getLayoutY();
-        imageView.setUserData(new Object[] { offsetX, offsetY, gate });
-
-        if (event.getButton() == MouseButton.SECONDARY) {
-            showContextMenu(imageView, gate, event);
-        }
-    }
-
-    private void showContextMenu(ImageView imageView, LogicGate gate, MouseEvent event) {
-        if (openContextMenu != null) {
-            openContextMenu.hide();
-        }
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> {
-            removeGate(imageView);
-            if (highlightedGate == gate) {
-                highlightedGate = null;
-            }
-        });
-        MenuItem propertiesItem = new MenuItem("Properties");
-        propertiesItem.setOnAction(e -> showPropertiesDialog(gate));
-
-        if (gate instanceof ClockGate) {
-            MenuItem editItem = new MenuItem("Edit time");
-            editItem.setOnAction(e -> ((ClockGate) gate).showTimeEditDialog());
-            contextMenu.getItems().addAll(deleteItem, propertiesItem, editItem);
-        } else {
-            contextMenu.getItems().addAll(deleteItem, propertiesItem);
-        }
-
-        contextMenu.show(imageView, event.getScreenX(), event.getScreenY());
-        openContextMenu = contextMenu;
-        event.consume();
-    }
-
-    private void showPropertiesDialog(LogicGate gate) {
-        if (openContextMenu != null) {
-            openContextMenu.hide();
-            openContextMenu = null;
-        }
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Gate Properties");
-        alert.setHeaderText("Properties for " + gate.getClass().getSimpleName());
-
-        TableView<Boolean[]> table = new TableView<>();
-        List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
-        List<Boolean[]> dataList = new ArrayList<>();
-        for (Pair<Boolean[], Boolean> pair : pairList) {
-            Boolean[] row = new Boolean[pair.getKey().length + 1];
-            System.arraycopy(pair.getKey(), 0, row, 0, pair.getKey().length);
-            row[pair.getKey().length] = pair.getValue();
-            dataList.add(row);
-        }
-
-        ObservableList<Boolean[]> data = FXCollections.observableArrayList(dataList);
-        table.setItems(data);
-
-        int numInputs = pairList.isEmpty() || pairList.get(0).getKey().length == 0 ? 0
-                : pairList.get(0).getKey().length;
-        for (int i = 0; i < numInputs; i++) {
-            TableColumn<Boolean[], String> inputCol = new TableColumn<>("Input " + (i +
-                    1));
-            final int index = i;
-            inputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                    param.getValue().length > index ? (param.getValue()[index] ? "1" : "0") : "N/A"));
-            table.getColumns().add(inputCol);
-            inputCol.setPrefWidth(USE_COMPUTED_SIZE);
-        }
-
-        TableColumn<Boolean[], String> outputCol = new TableColumn<>("Output");
-        outputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                param.getValue()[param.getValue().length - 1] ? "1" : "0"));
-        table.getColumns().add(outputCol);
-        outputCol.setPrefWidth(USE_COMPUTED_SIZE);
-
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setMinWidth(Region.USE_PREF_SIZE);
-        table.setMinHeight(Region.USE_PREF_SIZE);
-
-        double rowHeight = 30.0;
-        double headerHeight = 27.0;
-
-        table.prefHeightProperty().bind(Bindings.size(table.getItems()).multiply(rowHeight).add(headerHeight));
-        table.maxHeightProperty().bind(table.prefHeightProperty());
-
-        table.skinProperty().addListener((obs, oldSkin, newSkin) -> {
-            final TableHeaderRow header = (TableHeaderRow) table.lookup("TableHeaderRow");
-            header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
-        });
-
-        alert.getDialogPane().setContent(table);
-        alert.getDialogPane().getStylesheets()
-                .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
-        table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
-        alert.showAndWait();
     }
 
     public void removeGate(ImageView gate) {
@@ -1018,6 +775,118 @@ public class CircuitCanvas extends Pane {
 
     public void setCurrentCursorMode(CursorMode mode) {
         this.currentCursorMode = mode;
+    }
+
+    public Point2D getLastMouseCoordinates() {
+        return lastMouseCoordinates;
+    }
+
+    public void setLastMouseCoordinates(Point2D coordinates) {
+        this.lastMouseCoordinates = coordinates;
+    }
+
+    public void addGateImageView(ImageView imageView, LogicGate gate) {
+        gateImageViews.put(imageView, gate);
+    }
+
+    public LogicGate getGate(ImageView imageView) {
+        return gateImageViews.get(imageView);
+    }
+
+    public void removeGateImageView(ImageView imageView) {
+        gateImageViews.remove(imageView);
+    }
+
+    public double getLastX() {
+        return lastX;
+    }
+
+    public double getLastY() {
+        return lastY;
+    }
+
+    public void setLastX(double x) {
+        this.lastX = x;
+    }
+
+    public void setLastY(double y) {
+        this.lastY = y;
+    }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
+    public Point2D getVirtualOrigin() {
+        return virtualOrigin;
+    }
+
+    public boolean isSelecting() {
+        return isSelecting;
+    }
+
+    public void setSelecting(boolean selecting) {
+        isSelecting = selecting;
+    }
+
+    public Map<ImageView, LogicGate> getGateImageViews() {
+        return gateImageViews;
+    }
+
+    public LogicGate getHighlightedGate() {
+        return highlightedGate;
+    }
+
+    public void setHighlightedGate(LogicGate gate) {
+        this.highlightedGate = gate;
+    }
+
+    public CursorMode getCurrentCursorMode() {
+        return currentCursorMode;
+    }
+
+    public Rectangle getSelectionRect() {
+        return selectionRect;
+    }
+
+    public ContextMenu getOpenContextMenu() {
+        return openContextMenu;
+    }
+
+    public void setOpenContextMenu(ContextMenu openContextMenu) {
+        this.openContextMenu = openContextMenu;
+    }
+
+    public boolean isJustSelected() {
+        return justSelected;
+    }
+
+    public void setJustSelected(boolean justSelected) {
+        this.justSelected = justSelected;
+    }
+
+    public Line getCurrentLine() {
+        return currentLine;
+    }
+
+    public void setCurrentLine(Line currentLine) {
+        this.currentLine = currentLine;
+    }
+
+    public LogicGate getStartGate() {
+        return startGate;
+    }
+
+    public void setStartGate(LogicGate startGate) {
+        this.startGate = startGate;
+    }
+
+    public Map<Line, LogicGate> getLineToStartGateMap() {
+        return lineToStartGateMap;
+    }
+
+    public Set<LogicGate> getGatesToBeUpdated() {
+        return gatesToBeUpdated;
     }
 
 }
