@@ -7,6 +7,7 @@ import javafx.scene.shape.Circle;
 
 public class GateManager {
     private CircuitCanvas canvas;
+    private LogicGate startGate;
 
     public GateManager(CircuitCanvas canvas) {
         this.canvas = canvas;
