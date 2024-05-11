@@ -24,6 +24,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.util.Pair;
@@ -335,7 +336,7 @@ public class InteractionManager {
         alert.showAndWait();
     }
 
-    private boolean finalizeConnection(double x, double y, Circle outputMarker) {
+    public boolean finalizeConnection(double x, double y, Circle outputMarker) {
         for (Node node : canvas.getChildren()) {
             if (node instanceof Circle && node != outputMarker) {
                 Circle inputMarker = (Circle) node;
@@ -378,7 +379,7 @@ public class InteractionManager {
         return false;
     }
 
-    private void setupConnectionHandlers() {
+    public void setupConnectionHandlers() {
         canvas.setOnMouseMoved(mouseMoveEvent -> {
             if (canvas.getCurrentLine() != null) {
                 canvas.getCurrentLine().setEndX(mouseMoveEvent.getX());
@@ -423,6 +424,49 @@ public class InteractionManager {
     public void scheduleUpdate(LogicGate gate) {
         canvas.getGatesToBeUpdated().add(gate);
         Platform.runLater(canvas::propagateUpdates);
+    }
+
+    public void initializeSelectionMechanism() {
+        canvas.getSelectionRect().setStroke(Color.BLUE);
+        canvas.getSelectionRect().setStrokeWidth(1);
+        canvas.getSelectionRect().setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
+        canvas.getSelectionRect().setVisible(false);
+        canvas.getChildren().add(canvas.getSelectionRect());
+        final double dragThreshold = 10.0;
+
+        canvas.setOnMousePressed(event -> {
+            canvas.setLastMouseCoordinates(new Point2D(Math.max(0, Math.min(event.getX(),
+                    canvas.getWidth())),
+                    Math.max(0, Math.min(event.getY(), canvas.getHeight()))));
+            canvas.getSelectionRect().setX(canvas.getLastMouseCoordinates().getX());
+            canvas.getSelectionRect().setY(canvas.getLastMouseCoordinates().getY());
+            canvas.getSelectionRect().setWidth(0);
+            canvas.getSelectionRect().setHeight(0);
+            canvas.getSelectionRect().setVisible(true);
+            canvas.setSelecting(true);
+        });
+
+        canvas.setOnMouseDragged(event -> {
+            if (canvas.isSelecting()) {
+                double x = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
+                double y = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
+                canvas.getSelectionRect().setWidth(Math.abs(x - canvas.getLastMouseCoordinates().getX()));
+                canvas.getSelectionRect().setHeight(Math.abs(y - canvas.getLastMouseCoordinates().getY()));
+                canvas.getSelectionRect().setX(Math.min(x, canvas.getLastMouseCoordinates().getX()));
+                canvas.getSelectionRect().setY(Math.min(y, canvas.getLastMouseCoordinates().getY()));
+            }
+        });
+
+        canvas.setOnMouseReleased(event -> {
+            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && canvas.isJustSelected()
+                    && (canvas.getSelectionRect().getWidth() > dragThreshold
+                            || canvas.getSelectionRect().getHeight() > dragThreshold)) {
+                this.selectGatesInRectangle();
+            }
+            canvas.getSelectionRect().setVisible(false);
+            canvas.setSelecting(false);
+            canvas.setJustSelected(false);
+        });
     }
 
 }
