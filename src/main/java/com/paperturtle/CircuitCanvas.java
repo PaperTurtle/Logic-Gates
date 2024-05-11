@@ -54,9 +54,6 @@ public class CircuitCanvas extends Pane {
     private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
     private List<ClipboardData> clipboard = new ArrayList<>();
-    private Stack<Action> undoStack = new Stack<>();
-    private Stack<Action> redoStack = new Stack<>();
-    private boolean isUndoOrRedo = false;
     private InteractionManager interactionManager;
 
     public enum CursorMode {
@@ -71,8 +68,7 @@ public class CircuitCanvas extends Pane {
         this.setFocusTraversable(true);
         this.interactionManager = new InteractionManager(this);
 
-        initializeSelectionMechanism();
-        initializeZoomHandling();
+        interactionManager.initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
         this.setOnMousePressed(interactionManager::handleMousePressed);
@@ -88,121 +84,8 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 removeSelectedGates();
                 event.consume();
-            } else if (event.getCode() == KeyCode.Z && event.isControlDown()) {
-                undo();
-                event.consume();
-            } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
-                redo();
-                event.consume();
             }
         });
-    }
-
-    public void logAction(Action action, boolean fromUserAction) {
-        if (fromUserAction) {
-            undoStack.push(action);
-            redoStack.clear();
-        }
-    }
-
-    public void undo() {
-        if (!undoStack.isEmpty()) {
-            Action lastAction = undoStack.pop();
-            isUndoOrRedo = true;
-            boolean actionApplied = applyAction(lastAction, true);
-            if (actionApplied) {
-                redoStack.push(lastAction);
-            }
-            isUndoOrRedo = false;
-        }
-    }
-
-    public void redo() {
-        if (!redoStack.isEmpty()) {
-            Action nextAction = redoStack.pop();
-            isUndoOrRedo = true;
-            boolean actionApplied = applyAction(nextAction, false);
-            if (actionApplied) {
-                undoStack.push(nextAction);
-            }
-            isUndoOrRedo = false;
-        }
-    }
-
-    private boolean applyAction(Action action, boolean isUndo) {
-        boolean stateChanged = false;
-        switch (action.type) {
-            case ADD:
-                if (isUndo) {
-                    removeComponents(action.affectedComponents);
-                    stateChanged = true;
-                } else {
-                    addComponents(action.affectedComponents);
-                    stateChanged = true;
-                }
-                break;
-            case MOVE:
-                moveComponents(action.affectedComponents, isUndo ? action.oldPositions : action.newPositions);
-                stateChanged = true;
-                break;
-            case REMOVE:
-                if (isUndo) {
-                    addComponents(action.affectedComponents);
-                    stateChanged = true;
-                } else {
-                    removeComponents(action.affectedComponents);
-                    stateChanged = true;
-                }
-                break;
-        }
-        return stateChanged;
-    }
-
-    private void addComponents(List<CircuitComponent> components) {
-        for (CircuitComponent component : components) {
-            if (component instanceof LogicGate) {
-                LogicGate gate = (LogicGate) component;
-
-                drawGate(gate, gate.getPosition().getX(), gate.getPosition().getY());
-            } else if (component instanceof TextLabel) {
-                TextLabel label = (TextLabel) component;
-                drawTextLabel(label, label.getLayoutX(), label.getLayoutY());
-            }
-        }
-    }
-
-    // Method to remove components from the canvas
-    private void removeComponents(List<CircuitComponent> components) {
-        for (CircuitComponent component : components) {
-            if (component instanceof LogicGate) {
-                LogicGate gate = (LogicGate) component;
-                removeGate(gate.getImageView());
-            } else if (component instanceof TextLabel) {
-                TextLabel label = (TextLabel) component;
-                this.getChildren().remove(label);
-            }
-        }
-    }
-
-    private void moveComponents(List<CircuitComponent> components, List<Point2D> newPositions) {
-        List<Point2D> oldPositions = new ArrayList<>();
-        for (int i = 0; i < components.size(); i++) {
-            CircuitComponent component = components.get(i);
-            Point2D newPosition = newPositions.get(i);
-            if (component instanceof LogicGate) {
-                LogicGate gate = (LogicGate) component;
-                oldPositions.add(gate.getPosition());
-                gate.setPosition(newPosition.getX(), newPosition.getY());
-                gate.getImageView().relocate(newPosition.getX(), newPosition.getY());
-            } else if (component instanceof TextLabel) {
-                TextLabel label = (TextLabel) component;
-                oldPositions.add(new Point2D(label.getLayoutX(), label.getLayoutY()));
-                label.setLayoutX(newPosition.getX());
-                label.setLayoutY(newPosition.getY());
-            }
-        }
-        Action moveAction = new Action(ActionType.MOVE, components, oldPositions, newPositions);
-        logAction(moveAction, !isUndoOrRedo);
     }
 
     private void pasteGatesFromClipboard() {
@@ -266,66 +149,6 @@ public class CircuitCanvas extends Pane {
                 });
     }
 
-    private void handleMouseDragged(MouseEvent event) {
-        if (currentCursorMode == CursorMode.GRABBY) {
-            double dampingFactor = 0.2;
-            double deltaX = (event.getX() - lastX) * dampingFactor;
-            double deltaY = (event.getY() - lastY) * dampingFactor;
-
-            if (deltaX != 0 || deltaY != 0) {
-                virtualOrigin = virtualOrigin.subtract(deltaX, deltaY);
-                for (Node child : getChildren()) {
-                    child.setTranslateX(child.getTranslateX() + deltaX);
-                    child.setTranslateY(child.getTranslateY() + deltaY);
-                }
-
-                updateScrollPaneViewport(-deltaX, -deltaY);
-            }
-
-        } else if (currentCursorMode == CursorMode.POINTER && isSelecting) {
-            double transformedX = scrollPane.getHvalue() * (scrollPane.getContent().getBoundsInLocal().getWidth()
-                    - scrollPane.getViewportBounds().getWidth());
-            double transformedY = scrollPane.getVvalue() * (scrollPane.getContent().getBoundsInLocal().getHeight()
-                    - scrollPane.getViewportBounds().getHeight());
-
-            double x = event.getX() + transformedX - virtualOrigin.getX();
-            double y = event.getY() + transformedY - virtualOrigin.getY();
-
-            selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
-            selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
-            selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
-            selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
-        }
-
-        lastX = event.getX() + viewOffsetX;
-        lastY = event.getY() + viewOffsetY;
-    }
-
-    private void updateScrollPaneViewport(double deltaX, double deltaY) {
-        double hValue = scrollPane.getHvalue() + (deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
-        double vValue = scrollPane.getVvalue() + (deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
-
-        scrollPane.setHvalue(Math.max(0, Math.min(hValue, 1)));
-        scrollPane.setVvalue(Math.max(0, Math.min(vValue, 1)));
-    }
-
-    private void initializeZoomHandling() {
-        this.addEventFilter(ScrollEvent.SCROLL, event -> {
-            if (event.isControlDown()) {
-                double scaleFactor = 1.1;
-                double deltaY = event.getDeltaY();
-                if (deltaY > 0) {
-                    this.setScaleX(this.getScaleX() * scaleFactor);
-                    this.setScaleY(this.getScaleY() * scaleFactor);
-                } else if (deltaY < 0) {
-                    this.setScaleX(this.getScaleX() / scaleFactor);
-                    this.setScaleY(this.getScaleY() / scaleFactor);
-                }
-                event.consume();
-            }
-        });
-    }
-
     private void deselectAllGates() {
         gateImageViews.values().forEach(gate -> {
             gate.getImageView().getStyleClass().remove("selected");
@@ -334,96 +157,6 @@ public class CircuitCanvas extends Pane {
             }
         });
         highlightedGate = null;
-    }
-
-    private void handleCanvasClick(MouseEvent event) {
-        if (!(event.getTarget() instanceof ImageView)) {
-            if (justSelected) {
-                justSelected = false;
-                return;
-            }
-            deselectAllGates();
-            this.requestFocus();
-            return;
-        } else if (event.getTarget() instanceof ImageView) {
-            ImageView clickedImageView = (ImageView) event.getTarget();
-            if (highlightedGate != null && !highlightedGate.getImageView().equals(clickedImageView)) {
-                deselectAllGates();
-                LogicGate clickedGate = gateImageViews.get(clickedImageView);
-                if (clickedGate != null) {
-                    highlightedGate = clickedGate;
-                    if (!clickedImageView.getStyleClass().contains("selected")) {
-                        clickedImageView.getStyleClass().add("selected");
-                    }
-                    if (clickedGate instanceof SwitchGate) {
-                        ((SwitchGate) clickedGate).setSelected(true);
-                    }
-                }
-            }
-        }
-    }
-
-    private void initializeSelectionMechanism() {
-        selectionRect.setStroke(Color.BLUE);
-        selectionRect.setStrokeWidth(1);
-        selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
-        selectionRect.setVisible(false);
-        this.getChildren().add(selectionRect);
-        final double dragThreshold = 10.0;
-
-        this.setOnMousePressed(event -> {
-            lastMouseCoordinates = new Point2D(Math.max(0, Math.min(event.getX(),
-                    getWidth())),
-                    Math.max(0, Math.min(event.getY(), getHeight())));
-            selectionRect.setX(lastMouseCoordinates.getX());
-            selectionRect.setY(lastMouseCoordinates.getY());
-            selectionRect.setWidth(0);
-            selectionRect.setHeight(0);
-            selectionRect.setVisible(true);
-            isSelecting = true;
-        });
-
-        this.setOnMouseDragged(event -> {
-            if (isSelecting) {
-                double x = Math.max(0, Math.min(event.getX(), getWidth()));
-                double y = Math.max(0, Math.min(event.getY(), getHeight()));
-                selectionRect.setWidth(Math.abs(x - lastMouseCoordinates.getX()));
-                selectionRect.setHeight(Math.abs(y - lastMouseCoordinates.getY()));
-                selectionRect.setX(Math.min(x, lastMouseCoordinates.getX()));
-                selectionRect.setY(Math.min(y, lastMouseCoordinates.getY()));
-            }
-        });
-
-        this.setOnMouseReleased(event -> {
-            if (currentCursorMode == CursorMode.POINTER && isSelecting
-                    && (selectionRect.getWidth() > dragThreshold || selectionRect.getHeight() > dragThreshold)) {
-                interactionManager.selectGatesInRectangle();
-            }
-            selectionRect.setVisible(false);
-            isSelecting = false;
-            justSelected = true;
-        });
-    }
-
-    private void selectGatesInRectangle() {
-        for (Map.Entry<ImageView, LogicGate> entry : gateImageViews.entrySet()) {
-            ImageView gateView = entry.getKey();
-            LogicGate gate = entry.getValue();
-            boolean intersects = gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
-            boolean isSelected = gateView.getStyleClass().contains("selected");
-
-            if (intersects && !isSelected) {
-                gateView.getStyleClass().add("selected");
-                if (gate instanceof SwitchGate) {
-                    ((SwitchGate) gate).setSelected(true);
-                }
-            } else if (!intersects && isSelected) {
-                gateView.getStyleClass().remove("selected");
-                if (gate instanceof SwitchGate) {
-                    ((SwitchGate) gate).setSelected(false);
-                }
-            }
-        }
     }
 
     private void removeSelectedGates() {
@@ -443,8 +176,6 @@ public class CircuitCanvas extends Pane {
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
         }
-        Action addAction = new Action(ActionType.ADD, Collections.singletonList((CircuitComponent) gate));
-        logAction(addAction, !isUndoOrRedo);
     }
 
     public void drawTextLabel(TextLabel textLabel, double x, double y) {
@@ -466,53 +197,10 @@ public class CircuitCanvas extends Pane {
                 lineToStartGateMap.put(currentLine, gate);
                 startGate = gate;
                 gate.addOutputConnection(currentLine);
-                setupConnectionHandlers();
+                interactionManager.setupConnectionHandlers();
                 event.consume();
             }
         });
-    }
-
-    private boolean finalizeConnection(double x, double y, Circle outputMarker) {
-        for (Node node : this.getChildren()) {
-            if (node instanceof Circle && node != outputMarker) {
-                Circle inputMarker = (Circle) node;
-                if (inputMarker.contains(x, y) && inputMarker.getOpacity() == 1.0) {
-                    Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
-                    currentLine.setEndX(inputPos.getX());
-                    currentLine.setEndY(inputPos.getY());
-
-                    LogicGate targetGate = findGateForInputMarker(inputMarker);
-                    LogicGate sourceGate = lineToStartGateMap.get(currentLine);
-                    if (targetGate != null && sourceGate != null && targetGate != sourceGate) {
-                        int inputIndex = findInputMarkerIndex(targetGate, inputMarker);
-                        targetGate.addInputConnection(currentLine, inputIndex);
-                        targetGate.addInput(sourceGate);
-                        sourceGate.addOutputConnection(currentLine);
-                        sourceGate.addOutputGate(targetGate);
-                        targetGate.evaluate();
-                        targetGate.propagateStateChange();
-                        sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
-                        scheduleUpdate(targetGate);
-                        startGate = null;
-                    } else {
-                        if (currentLine != null && startGate != null) {
-                            this.getChildren().remove(currentLine);
-                            startGate.removeOutputConnection(currentLine);
-                            currentLine = null;
-                        }
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-        }
-        if (currentLine != null && startGate != null) {
-            this.getChildren().remove(currentLine);
-            startGate.removeOutputConnection(currentLine);
-            currentLine = null;
-        }
-        return false;
     }
 
     public LogicGate findGateForInputMarker(Circle inputMarker) {
@@ -527,11 +215,6 @@ public class CircuitCanvas extends Pane {
 
     public int findInputMarkerIndex(LogicGate gate, Circle inputMarker) {
         return gate.getInputMarkers().indexOf(inputMarker);
-    }
-
-    private void resetInteractionHandlers() {
-        this.setOnMouseMoved(null);
-        this.setOnMouseClicked(null);
     }
 
     public void removeGate(ImageView gate) {
@@ -558,9 +241,6 @@ public class CircuitCanvas extends Pane {
             });
             logicGate.getInputMarkers().clear();
 
-            Action removeAction = new Action(ActionType.REMOVE,
-                    Collections.singletonList((CircuitComponent) logicGate));
-            logAction(removeAction, !isUndoOrRedo);
         }
         propagateUpdates();
     }
@@ -625,43 +305,6 @@ public class CircuitCanvas extends Pane {
             }
         }
         return null;
-    }
-
-    private void setupConnectionHandlers() {
-        this.setOnMouseMoved(mouseMoveEvent -> {
-            if (currentLine != null) {
-                currentLine.setEndX(mouseMoveEvent.getX());
-                currentLine.setEndY(mouseMoveEvent.getY());
-            }
-        });
-
-        this.setOnMouseClicked(mouseClickEvent -> {
-            if (currentLine != null && mouseClickEvent.getClickCount() == 1) {
-                if (!finalizeConnection(mouseClickEvent.getX(), mouseClickEvent.getY(), null)) {
-                    this.getChildren().remove(currentLine);
-                }
-                currentLine = null;
-                resetInteractionHandlers();
-            }
-        });
-        this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            if (event.getButton() == MouseButton.SECONDARY && event.getTarget() instanceof Line) {
-                Line targetLine = (Line) event.getTarget();
-                if (openContextMenu != null) {
-                    openContextMenu.hide();
-                }
-                ContextMenu lineContextMenu = new ContextMenu();
-                MenuItem deleteLine = new MenuItem("Remove");
-                deleteLine.setOnAction(e -> {
-                    removeConnection(targetLine);
-                    e.consume();
-                });
-                lineContextMenu.getItems().add(deleteLine);
-                lineContextMenu.show(targetLine, event.getScreenX(), event.getScreenY());
-                openContextMenu = lineContextMenu;
-            }
-        });
-
     }
 
     public void propagateUpdates() {
