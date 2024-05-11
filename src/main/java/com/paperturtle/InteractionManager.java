@@ -6,13 +6,11 @@ import java.util.Map;
 
 import com.paperturtle.CircuitCanvas.CursorMode;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -27,16 +25,20 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 public class InteractionManager {
     private CircuitCanvas canvas;
+    private Rectangle selectionRect = new Rectangle();
+    private boolean isSelecting = false;
+    private boolean justSelected = false;
+    private LogicGate highlightedGate = null;
 
     public InteractionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
-    // Done
     public void handleMousePressed(MouseEvent event) {
         double transformedX = canvas.getScrollPane().getHvalue()
                 * (canvas.getScrollPane().getContent().getBoundsInLocal().getWidth()
@@ -49,23 +51,23 @@ public class InteractionManager {
         canvas.setLastY(event.getY() + transformedY - canvas.getVirtualOrigin().getY());
 
         if (canvas.getCurrentCursorMode() == CursorMode.GRABBY) {
-            canvas.setSelecting(false);
+            isSelecting = false;
         } else if (canvas.getCurrentCursorMode() == CursorMode.POINTER) {
-            canvas.setSelecting(true);
+            isSelecting = true;
             canvas.setLastMouseCoordinates(new Point2D(canvas.getLastX(), canvas.getLastY()));
-            canvas.getSelectionRect().setX(canvas.getLastMouseCoordinates().getX());
-            canvas.getSelectionRect().setY(canvas.getLastMouseCoordinates().getY());
-            canvas.getSelectionRect().setWidth(0);
-            canvas.getSelectionRect().setHeight(0);
-            canvas.getSelectionRect().setVisible(true);
+            selectionRect.setX(canvas.getLastMouseCoordinates().getX());
+            selectionRect.setY(canvas.getLastMouseCoordinates().getY());
+            selectionRect.setWidth(0);
+            selectionRect.setHeight(0);
+            selectionRect.setVisible(true);
         }
     }
 
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
-        if (canvas.getHighlightedGate() != null && canvas.getHighlightedGate() != gate) {
-            canvas.getHighlightedGate().getImageView().getStyleClass().remove("selected");
+        if (highlightedGate != null && highlightedGate != gate) {
+            highlightedGate.getImageView().getStyleClass().remove("selected");
         }
-        canvas.setHighlightedGate(gate);
+        highlightedGate = gate;
 
         if (!imageView.getStyleClass().contains("selected")) {
             imageView.getStyleClass().add("selected");
@@ -142,9 +144,9 @@ public class InteractionManager {
 
         canvas.setOnMouseClicked(event -> {
             if (!(event.getTarget() instanceof ImageView)) {
-                if (canvas.getHighlightedGate() != null) {
-                    canvas.getHighlightedGate().getImageView().getStyleClass().remove("selected");
-                    canvas.setHighlightedGate(null);
+                if (highlightedGate != null) {
+                    highlightedGate.getImageView().getStyleClass().remove("selected");
+                    highlightedGate = null;
                 }
                 if (canvas.getOpenContextMenu() != null) {
                     canvas.getOpenContextMenu().hide();
@@ -177,8 +179,8 @@ public class InteractionManager {
 
     public void handleCanvasClick(MouseEvent event) {
         if (!(event.getTarget() instanceof ImageView)) {
-            if (canvas.isJustSelected()) {
-                canvas.setJustSelected(false);
+            if (justSelected) {
+                justSelected = false;
                 return;
             }
             deselectAllGates();
@@ -186,12 +188,12 @@ public class InteractionManager {
             return;
         } else if (event.getTarget() instanceof ImageView) {
             ImageView clickedImageView = (ImageView) event.getTarget();
-            if (canvas.getHighlightedGate() != null
-                    && !canvas.getHighlightedGate().getImageView().equals(clickedImageView)) {
+            if (highlightedGate != null
+                    && !highlightedGate.getImageView().equals(clickedImageView)) {
                 deselectAllGates();
                 LogicGate clickedGate = canvas.getGateImageViews().get(clickedImageView);
                 if (clickedGate != null) {
-                    canvas.setHighlightedGate(clickedGate);
+                    highlightedGate = clickedGate;
                     if (!clickedImageView.getStyleClass().contains("selected")) {
                         clickedImageView.getStyleClass().add("selected");
                     }
@@ -207,7 +209,7 @@ public class InteractionManager {
         for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
             ImageView gateView = entry.getKey();
             LogicGate gate = entry.getValue();
-            boolean intersects = gateView.getBoundsInParent().intersects(canvas.getSelectionRect().getBoundsInParent());
+            boolean intersects = gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
             boolean isSelected = gateView.getStyleClass().contains("selected");
 
             if (intersects && !isSelected) {
@@ -231,7 +233,7 @@ public class InteractionManager {
                 ((SwitchGate) gate).setSelected(false);
             }
         });
-        canvas.setHighlightedGate(null);
+        highlightedGate = null;
     }
 
     private void deselectAllGatesExcept(ImageView exceptImageView) {
@@ -253,8 +255,8 @@ public class InteractionManager {
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> {
             canvas.getGateManager().removeGate(imageView);
-            if (canvas.getHighlightedGate() == gate) {
-                canvas.setHighlightedGate(null);
+            if (highlightedGate == gate) {
+                highlightedGate = null;
             }
         });
         MenuItem propertiesItem = new MenuItem("Properties");
@@ -380,46 +382,67 @@ public class InteractionManager {
     }
 
     public void initializeSelectionMechanism() {
-        canvas.getSelectionRect().setStroke(Color.BLUE);
-        canvas.getSelectionRect().setStrokeWidth(1);
-        canvas.getSelectionRect().setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
-        canvas.getSelectionRect().setVisible(false);
-        canvas.getChildren().add(canvas.getSelectionRect());
+        selectionRect.setStroke(Color.BLUE);
+        selectionRect.setStrokeWidth(1);
+        selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
+        selectionRect.setVisible(false);
+        canvas.getChildren().add(selectionRect);
         final double dragThreshold = 10.0;
 
         canvas.setOnMousePressed(event -> {
             canvas.setLastMouseCoordinates(new Point2D(Math.max(0, Math.min(event.getX(),
                     canvas.getWidth())),
                     Math.max(0, Math.min(event.getY(), canvas.getHeight()))));
-            canvas.getSelectionRect().setX(canvas.getLastMouseCoordinates().getX());
-            canvas.getSelectionRect().setY(canvas.getLastMouseCoordinates().getY());
-            canvas.getSelectionRect().setWidth(0);
-            canvas.getSelectionRect().setHeight(0);
-            canvas.getSelectionRect().setVisible(true);
-            canvas.setSelecting(true);
+            selectionRect.setX(canvas.getLastMouseCoordinates().getX());
+            selectionRect.setY(canvas.getLastMouseCoordinates().getY());
+            selectionRect.setWidth(0);
+            selectionRect.setHeight(0);
+            selectionRect.setVisible(true);
+            isSelecting = true;
         });
 
         canvas.setOnMouseDragged(event -> {
-            if (canvas.isSelecting()) {
+            if (isSelecting) {
                 double x = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
                 double y = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
-                canvas.getSelectionRect().setWidth(Math.abs(x - canvas.getLastMouseCoordinates().getX()));
-                canvas.getSelectionRect().setHeight(Math.abs(y - canvas.getLastMouseCoordinates().getY()));
-                canvas.getSelectionRect().setX(Math.min(x, canvas.getLastMouseCoordinates().getX()));
-                canvas.getSelectionRect().setY(Math.min(y, canvas.getLastMouseCoordinates().getY()));
+                selectionRect.setWidth(Math.abs(x - canvas.getLastMouseCoordinates().getX()));
+                selectionRect.setHeight(Math.abs(y - canvas.getLastMouseCoordinates().getY()));
+                selectionRect.setX(Math.min(x, canvas.getLastMouseCoordinates().getX()));
+                selectionRect.setY(Math.min(y, canvas.getLastMouseCoordinates().getY()));
             }
         });
 
         canvas.setOnMouseReleased(event -> {
-            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && canvas.isSelecting()
-                    && (canvas.getSelectionRect().getWidth() > dragThreshold
-                            || canvas.getSelectionRect().getHeight() > dragThreshold)) {
+            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && isSelecting
+                    && (selectionRect.getWidth() > dragThreshold
+                            || selectionRect.getHeight() > dragThreshold)) {
                 this.selectGatesInRectangle();
             }
-            canvas.getSelectionRect().setVisible(false);
-            canvas.setSelecting(false);
-            canvas.setJustSelected(false);
+            selectionRect.setVisible(false);
+            isSelecting = false;
+            justSelected = false;
         });
     }
 
+    public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
+        outputMarker.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null) {
+                Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
+                canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
+                Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
+                canvas.getCurrentLine().setStroke(lineColor);
+                canvas.getCurrentLine().setStrokeWidth(3.5);
+                canvas.getChildren().add(canvas.getCurrentLine());
+                canvas.getLineToStartGateMap().put(canvas.getCurrentLine(), gate);
+                canvas.getConnectionManager().setStartGate(gate);
+                gate.addOutputConnection(canvas.getCurrentLine());
+                canvas.getInteractionManager().setupConnectionHandlers();
+                event.consume();
+            }
+        });
+    }
+
+    public void setHighlightedGate(LogicGate highlightedGate) {
+        this.highlightedGate = highlightedGate;
+    }
 }
