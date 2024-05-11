@@ -78,7 +78,7 @@ public class ClockGate extends LogicGate {
         }
         if (outputMarker != null) {
             canvas.getChildren().add(outputMarker);
-            ((CircuitCanvas) canvas).setupOutputInteraction(outputMarker, this);
+            ((CircuitCanvas) canvas).getInteractionManager().setupOutputInteraction(outputMarker, this);
             updateMarkerPosition();
         }
     }
