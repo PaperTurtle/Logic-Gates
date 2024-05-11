@@ -45,6 +45,11 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public abstract boolean evaluate();
 
+    /**
+     * Abstract method to get the truth table data for this gate.
+     * 
+     * @return the truth table data.
+     */
     public abstract List<Pair<Boolean[], Boolean>> getTruthTableData();
 
     /**
@@ -80,6 +85,12 @@ public abstract class LogicGate implements CircuitComponent {
         }
     }
 
+    /**
+     * Adds an input connection to this gate.
+     * 
+     * @param line       the Line to be added.
+     * @param inputIndex the index of the input connection.
+     */
     public void addInputConnection(Line line, int inputIndex) {
         List<Line> connections = getInputConnections(inputIndex);
         if (connections != null) {
@@ -87,6 +98,12 @@ public abstract class LogicGate implements CircuitComponent {
         }
     }
 
+    /**
+     * Removes an input connection from this gate.
+     * 
+     * @param line       the Line to be removed.
+     * @param inputIndex the index of the input connection.
+     */
     public void removeInputConnection(Line line, int inputIndex) {
         if (inputIndex >= 0 && inputIndex < inputConnections.size()) {
             inputConnections.get(inputIndex).remove(line);
@@ -209,6 +226,12 @@ public abstract class LogicGate implements CircuitComponent {
         }
     }
 
+    /**
+     * Returns the input connections for the given index.
+     * 
+     * @param index the index of the input connection.
+     * @return the list of input connections.
+     */
     public List<Line> getInputConnections(int index) {
         if (index >= 0 && index < inputConnections.size()) {
             return inputConnections.get(index);
@@ -393,6 +416,11 @@ public abstract class LogicGate implements CircuitComponent {
         return imageView;
     }
 
+    /**
+     * Returns the list of output gates for this gate.
+     * 
+     * @return the list of output gates.
+     */
     public List<LogicGate> getOutputGates() {
         return outputGates;
     }
@@ -447,18 +475,38 @@ public abstract class LogicGate implements CircuitComponent {
         return data;
     }
 
+    /**
+     * Returns the id of this gate.
+     * 
+     * @return the id.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Sets the id of this gate.
+     * 
+     * @param id the id to set.
+     */
     public void setId(String id) {
         this.id = id;
     }
 
+    /**
+     * Returns the position of the gate.
+     * 
+     * @return the position of the gate.
+     */
     public Point2D getPosition() {
         return new Point2D(imageView.getX(), imageView.getY());
     }
 
+    /**
+     * Returns the type of the component.
+     * 
+     * @return the type of the component.
+     */
     public String getComponentType() {
         return "gate";
     }
