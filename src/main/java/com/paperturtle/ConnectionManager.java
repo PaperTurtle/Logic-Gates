@@ -9,6 +9,7 @@ import javafx.scene.shape.Line;
 
 public class ConnectionManager {
     private CircuitCanvas canvas;
+    private LogicGate startGate;
 
     public ConnectionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
@@ -88,11 +89,11 @@ public class ConnectionManager {
                         targetGate.propagateStateChange();
                         sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
                         canvas.scheduleUpdate(targetGate);
-                        canvas.setStartGate(null);
+                        startGate = null;
                     } else {
-                        if (canvas.getCurrentLine() != null && canvas.getStartGate() != null) {
+                        if (canvas.getCurrentLine() != null && startGate != null) {
                             canvas.getChildren().remove(canvas.getCurrentLine());
-                            canvas.getStartGate().removeOutputConnection(canvas.getCurrentLine());
+                            startGate.removeOutputConnection(canvas.getCurrentLine());
                             canvas.setCurrentLine(null);
                         }
                         return false;
@@ -102,9 +103,9 @@ public class ConnectionManager {
                 }
             }
         }
-        if (canvas.getCurrentLine() != null && canvas.getStartGate() != null) {
+        if (canvas.getCurrentLine() != null && startGate != null) {
             canvas.getChildren().remove(canvas.getCurrentLine());
-            canvas.getStartGate().removeOutputConnection(canvas.getCurrentLine());
+            startGate.removeOutputConnection(canvas.getCurrentLine());
             canvas.setCurrentLine(null);
         }
         return false;
@@ -117,5 +118,13 @@ public class ConnectionManager {
             }
         }
         return null;
+    }
+
+    public void setStartGate(LogicGate startGate) {
+        this.startGate = startGate;
+    }
+
+    public LogicGate getStartGate() {
+        return startGate;
     }
 }
