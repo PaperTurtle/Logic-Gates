@@ -265,7 +265,7 @@ public abstract class LogicGate implements CircuitComponent {
         }
 
         if (canvas instanceof CircuitCanvas && outputMarker != null) {
-            ((CircuitCanvas) canvas).setupOutputInteraction(outputMarker, this);
+            ((CircuitCanvas) canvas).getInteractionManager().setupOutputInteraction(outputMarker, this);
         }
     }
 
