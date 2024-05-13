@@ -28,7 +28,6 @@ public class TextLabel extends Group implements CircuitComponent {
     private double width;
     private double height;
     private boolean isAutoSize;
-    private static TextLabel selectedLabel;
 
     public TextLabel(String label, double width, double height) {
         this.width = width;
@@ -48,29 +47,6 @@ public class TextLabel extends Group implements CircuitComponent {
         this.getChildren().addAll(background, labelText);
 
         setupContextMenu();
-        setupSelectionHandling();
-    }
-
-    private void setupSelectionHandling() {
-        this.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (selectedLabel != null) {
-                selectedLabel.getStyleClass().remove("selected");
-            }
-            this.getStyleClass().add("selected");
-            selectedLabel = this;
-            event.consume();
-        });
-
-        this.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    if (selectedLabel != null && !selectedLabel.equals(event.getTarget())) {
-                        selectedLabel.getStyleClass().remove("selected");
-                        selectedLabel = null;
-                    }
-                });
-            }
-        });
     }
 
     private void setupContextMenu() {
