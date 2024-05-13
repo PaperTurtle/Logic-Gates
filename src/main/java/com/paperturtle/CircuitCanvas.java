@@ -33,9 +33,6 @@ public class CircuitCanvas extends Pane {
     private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
     private ContextMenu openContextMenu = null;
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
-    private double lastX = 0;
-    private double lastY = 0;
-    private Point2D virtualOrigin = new Point2D(0, 0);
     private CursorMode currentCursorMode = CursorMode.POINTER;
     private InteractionManager interactionManager;
     private ConnectionManager connectionManager;
@@ -61,7 +58,6 @@ public class CircuitCanvas extends Pane {
         interactionManager.initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
-        this.setOnMousePressed(interactionManager::handleMousePressed);
 
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.C && event.isControlDown()) {
@@ -71,7 +67,7 @@ public class CircuitCanvas extends Pane {
                 clipboardManager.pasteGatesFromClipboard();
                 event.consume();
             } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
-                clipboardManager.removeSelectedGates();
+                gateManager.removeSelectedGates();
                 event.consume();
             }
         });
@@ -227,28 +223,8 @@ public class CircuitCanvas extends Pane {
         gateImageViews.remove(imageView);
     }
 
-    public double getLastX() {
-        return lastX;
-    }
-
-    public double getLastY() {
-        return lastY;
-    }
-
-    public void setLastX(double x) {
-        this.lastX = x;
-    }
-
-    public void setLastY(double y) {
-        this.lastY = y;
-    }
-
     public ScrollPane getScrollPane() {
         return scrollPane;
-    }
-
-    public Point2D getVirtualOrigin() {
-        return virtualOrigin;
     }
 
     public Map<ImageView, LogicGate> getGateImageViews() {
