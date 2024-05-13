@@ -39,30 +39,6 @@ public class InteractionManager {
         this.canvas = canvas;
     }
 
-    public void handleMousePressed(MouseEvent event) {
-        double transformedX = canvas.getScrollPane().getHvalue()
-                * (canvas.getScrollPane().getContent().getBoundsInLocal().getWidth()
-                        - canvas.getScrollPane().getViewportBounds().getWidth());
-        double transformedY = canvas.getScrollPane().getVvalue()
-                * (canvas.getScrollPane().getContent().getBoundsInLocal().getHeight()
-                        - canvas.getScrollPane().getViewportBounds().getHeight());
-
-        canvas.setLastX(event.getX() + transformedX - canvas.getVirtualOrigin().getX());
-        canvas.setLastY(event.getY() + transformedY - canvas.getVirtualOrigin().getY());
-
-        if (canvas.getCurrentCursorMode() == CursorMode.GRABBY) {
-            isSelecting = false;
-        } else if (canvas.getCurrentCursorMode() == CursorMode.POINTER) {
-            isSelecting = true;
-            canvas.setLastMouseCoordinates(new Point2D(canvas.getLastX(), canvas.getLastY()));
-            selectionRect.setX(canvas.getLastMouseCoordinates().getX());
-            selectionRect.setY(canvas.getLastMouseCoordinates().getY());
-            selectionRect.setWidth(0);
-            selectionRect.setHeight(0);
-            selectionRect.setVisible(true);
-        }
-    }
-
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
         if (highlightedGate != null && highlightedGate != gate) {
             highlightedGate.getImageView().getStyleClass().remove("selected");
@@ -138,7 +114,7 @@ public class InteractionManager {
 
         canvas.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
             if (e.getTarget() instanceof Pane) {
-                deselectAllGates();
+                canvas.getGateManager().deselectAllGates();
             }
         });
 
@@ -183,14 +159,14 @@ public class InteractionManager {
                 justSelected = false;
                 return;
             }
-            deselectAllGates();
+            // canvas.getGateManager().deselectAllGates();
             canvas.requestFocus();
             return;
         } else if (event.getTarget() instanceof ImageView) {
             ImageView clickedImageView = (ImageView) event.getTarget();
             if (highlightedGate != null
                     && !highlightedGate.getImageView().equals(clickedImageView)) {
-                deselectAllGates();
+                canvas.getGateManager().deselectAllGates();
                 LogicGate clickedGate = canvas.getGateImageViews().get(clickedImageView);
                 if (clickedGate != null) {
                     highlightedGate = clickedGate;
@@ -209,6 +185,7 @@ public class InteractionManager {
         for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
             ImageView gateView = entry.getKey();
             LogicGate gate = entry.getValue();
+
             boolean intersects = gateView.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
             boolean isSelected = gateView.getStyleClass().contains("selected");
 
@@ -226,21 +203,11 @@ public class InteractionManager {
         }
     }
 
-    private void deselectAllGates() {
-        canvas.getGateImageViews().values().forEach(gate -> {
-            gate.getImageView().getStyleClass().remove("selected");
-            if (gate instanceof SwitchGate) {
-                ((SwitchGate) gate).setSelected(false);
-            }
-        });
-        highlightedGate = null;
-    }
-
     private void deselectAllGatesExcept(ImageView exceptImageView) {
         canvas.getGateImageViews().entrySet().stream()
                 .filter(entry -> entry.getKey() != exceptImageView)
                 .forEach(entry -> {
-                    entry.getKey().getStyleClass().remove("selected");
+                    entry.getValue().getImageView().getStyleClass().remove("selected");
                     if (entry.getValue() instanceof SwitchGate) {
                         ((SwitchGate) entry.getValue()).setSelected(false);
                     }
@@ -316,7 +283,7 @@ public class InteractionManager {
         table.getColumns().add(outputCol);
         outputCol.setPrefWidth(Region.USE_COMPUTED_SIZE);
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         table.setMinWidth(Region.USE_PREF_SIZE);
         table.setMinHeight(Region.USE_PREF_SIZE);
 
@@ -390,11 +357,11 @@ public class InteractionManager {
         final double dragThreshold = 10.0;
 
         canvas.setOnMousePressed(event -> {
-            canvas.setLastMouseCoordinates(new Point2D(Math.max(0, Math.min(event.getX(),
-                    canvas.getWidth())),
-                    Math.max(0, Math.min(event.getY(), canvas.getHeight()))));
-            selectionRect.setX(canvas.getLastMouseCoordinates().getX());
-            selectionRect.setY(canvas.getLastMouseCoordinates().getY());
+            double startX = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
+            double startY = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
+            canvas.setLastMouseCoordinates(new Point2D(startX, startY));
+            selectionRect.setX(startX);
+            selectionRect.setY(startY);
             selectionRect.setWidth(0);
             selectionRect.setHeight(0);
             selectionRect.setVisible(true);
@@ -403,12 +370,17 @@ public class InteractionManager {
 
         canvas.setOnMouseDragged(event -> {
             if (isSelecting) {
-                double x = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
-                double y = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
-                selectionRect.setWidth(Math.abs(x - canvas.getLastMouseCoordinates().getX()));
-                selectionRect.setHeight(Math.abs(y - canvas.getLastMouseCoordinates().getY()));
-                selectionRect.setX(Math.min(x, canvas.getLastMouseCoordinates().getX()));
-                selectionRect.setY(Math.min(y, canvas.getLastMouseCoordinates().getY()));
+                double endX = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
+                double endY = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
+                double minX = Math.min(canvas.getLastMouseCoordinates().getX(), endX);
+                double maxX = Math.max(canvas.getLastMouseCoordinates().getX(), endX);
+                double minY = Math.min(canvas.getLastMouseCoordinates().getY(), endY);
+                double maxY = Math.max(canvas.getLastMouseCoordinates().getY(), endY);
+
+                selectionRect.setX(minX);
+                selectionRect.setY(minY);
+                selectionRect.setWidth(maxX - minX);
+                selectionRect.setHeight(maxY - minY);
             }
         });
 
@@ -419,8 +391,8 @@ public class InteractionManager {
                 this.selectGatesInRectangle();
             }
             selectionRect.setVisible(false);
-            isSelecting = false;
             justSelected = false;
+            isSelecting = false;
         });
     }
 

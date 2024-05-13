@@ -20,7 +20,7 @@ public class ConnectionManager {
         if (sourceGate != null) {
             sourceGate.removeOutputConnection(connection);
 
-            LogicGate targetGate = findTargetGate(connection);
+            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
             if (targetGate != null) {
                 int index = targetGate.findInputConnectionIndex(connection);
                 if (index != -1) {
@@ -109,15 +109,6 @@ public class ConnectionManager {
             canvas.setCurrentLine(null);
         }
         return false;
-    }
-
-    private LogicGate findTargetGate(Line connection) {
-        for (LogicGate gate : canvas.getGateImageViews().values()) {
-            if (gate.getInputConnections().contains(connection)) {
-                return gate;
-            }
-        }
-        return null;
     }
 
     public void setStartGate(LogicGate startGate) {

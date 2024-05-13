@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javafx.geometry.Point2D;
-import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
@@ -20,7 +18,7 @@ public class ClipboardManager {
     }
 
     public void pasteGatesFromClipboard() {
-        deselectAllGates();
+        canvas.getGateManager().deselectAllGates();
         Map<String, LogicGate> createdGates = new HashMap<>();
         double offsetX = 30;
         double offsetY = 30;
@@ -78,24 +76,5 @@ public class ClipboardManager {
                     LogicGate gate = entry.getValue();
                     clipboard.add(gate.getGateClipboardData());
                 });
-    }
-
-    private void deselectAllGates() {
-        canvas.getGateImageViews().values().forEach(gate -> {
-            gate.getImageView().getStyleClass().remove("selected");
-            if (gate instanceof SwitchGate) {
-                ((SwitchGate) gate).setSelected(false);
-            }
-        });
-        canvas.getInteractionManager().setHighlightedGate(null);
-    }
-
-    public void removeSelectedGates() {
-        List<ImageView> selectedGates = canvas.getGateImageViews().entrySet().stream()
-                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        selectedGates.forEach(canvas.getGateManager()::removeGate);
     }
 }
