@@ -84,6 +84,10 @@ public class App extends Application {
             circuitCanvas.setCursor(Cursor.DEFAULT);
         });
 
+        tableItem.setOnAction(e -> {
+            circuitCanvas.getInteractionManager().generateAndDisplaySelectedGatesTruthTables();
+        });
+
         // grabbyItem.setOnAction(e -> {
         // scene.setCursor(Cursor.OPEN_HAND);
         // circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
