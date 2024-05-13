@@ -75,6 +75,9 @@ public class App extends Application {
         MenuItem pointerItem = new MenuItem("Use Pointer");
         // MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
 
+        Menu optionsMenu = new Menu("Options");
+        MenuItem tableItem = new MenuItem("Generate Truth Table");
+
         pointerItem.setOnAction(e -> {
             scene.setCursor(Cursor.DEFAULT);
             circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.POINTER);
@@ -90,8 +93,9 @@ public class App extends Application {
         fileMenu.getItems().addAll(openItem, saveItem);
         // cursorMenu.getItems().addAll(pointerItem, grabbyItem);
         cursorMenu.getItems().addAll(pointerItem);
+        optionsMenu.getItems().addAll(tableItem);
 
-        menuBar.getMenus().addAll(fileMenu, cursorMenu);
+        menuBar.getMenus().addAll(fileMenu, cursorMenu, optionsMenu);
 
         openItem.setOnAction(e -> {
             if (!circuitCanvas.isEmpty()) {
