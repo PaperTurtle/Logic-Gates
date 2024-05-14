@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.paperturtle.GateData.ConnectionData;
 
@@ -28,6 +29,7 @@ public class CircuitCanvas extends Pane {
     private Line currentLine;
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
+    private List<TextLabel> textLabels = new ArrayList<>();
     private Point2D lastMouseCoordinates;
     private ScrollPane scrollPane;
     private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
@@ -87,6 +89,7 @@ public class CircuitCanvas extends Pane {
         this.getChildren().add(textLabel);
         textLabel.setLayoutX(x);
         textLabel.setLayoutY(y);
+        textLabels.add(textLabel);
         interactionManager.setupDragHandlersForLabel(textLabel);
     }
 
@@ -231,6 +234,10 @@ public class CircuitCanvas extends Pane {
         return gateImageViews;
     }
 
+    public List<TextLabel> getTextLabels() {
+        return textLabels;
+    }
+
     public CursorMode getCurrentCursorMode() {
         return currentCursorMode;
     }
@@ -273,6 +280,13 @@ public class CircuitCanvas extends Pane {
 
     public GateManager getGateManager() {
         return gateManager;
+    }
+
+    public List<LogicGate> getSelectedGates() {
+        return gateImageViews.entrySet().stream()
+                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
 }
