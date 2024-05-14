@@ -85,7 +85,7 @@ public class App extends Application {
         });
 
         tableItem.setOnAction(e -> {
-            circuitCanvas.getInteractionManager().generateAndDisplaySelectedGatesTruthTables();
+            circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
         });
 
         // grabbyItem.setOnAction(e -> {
