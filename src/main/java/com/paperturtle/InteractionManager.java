@@ -1,16 +1,19 @@
 package com.paperturtle;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import com.paperturtle.CircuitCanvas.CursorMode;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -26,6 +29,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
 public class InteractionManager {
@@ -201,6 +205,17 @@ public class InteractionManager {
                 }
             }
         }
+
+        for (TextLabel textLabel : canvas.getTextLabels()) {
+            boolean intersects = textLabel.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
+            boolean isSelected = textLabel.getStyleClass().contains("selected");
+
+            if (intersects && !isSelected) {
+                textLabel.getStyleClass().add("selected");
+            } else if (!intersects && isSelected) {
+                textLabel.getStyleClass().remove("selected");
+            }
+        }
     }
 
     private void deselectAllGatesExcept(ImageView exceptImageView) {
@@ -303,6 +318,90 @@ public class InteractionManager {
                 .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         alert.showAndWait();
+    }
+
+    public void generateAndDisplayCompleteTruthTable() {
+        List<LogicGate> selectedGates = canvas.getSelectedGates();
+        int uniqueInputs = countUniqueInputs(selectedGates);
+        int totalCombinations = 1 << uniqueInputs;
+        Boolean[][] truthTableInputs = new Boolean[totalCombinations][uniqueInputs];
+        Boolean[][] truthTableOutputs = new Boolean[totalCombinations][selectedGates.size()];
+
+        for (int i = 0; i < totalCombinations; i++) {
+            for (int j = 0; j < uniqueInputs; j++) {
+                truthTableInputs[i][j] = (i & (1 << j)) != 0;
+            }
+        }
+
+        for (int i = 0; i < totalCombinations; i++) {
+            setGateInputs(selectedGates, truthTableInputs[i], uniqueInputs);
+
+            for (int j = 0; j < selectedGates.size(); j++) {
+                truthTableOutputs[i][j] = selectedGates.get(j).evaluate();
+            }
+        }
+
+        displayTruthTable(truthTableInputs, truthTableOutputs, selectedGates);
+    }
+
+    /**
+     * Sets the inputs for all gates based on the given input combination.
+     * 
+     * @param gates      The list of gates to set inputs for.
+     * @param inputs     The input combination to apply.
+     * @param inputCount The number of unique inputs.
+     */
+    private void setGateInputs(List<LogicGate> gates, Boolean[] inputs, int inputCount) {
+        gates.forEach(gate -> {
+            if (gate instanceof SwitchGate) {
+                ((SwitchGate) gate).setState(false);
+            }
+        });
+
+        for (int i = 0; i < gates.size(); i++) {
+            LogicGate gate = gates.get(i);
+            if (gate instanceof SwitchGate) {
+                if (i < inputs.length) {
+                    ((SwitchGate) gate).setState(inputs[i]);
+                }
+            }
+        }
+
+        gates.forEach(LogicGate::evaluate);
+    }
+
+    private void displayTruthTable(Boolean[][] inputs, Boolean[][] outputs, List<LogicGate> gates) {
+        TableView<List<String>> table = new TableView<>();
+        ObservableList<List<String>> data = FXCollections.observableArrayList();
+
+        for (int i = gates.size() - 1; i >= 0; i--) {
+            final int colIndex = i + inputs[0].length;
+            TableColumn<List<String>, String> column = new TableColumn<>(
+                    gates.get(i).getClass().getSimpleName() + " Output");
+            int finalI = i;
+            column.setCellValueFactory(
+                    param -> new ReadOnlyStringWrapper(param.getValue().get(finalI + inputs[0].length)));
+            table.getColumns().add(column);
+        }
+
+        for (int i = 0; i < inputs.length; i++) {
+            List<String> row = new ArrayList<>();
+            for (Boolean input : inputs[i]) {
+                row.add(input ? "1" : "0");
+            }
+            for (Boolean output : outputs[i]) {
+                row.add(output ? "1" : "0");
+            }
+            data.add(row);
+        }
+
+        table.setItems(data);
+
+        Stage stage = new Stage();
+        stage.setTitle("Truth Table");
+        Scene scene = new Scene(table, 500, 300);
+        stage.setScene(scene);
+        stage.show();
     }
 
     public void setupConnectionHandlers() {
@@ -412,6 +511,18 @@ public class InteractionManager {
                 event.consume();
             }
         });
+    }
+
+    private int countUniqueInputs(List<LogicGate> selectedGates) {
+        List<Circle> uniqueInputs = new ArrayList<>();
+        for (LogicGate gate : selectedGates) {
+            for (Circle input : gate.getInputMarkers()) {
+                if (!uniqueInputs.contains(input)) {
+                    uniqueInputs.add(input);
+                }
+            }
+        }
+        return uniqueInputs.size();
     }
 
     public void setHighlightedGate(LogicGate highlightedGate) {
