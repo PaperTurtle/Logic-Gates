@@ -107,4 +107,14 @@ public class SwitchGate extends LogicGate {
         return isSelected;
     }
 
+    public boolean getState() {
+        return state;
+    }
+
+    public void setState(boolean state) {
+        this.state = state;
+        updateVisualState();
+        updateOutputConnectionsColor();
+    }
+
 }
