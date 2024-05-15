@@ -71,6 +71,9 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
                 gateManager.removeSelectedGates();
                 event.consume();
+            } else if (event.getCode() == KeyCode.A && event.isControlDown()) {
+                interactionManager.selectAllComponents();
+                event.consume();
             }
         });
     }
