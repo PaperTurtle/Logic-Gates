@@ -633,6 +633,21 @@ public class InteractionManager {
         return uniqueInputs.size();
     }
 
+    public void selectAllComponents() {
+        for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
+            ImageView gateView = entry.getKey();
+            if (!gateView.getStyleClass().contains("selected")) {
+                gateView.getStyleClass().add("selected");
+            }
+        }
+
+        for (TextLabel textLabel : canvas.getTextLabels()) {
+            if (!textLabel.getStyleClass().contains("selected")) {
+                textLabel.getStyleClass().add("selected");
+            }
+        }
+    }
+
     public void setHighlightedGate(LogicGate highlightedGate) {
         this.highlightedGate = highlightedGate;
     }
