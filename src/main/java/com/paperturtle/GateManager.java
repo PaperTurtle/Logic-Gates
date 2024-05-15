@@ -58,8 +58,11 @@ public class GateManager {
                 .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+        List<TextLabel> selectedLabels = canvas.getTextLabels().stream()
+                .filter(entry -> entry.getStyleClass().contains("selected")).collect(Collectors.toList());
 
         selectedGates.forEach(canvas.getGateManager()::removeGate);
+        selectedLabels.forEach(label -> label.removeSelf());
     }
 
     public LogicGate findGateForInputMarker(Circle inputMarker) {
