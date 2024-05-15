@@ -92,6 +92,19 @@ public class InteractionManager {
                     }
                 }
 
+                for (TextLabel textLabel : canvas.getTextLabels()) {
+                    if (textLabel.getStyleClass().contains("selected")) {
+                        double newX = textLabel.getLayoutX() + deltaX;
+                        double newY = textLabel.getLayoutY() + deltaY;
+
+                        double clampedX = Math.max(0, Math.min(newX, canvas.getWidth() - textLabel.getWidth()));
+                        double clampedY = Math.max(0, Math.min(newY, canvas.getHeight() - textLabel.getHeight()));
+
+                        textLabel.setLayoutX(clampedX);
+                        textLabel.setLayoutY(clampedY);
+                    }
+                }
+
                 imageView.setUserData(new Object[] { event.getSceneX(), event.getSceneY(), gate });
                 event.consume();
             }
@@ -103,6 +116,7 @@ public class InteractionManager {
                 double offsetY = event.getSceneY() - imageView.getLayoutY();
                 if (!event.isControlDown() && !imageView.getStyleClass().contains("selected")) {
                     deselectAllGatesExcept(imageView);
+                    deselectAllLabels();
                 }
                 imageView.getStyleClass().add("selected");
                 imageView.setUserData(new Object[] { offsetX, offsetY, gate });
@@ -141,20 +155,111 @@ public class InteractionManager {
         textLabel.setOnMousePressed(event -> {
             double offsetX = event.getSceneX() - textLabel.getLayoutX();
             double offsetY = event.getSceneY() - textLabel.getLayoutY();
-            textLabel.setUserData(new Object[] { offsetX, offsetY });
+            textLabel.setUserData(new double[] { offsetX, offsetY });
 
-            textLabel.setOnMouseDragged(dragEvent -> {
+            if (!event.isControlDown() && !textLabel.getStyleClass().contains("selected")) {
+                deselectAllLabelsExcept(textLabel);
+            }
+            if (!textLabel.getStyleClass().contains("selected")) {
+                textLabel.getStyleClass().add("selected");
+            }
+
+        });
+
+        textLabel.setOnMouseDragged(dragEvent -> {
+            if (dragEvent.getButton() == MouseButton.PRIMARY && textLabel.getStyleClass().contains("selected")) {
+                double[] userData = (double[]) textLabel.getUserData();
+                double offsetX = userData[0];
+                double offsetY = userData[1];
+
                 double newX = dragEvent.getSceneX() - offsetX;
                 double newY = dragEvent.getSceneY() - offsetY;
+
+                double deltaX = newX - textLabel.getLayoutX();
+                double deltaY = newY - textLabel.getLayoutY();
 
                 newX = Math.max(0, Math.min(newX, canvas.getWidth() - textLabel.getWidth()));
                 newY = Math.max(0, Math.min(newY, canvas.getHeight() - textLabel.getHeight()));
 
                 textLabel.setLayoutX(newX);
                 textLabel.setLayoutY(newY);
-            });
-            event.consume();
+
+                // Move all selected gates
+                for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
+                    ImageView otherImageView = entry.getKey();
+                    if (otherImageView.getStyleClass().contains("selected")) {
+                        LogicGate otherGate = entry.getValue();
+
+                        newX = otherGate.getImageView().getX() + deltaX;
+                        newY = otherGate.getImageView().getY() + deltaY;
+
+                        double clampedX = Math.max(0, Math.min(
+                                newX,
+                                canvas.getWidth() - otherImageView.getBoundsInLocal().getWidth()));
+                        double clampedY = Math.max(0, Math.min(
+                                newY,
+                                canvas.getHeight() - otherImageView.getBoundsInLocal().getHeight()));
+
+                        otherGate.setPosition(clampedX, clampedY);
+                        otherImageView.relocate(clampedX, clampedY);
+                    }
+                }
+
+                // Move all selected text labels (except the current one)
+                for (TextLabel otherLabel : canvas.getTextLabels()) {
+                    if (otherLabel != textLabel && otherLabel.getStyleClass().contains("selected")) {
+                        double newLabelX = otherLabel.getLayoutX() + deltaX;
+                        double newLabelY = otherLabel.getLayoutY() + deltaY;
+
+                        double clampedX = Math.max(0,
+                                Math.min(newLabelX, canvas.getWidth() - otherLabel.getWidth()));
+                        double clampedY = Math.max(0,
+                                Math.min(newLabelY, canvas.getHeight() - otherLabel.getHeight()));
+
+                        otherLabel.setLayoutX(clampedX);
+                        otherLabel.setLayoutY(clampedY);
+                    }
+                }
+
+                dragEvent.consume();
+            }
         });
+
+        textLabel.setOnMouseReleased(event -> {
+            if (textLabel.getStyleClass().contains("selected")) {
+                event.consume();
+            }
+        });
+
+        canvas.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
+            if (e.getTarget() instanceof Pane) {
+                deselectAllLabels();
+            }
+        });
+
+        canvas.setOnMouseClicked(event -> {
+            if (!(event.getTarget() instanceof TextLabel)) {
+                if (canvas.getOpenContextMenu() != null) {
+                    canvas.getOpenContextMenu().hide();
+                    canvas.setOpenContextMenu(null);
+                }
+                canvas.requestFocus();
+            }
+        });
+    }
+
+    private void deselectAllLabelsExcept(TextLabel textLabel) {
+        for (TextLabel label : canvas.getTextLabels()) {
+            if (!label.equals(textLabel)) {
+                label.getStyleClass().remove("selected");
+            }
+        }
+    }
+
+    public void deselectAllLabels() {
+        for (TextLabel label : canvas.getTextLabels()) {
+            label.getStyleClass().remove("selected");
+        }
     }
 
     public void handleCanvasClick(MouseEvent event) {
@@ -163,7 +268,6 @@ public class InteractionManager {
                 justSelected = false;
                 return;
             }
-            // canvas.getGateManager().deselectAllGates();
             canvas.requestFocus();
             return;
         } else if (event.getTarget() instanceof ImageView) {
@@ -207,11 +311,15 @@ public class InteractionManager {
         }
 
         for (TextLabel textLabel : canvas.getTextLabels()) {
-            boolean intersects = textLabel.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
+            boolean intersects = selectionRect.getBoundsInParent()
+                    .intersects(textLabel.localToScene(textLabel.getBoundsInLocal()));
             boolean isSelected = textLabel.getStyleClass().contains("selected");
 
             if (intersects && !isSelected) {
-                textLabel.getStyleClass().add("selected");
+                if (!textLabel.getStyleClass().contains("selected")) {
+                    textLabel.getStyleClass().add("selected");
+                }
+
             } else if (!intersects && isSelected) {
                 textLabel.getStyleClass().remove("selected");
             }
