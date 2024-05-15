@@ -2,6 +2,7 @@ package com.paperturtle;
 
 import javafx.application.Platform;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -49,9 +50,18 @@ public class TextLabel extends Group implements CircuitComponent {
         setupContextMenu();
     }
 
+    public void removeSelf() {
+        Parent parent = this.getParent();
+        if (parent instanceof CircuitCanvas) {
+            ((CircuitCanvas) parent).removeTextLabel(this);
+        }
+    }
+
     private void setupContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editItem = new MenuItem("Edit");
+        MenuItem removeItem = new MenuItem("Remove");
+        removeItem.setOnAction(e -> removeSelf());
         editItem.setOnAction(e -> showEditDialog());
         contextMenu.getItems().add(editItem);
 
