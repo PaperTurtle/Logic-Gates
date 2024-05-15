@@ -5,6 +5,7 @@ import javafx.scene.layout.Pane;
 import java.util.List;
 
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -58,6 +59,7 @@ public class CircuitCanvas extends Pane {
         this.clipboardManager = new ClipboardManager(this);
 
         interactionManager.initializeSelectionMechanism();
+        interactionManager.setupPanning();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
 
@@ -76,6 +78,30 @@ public class CircuitCanvas extends Pane {
                 event.consume();
             }
         });
+
+        this.getChildren().addListener((ListChangeListener<Node>) change -> updateCanvasSize());
+    }
+
+    public void updateCanvasSize() {
+        double maxWidth = 0;
+        double maxHeight = 0;
+
+        for (Node node : this.getChildren()) {
+            if (node.getBoundsInParent().getMaxX() > maxWidth) {
+                maxWidth = node.getBoundsInParent().getMaxX();
+            }
+            if (node.getBoundsInParent().getMaxY() > maxHeight) {
+                maxHeight = node.getBoundsInParent().getMaxY();
+            }
+        }
+
+        this.setPrefSize(maxWidth + 50, maxHeight + 50);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        updateCanvasSize();
     }
 
     public void drawGate(LogicGate gate, double x, double y) {
@@ -86,6 +112,7 @@ public class CircuitCanvas extends Pane {
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
         }
+        updateCanvasSize();
     }
 
     public void drawTextLabel(TextLabel textLabel, double x, double y) {
@@ -94,6 +121,7 @@ public class CircuitCanvas extends Pane {
         textLabel.setLayoutY(y);
         textLabels.add(textLabel);
         interactionManager.setupDragHandlersForLabel(textLabel);
+        updateCanvasSize();
     }
 
     public void scheduleUpdate(LogicGate gate) {
@@ -193,6 +221,12 @@ public class CircuitCanvas extends Pane {
 
     public boolean isEmpty() {
         return gateImageViews.isEmpty();
+    }
+
+    public void removeTextLabel(TextLabel textLabel) {
+        this.getChildren().remove(textLabel);
+        textLabels.remove(textLabel);
+        updateCanvasSize();
     }
 
     public void clearCanvas() {
