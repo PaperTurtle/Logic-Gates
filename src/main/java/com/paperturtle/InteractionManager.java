@@ -38,9 +38,54 @@ public class InteractionManager {
     private boolean isSelecting = false;
     private boolean justSelected = false;
     private LogicGate highlightedGate = null;
+    private boolean isPanning = false;
+    private double panStartX;
+    private double panStartY;
 
     public InteractionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
+        setupPanning();
+    }
+
+    public void setupPanning() {
+        canvas.setOnMousePressed(event -> {
+            if (canvas.getCurrentCursorMode() == CursorMode.GRABBY && event.getButton() == MouseButton.PRIMARY) {
+                isPanning = true;
+                panStartX = event.getSceneX();
+                panStartY = event.getSceneY();
+                System.out.println("Panning started at (" + panStartX + ", " + panStartY + ")");
+                event.consume();
+            }
+        });
+
+        canvas.setOnMouseDragged(event -> {
+            if (isPanning && event.getButton() == MouseButton.PRIMARY) {
+                double deltaX = event.getSceneX() - panStartX;
+                double deltaY = event.getSceneY() - panStartY;
+                System.out.println("Mouse dragged: deltaX = " + deltaX + ", deltaY = " + deltaY);
+
+                double newHValue = canvas.getScrollPane().getHvalue()
+                        - deltaX / canvas.getScrollPane().getContent().getBoundsInLocal().getWidth();
+                double newVValue = canvas.getScrollPane().getVvalue()
+                        - deltaY / canvas.getScrollPane().getContent().getBoundsInLocal().getHeight();
+                System.out.println("New Scroll values: H = " + newHValue + ", V = " + newVValue);
+
+                canvas.getScrollPane().setHvalue(Math.max(0, Math.min(1, newHValue)));
+                canvas.getScrollPane().setVvalue(Math.max(0, Math.min(1, newVValue)));
+
+                panStartX = event.getSceneX();
+                panStartY = event.getSceneY();
+                event.consume();
+            }
+        });
+
+        canvas.setOnMouseReleased(event -> {
+            if (isPanning && event.getButton() == MouseButton.PRIMARY) {
+                isPanning = false;
+                System.out.println("Panning ended");
+                event.consume();
+            }
+        });
     }
 
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
