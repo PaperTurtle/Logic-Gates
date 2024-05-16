@@ -41,6 +41,9 @@ public class CircuitCanvas extends Pane {
     private ConnectionManager connectionManager;
     private GateManager gateManager;
     private ClipboardManager clipboardManager;
+    private double lastMouseX;
+    private double lastMouseY;
+    private boolean dragging = false;
 
     public enum CursorMode {
         POINTER, GRABBY
@@ -59,7 +62,6 @@ public class CircuitCanvas extends Pane {
         this.clipboardManager = new ClipboardManager(this);
 
         interactionManager.initializeSelectionMechanism();
-        interactionManager.setupPanning();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
 
@@ -80,6 +82,33 @@ public class CircuitCanvas extends Pane {
         });
 
         this.getChildren().addListener((ListChangeListener<Node>) change -> updateCanvasSize());
+
+        this.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            if (currentCursorMode == CursorMode.GRABBY) {
+                lastMouseX = event.getSceneX();
+                lastMouseY = event.getSceneY();
+                dragging = true;
+            }
+        });
+
+        this.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            if (currentCursorMode == CursorMode.GRABBY && dragging) {
+                double deltaX = event.getSceneX() - lastMouseX;
+                double deltaY = event.getSceneY() - lastMouseY;
+
+                scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getWidth());
+                scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
+
+                lastMouseX = event.getSceneX();
+                lastMouseY = event.getSceneY();
+            }
+        });
+
+        this.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+            if (currentCursorMode == CursorMode.GRABBY) {
+                dragging = false;
+            }
+        });
     }
 
     public void updateCanvasSize() {
