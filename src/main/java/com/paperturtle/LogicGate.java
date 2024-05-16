@@ -188,6 +188,7 @@ public abstract class LogicGate implements CircuitComponent {
         if (outputMarker != null) {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
             outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
+            outputMarker.toFront();
         }
         for (int i = 0; i < inputPoints.size(); i++) {
             if (i < inputMarkers.size()) {
@@ -195,6 +196,7 @@ public abstract class LogicGate implements CircuitComponent {
                 Point2D point = inputPoints.get(i);
                 marker.setCenterX(imageView.getX() + point.getX());
                 marker.setCenterY(imageView.getY() + point.getY());
+                marker.toFront();
             } else {
                 System.err.println("No marker available for input point at index " + i);
             }
@@ -253,6 +255,7 @@ public abstract class LogicGate implements CircuitComponent {
         if (outputPoint != null) {
             outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
             canvas.getChildren().add(outputMarker);
+            outputMarker.toFront();
         }
 
         if (inputPoints != null) {
@@ -261,6 +264,7 @@ public abstract class LogicGate implements CircuitComponent {
                 Circle inputMarker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
                 inputMarkers.add(inputMarker);
                 canvas.getChildren().add(inputMarker);
+                outputMarker.toFront();
                 inputConnections.add(new ArrayList<>());
             }
         }

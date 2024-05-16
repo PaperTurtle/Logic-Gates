@@ -11,10 +11,13 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
@@ -23,8 +26,10 @@ import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -381,6 +386,10 @@ public class InteractionManager {
             gate.setMaxOutputConnections(newValue);
         });
 
+        Label spinnerLabel = new Label("Max Output Connections:");
+        HBox spinnerBox = new HBox(10, spinnerLabel, maxOutputSpinner);
+        spinnerBox.setAlignment(Pos.CENTER_LEFT);
+
         TableView<Boolean[]> table = new TableView<>();
         List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
         List<Boolean[]> dataList = new ArrayList<>();
@@ -426,7 +435,10 @@ public class InteractionManager {
             header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
         });
 
-        alert.getDialogPane().setContent(table);
+        VBox vbox = new VBox(10, spinnerBox, table);
+        vbox.setPadding(new Insets(10));
+
+        alert.getDialogPane().setContent(vbox);
         alert.getDialogPane().getStylesheets()
                 .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
