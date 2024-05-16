@@ -431,39 +431,50 @@ public class InteractionManager {
     public void generateAndDisplayCompleteTruthTable() {
         List<LogicGate> selectedGates = canvas.getSelectedGates();
 
-        SwitchGate switchGate = null;
+        List<SwitchGate> switchGates = new ArrayList<>();
         Lightbulb lightbulb = null;
 
         for (LogicGate gate : selectedGates) {
             if (gate instanceof SwitchGate) {
-                switchGate = (SwitchGate) gate;
+                switchGates.add((SwitchGate) gate);
             } else if (gate instanceof Lightbulb) {
                 lightbulb = (Lightbulb) gate;
             }
         }
 
-        if (switchGate == null || lightbulb == null) {
-            System.out.println("SwitchGate or Lightbulb not found in the selected gates.");
+        if (switchGates.isEmpty() || lightbulb == null) {
+            System.out.println("SwitchGates or Lightbulb not found in the selected gates.");
             return;
         }
 
-        boolean initialState = switchGate.getState();
+        int numInputs = switchGates.size();
+        int totalCombinations = 1 << numInputs;
 
-        Boolean[][] truthTableInputs = new Boolean[2][1];
-        Boolean[] truthTableOutputs = new Boolean[2];
+        Boolean[][] truthTableInputs = new Boolean[totalCombinations][numInputs];
+        Boolean[] truthTableOutputs = new Boolean[totalCombinations];
 
-        switchGate.setState(false);
-        lightbulb.evaluate();
-        truthTableInputs[0][0] = false;
-        truthTableOutputs[0] = lightbulb.evaluate();
+        boolean[] initialStates = new boolean[numInputs];
+        for (int i = 0; i < numInputs; i++) {
+            initialStates[i] = switchGates.get(i).getState();
+        }
 
-        switchGate.setState(true);
-        lightbulb.evaluate();
-        truthTableInputs[1][0] = true;
-        truthTableOutputs[1] = lightbulb.evaluate();
+        for (int i = 0; i < totalCombinations; i++) {
+            for (int j = 0; j < numInputs; j++) {
+                truthTableInputs[i][j] = (i & (1 << j)) != 0;
+            }
+        }
 
-        switchGate.setState(initialState);
-        switchGate.propagateStateChange();
+        for (int i = 0; i < totalCombinations; i++) {
+            for (int j = 0; j < numInputs; j++) {
+                switchGates.get(j).setState(truthTableInputs[i][j]);
+            }
+
+            truthTableOutputs[i] = lightbulb.evaluate();
+        }
+
+        for (int i = 0; i < numInputs; i++) {
+            switchGates.get(i).setState(initialStates[i]);
+        }
         lightbulb.evaluate();
 
         displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
@@ -473,20 +484,22 @@ public class InteractionManager {
         TableView<List<String>> table = new TableView<>();
         ObservableList<List<String>> data = FXCollections.observableArrayList();
 
-        // Add input column
-        TableColumn<List<String>, String> inputColumn = new TableColumn<>("I1");
-        inputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(0)));
-        table.getColumns().add(inputColumn);
+        for (int i = 0; i < inputs[0].length; i++) {
+            final int colIndex = i;
+            TableColumn<List<String>, String> inputColumn = new TableColumn<>("I" + (i + 1));
+            inputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(colIndex)));
+            table.getColumns().add(inputColumn);
+        }
 
-        // Add output column
         TableColumn<List<String>, String> outputColumn = new TableColumn<>("O1");
-        outputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(1)));
+        outputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(inputs[0].length)));
         table.getColumns().add(outputColumn);
 
-        // Add rows with input and output values
         for (int i = 0; i < inputs.length; i++) {
             List<String> row = new ArrayList<>();
-            row.add(inputs[i][0] ? "true" : "false");
+            for (Boolean input : inputs[i]) {
+                row.add(input ? "true" : "false");
+            }
             row.add(outputs[i] ? "true" : "false");
             data.add(row);
         }
@@ -495,7 +508,7 @@ public class InteractionManager {
 
         Stage stage = new Stage();
         stage.setTitle("Simplified Truth Table");
-        Scene scene = new Scene(table, 200, 150);
+        Scene scene = new Scene(table, 400, 300);
         stage.setScene(scene);
         stage.show();
     }
