@@ -58,7 +58,7 @@ public abstract class LogicGate implements CircuitComponent {
      * @param input the LogicGate to be added.
      */
     public void addInput(LogicGate input) {
-        if (!inputs.contains(input)) {
+        if (inputs.size() < inputPoints.size() && !inputs.contains(input)) {
             inputs.add(input);
             evaluate();
             propagateStateChange();
