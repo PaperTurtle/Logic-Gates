@@ -38,54 +38,9 @@ public class InteractionManager {
     private boolean isSelecting = false;
     private boolean justSelected = false;
     private LogicGate highlightedGate = null;
-    private boolean isPanning = false;
-    private double panStartX;
-    private double panStartY;
 
     public InteractionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
-        setupPanning();
-    }
-
-    public void setupPanning() {
-        canvas.setOnMousePressed(event -> {
-            if (canvas.getCurrentCursorMode() == CursorMode.GRABBY && event.getButton() == MouseButton.PRIMARY) {
-                isPanning = true;
-                panStartX = event.getSceneX();
-                panStartY = event.getSceneY();
-                System.out.println("Panning started at (" + panStartX + ", " + panStartY + ")");
-                event.consume();
-            }
-        });
-
-        canvas.setOnMouseDragged(event -> {
-            if (isPanning && event.getButton() == MouseButton.PRIMARY) {
-                double deltaX = event.getSceneX() - panStartX;
-                double deltaY = event.getSceneY() - panStartY;
-                System.out.println("Mouse dragged: deltaX = " + deltaX + ", deltaY = " + deltaY);
-
-                double newHValue = canvas.getScrollPane().getHvalue()
-                        - deltaX / canvas.getScrollPane().getContent().getBoundsInLocal().getWidth();
-                double newVValue = canvas.getScrollPane().getVvalue()
-                        - deltaY / canvas.getScrollPane().getContent().getBoundsInLocal().getHeight();
-                System.out.println("New Scroll values: H = " + newHValue + ", V = " + newVValue);
-
-                canvas.getScrollPane().setHvalue(Math.max(0, Math.min(1, newHValue)));
-                canvas.getScrollPane().setVvalue(Math.max(0, Math.min(1, newVValue)));
-
-                panStartX = event.getSceneX();
-                panStartY = event.getSceneY();
-                event.consume();
-            }
-        });
-
-        canvas.setOnMouseReleased(event -> {
-            if (isPanning && event.getButton() == MouseButton.PRIMARY) {
-                isPanning = false;
-                System.out.println("Panning ended");
-                event.consume();
-            }
-        });
     }
 
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
@@ -475,84 +430,68 @@ public class InteractionManager {
 
     public void generateAndDisplayCompleteTruthTable() {
         List<LogicGate> selectedGates = canvas.getSelectedGates();
-        int uniqueInputs = countUniqueInputs(selectedGates);
-        int totalCombinations = 1 << uniqueInputs;
-        Boolean[][] truthTableInputs = new Boolean[totalCombinations][uniqueInputs];
-        Boolean[][] truthTableOutputs = new Boolean[totalCombinations][selectedGates.size()];
 
-        for (int i = 0; i < totalCombinations; i++) {
-            for (int j = 0; j < uniqueInputs; j++) {
-                truthTableInputs[i][j] = (i & (1 << j)) != 0;
+        SwitchGate switchGate = null;
+        LogicGate lightbulb = null;
+
+        for (LogicGate gate : selectedGates) {
+            if (gate instanceof SwitchGate) {
+                switchGate = (SwitchGate) gate;
+            } else if (gate instanceof Lightbulb) {
+                lightbulb = gate;
             }
         }
 
-        for (int i = 0; i < totalCombinations; i++) {
-            setGateInputs(selectedGates, truthTableInputs[i], uniqueInputs);
-
-            for (int j = 0; j < selectedGates.size(); j++) {
-                truthTableOutputs[i][j] = selectedGates.get(j).evaluate();
-            }
+        if (switchGate == null || lightbulb == null) {
+            System.out.println("SwitchGate or Lightbulb not found in the selected gates.");
+            return;
         }
 
-        displayTruthTable(truthTableInputs, truthTableOutputs, selectedGates);
+        Boolean[][] truthTableInputs = new Boolean[2][1];
+        Boolean[] truthTableOutputs = new Boolean[2];
+
+        switchGate.setState(false);
+        lightbulb.evaluate();
+        truthTableInputs[0][0] = false;
+        truthTableOutputs[0] = lightbulb.evaluate();
+
+        switchGate.setState(true);
+        lightbulb.evaluate();
+        truthTableInputs[1][0] = true;
+        truthTableOutputs[1] = lightbulb.evaluate();
+
+        switchGate.propagateStateChange();
+
+        displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
     }
 
-    /**
-     * Sets the inputs for all gates based on the given input combination.
-     * 
-     * @param gates      The list of gates to set inputs for.
-     * @param inputs     The input combination to apply.
-     * @param inputCount The number of unique inputs.
-     */
-    private void setGateInputs(List<LogicGate> gates, Boolean[] inputs, int inputCount) {
-        gates.forEach(gate -> {
-            if (gate instanceof SwitchGate) {
-                ((SwitchGate) gate).setState(false);
-            }
-        });
-
-        for (int i = 0; i < gates.size(); i++) {
-            LogicGate gate = gates.get(i);
-            if (gate instanceof SwitchGate) {
-                if (i < inputs.length) {
-                    ((SwitchGate) gate).setState(inputs[i]);
-                }
-            }
-        }
-
-        gates.forEach(LogicGate::evaluate);
-    }
-
-    private void displayTruthTable(Boolean[][] inputs, Boolean[][] outputs, List<LogicGate> gates) {
+    private void displaySimplifiedTruthTable(Boolean[][] inputs, Boolean[] outputs) {
         TableView<List<String>> table = new TableView<>();
         ObservableList<List<String>> data = FXCollections.observableArrayList();
 
-        for (int i = gates.size() - 1; i >= 0; i--) {
-            final int colIndex = i + inputs[0].length;
-            TableColumn<List<String>, String> column = new TableColumn<>(
-                    gates.get(i).getClass().getSimpleName() + " Output");
-            int finalI = i;
-            column.setCellValueFactory(
-                    param -> new ReadOnlyStringWrapper(param.getValue().get(finalI + inputs[0].length)));
-            table.getColumns().add(column);
-        }
+        // Add input column
+        TableColumn<List<String>, String> inputColumn = new TableColumn<>("I1");
+        inputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(0)));
+        table.getColumns().add(inputColumn);
 
+        // Add output column
+        TableColumn<List<String>, String> outputColumn = new TableColumn<>("O1");
+        outputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(1)));
+        table.getColumns().add(outputColumn);
+
+        // Add rows with input and output values
         for (int i = 0; i < inputs.length; i++) {
             List<String> row = new ArrayList<>();
-            for (Boolean input : inputs[i]) {
-                row.add(input ? "1" : "0");
-            }
-            for (Boolean output : outputs[i]) {
-                row.add(output ? "1" : "0");
-            }
+            row.add(inputs[i][0] ? "true" : "false");
+            row.add(outputs[i] ? "true" : "false");
             data.add(row);
         }
 
         table.setItems(data);
 
         Stage stage = new Stage();
-        stage.setTitle("Truth Table");
-        Scene scene = new Scene(table, 500, 300);
+        stage.setTitle("Simplified Truth Table");
+        Scene scene = new Scene(table, 200, 150);
         stage.setScene(scene);
         stage.show();
     }
