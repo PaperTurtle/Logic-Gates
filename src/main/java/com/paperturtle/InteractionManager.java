@@ -16,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.skin.TableHeaderRow;
@@ -374,6 +375,12 @@ public class InteractionManager {
         alert.setTitle("Gate Properties");
         alert.setHeaderText("Properties for " + gate.getClass().getSimpleName());
 
+        Spinner<Integer> maxOutputSpinner = new Spinner<>(1, 10, gate.getMaxOutputConnections());
+        maxOutputSpinner.setEditable(true);
+        maxOutputSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+            gate.setMaxOutputConnections(newValue);
+        });
+
         TableView<Boolean[]> table = new TableView<>();
         List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
         List<Boolean[]> dataList = new ArrayList<>();
@@ -604,8 +611,8 @@ public class InteractionManager {
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null && gate
-                    .getOutputConnections().isEmpty()) {
+            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null
+                    && gate.canAddOutputConnection()) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
                 Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
