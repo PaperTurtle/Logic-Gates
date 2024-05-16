@@ -109,11 +109,11 @@ public class App extends Application {
             circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
         });
 
-        fileMenu.getItems().addAll(openItem, saveItem);
+        fileMenu.getItems().addAll(openItem, saveItem, exitItem);
         optionsMenu.getItems().addAll(tableItem);
         editMenu.getItems().addAll(undoItem, redoItem, cutItem, copyItem, pasteItem, deleteItem);
-        menuBar.getMenus().addAll(fileMenu, optionsMenu);
         helpMenu.getItems().addAll(aboutItem, shortcutsItem);
+        menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, helpMenu);
 
         openItem.setOnAction(e -> {
             if (!circuitCanvas.isEmpty()) {
