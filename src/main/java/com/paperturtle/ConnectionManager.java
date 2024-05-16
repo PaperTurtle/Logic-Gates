@@ -38,6 +38,7 @@ public class ConnectionManager {
 
             sourceGate.evaluate();
             sourceGate.propagateStateChange();
+            sourceGate.setMaxOutputConnections(sourceGate.getMaxOutputConnections() + 1);
             canvas.scheduleUpdate(sourceGate);
         } else {
             System.out.println("No source gate found for the connection.");
@@ -97,6 +98,10 @@ public class ConnectionManager {
                         targetGate.evaluate();
                         targetGate.propagateStateChange();
                         sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
+
+                        targetGate.getInputMarkers().forEach(marker -> marker.toFront());
+                        sourceGate.getOutputMarker().toFront();
+
                         canvas.scheduleUpdate(targetGate);
                         startGate = null;
                     } else {
