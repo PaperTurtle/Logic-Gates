@@ -25,6 +25,7 @@ public abstract class LogicGate implements CircuitComponent {
     protected List<Line> outputConnections = new ArrayList<>();
     protected List<LogicGate> outputGates = new ArrayList<>();
     protected boolean currentState = false;
+    private int maxOutputConnections = 1;
     private static long idCounter = 0;
     protected String id;
 
@@ -509,6 +510,33 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public String getComponentType() {
         return "gate";
+    }
+
+    /**
+     * Returns the maximum number of output connections.
+     * 
+     * @return the maximum number of output connections.
+     */
+    public int getMaxOutputConnections() {
+        return maxOutputConnections;
+    }
+
+    /**
+     * Sets the maximum number of output connections.
+     * 
+     * @param maxOutputConnections the maximum number of output connections.
+     */
+    public void setMaxOutputConnections(int maxOutputConnections) {
+        this.maxOutputConnections = Math.min(Math.max(1, maxOutputConnections), 10);
+    }
+
+    /**
+     * Returns whether an output connection can be added.
+     * 
+     * @return true if an output connection can be added, false otherwise.
+     */
+    public boolean canAddOutputConnection() {
+        return outputConnections.size() < maxOutputConnections;
     }
 
 }
