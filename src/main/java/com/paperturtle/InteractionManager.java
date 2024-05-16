@@ -390,22 +390,21 @@ public class InteractionManager {
         int numInputs = pairList.isEmpty() || pairList.get(0).getKey().length == 0 ? 0
                 : pairList.get(0).getKey().length;
         for (int i = 0; i < numInputs; i++) {
-            TableColumn<Boolean[], String> inputCol = new TableColumn<>("Input " + (i +
-                    1));
+            TableColumn<Boolean[], String> inputCol = new TableColumn<>("Input " + (i + 1));
             final int index = i;
             inputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                    param.getValue().length > index ? (param.getValue()[index] ? "1" : "0") : "N/A"));
+                    param.getValue().length > index ? (param.getValue()[index] ? "true" : "false") : "N/A"));
             table.getColumns().add(inputCol);
-            inputCol.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            inputCol.setPrefWidth(75);
         }
 
         TableColumn<Boolean[], String> outputCol = new TableColumn<>("Output");
         outputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                param.getValue()[param.getValue().length - 1] ? "1" : "0"));
+                param.getValue()[param.getValue().length - 1] ? "true" : "false"));
         table.getColumns().add(outputCol);
-        outputCol.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        outputCol.setPrefWidth(75);
 
-        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setMinWidth(Region.USE_PREF_SIZE);
         table.setMinHeight(Region.USE_PREF_SIZE);
 
