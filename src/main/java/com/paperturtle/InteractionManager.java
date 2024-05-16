@@ -1,7 +1,6 @@
 package com.paperturtle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -606,7 +605,8 @@ public class InteractionManager {
 
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null) {
+            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null && gate
+                    .getOutputConnections().isEmpty()) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
                 Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
@@ -620,18 +620,6 @@ public class InteractionManager {
                 event.consume();
             }
         });
-    }
-
-    private int countUniqueInputs(List<LogicGate> selectedGates) {
-        List<Circle> uniqueInputs = new ArrayList<>();
-        for (LogicGate gate : selectedGates) {
-            for (Circle input : gate.getInputMarkers()) {
-                if (!uniqueInputs.contains(input)) {
-                    uniqueInputs.add(input);
-                }
-            }
-        }
-        return uniqueInputs.size();
     }
 
     public void selectAllComponents() {
