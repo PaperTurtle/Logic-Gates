@@ -75,7 +75,7 @@ public class App extends Application {
 
         Menu cursorMenu = new Menu("Cursor");
         MenuItem pointerItem = new MenuItem("Use Pointer");
-        MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
+        // MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
 
         Menu optionsMenu = new Menu("Options");
         MenuItem tableItem = new MenuItem("Generate Truth Table");
@@ -86,18 +86,18 @@ public class App extends Application {
             circuitCanvas.setCursor(Cursor.DEFAULT);
         });
 
-        grabbyItem.setOnAction(e -> {
-            scene.setCursor(Cursor.OPEN_HAND);
-            circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
-            circuitCanvas.setCursor(Cursor.OPEN_HAND);
-        });
+        // grabbyItem.setOnAction(e -> {
+        // scene.setCursor(Cursor.OPEN_HAND);
+        // circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
+        // circuitCanvas.setCursor(Cursor.OPEN_HAND);
+        // });
 
         tableItem.setOnAction(e -> {
             circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
         });
 
         fileMenu.getItems().addAll(openItem, saveItem);
-        cursorMenu.getItems().addAll(pointerItem, grabbyItem);
+        cursorMenu.getItems().addAll(pointerItem);
         optionsMenu.getItems().addAll(tableItem);
 
         menuBar.getMenus().addAll(fileMenu, cursorMenu, optionsMenu);
