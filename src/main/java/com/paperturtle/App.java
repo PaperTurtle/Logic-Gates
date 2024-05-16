@@ -72,35 +72,48 @@ public class App extends Application {
         Menu fileMenu = new Menu("File");
         MenuItem openItem = new MenuItem("Open...");
         MenuItem saveItem = new MenuItem("Save...");
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> stage.close());
 
-        Menu cursorMenu = new Menu("Cursor");
-        MenuItem pointerItem = new MenuItem("Use Pointer");
-        // MenuItem grabbyItem = new MenuItem("Use Grabby Hand");
+        Menu editMenu = new Menu("Edit");
+        MenuItem undoItem = new MenuItem("Undo");
+        MenuItem redoItem = new MenuItem("Redo");
+        MenuItem cutItem = new MenuItem("Cut");
+        MenuItem copyItem = new MenuItem("Copy");
+        MenuItem pasteItem = new MenuItem("Paste");
+        MenuItem deleteItem = new MenuItem("Delete");
+
+        Menu helpMenu = new Menu("Help");
+        MenuItem aboutItem = new MenuItem("About");
+        MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
+
+        aboutItem.setOnAction(e -> {
+            showAlert("About",
+                    "Logic Gates Simulator\nVersion 1.0\nCreated by Seweryn Czabanowski\nThis is a school project.",
+                    Alert.AlertType.INFORMATION);
+        });
+
+        shortcutsItem.setOnAction(e -> {
+            showAlert("Keyboard Shortcuts",
+                    "Ctrl+C: Copy selected gates\n" +
+                            "Ctrl+V: Paste gates from clipboard\n" +
+                            "Ctrl+X: Cut selected gates\n" +
+                            "Ctrl+A: Select all components",
+                    Alert.AlertType.INFORMATION);
+        });
 
         Menu optionsMenu = new Menu("Options");
         MenuItem tableItem = new MenuItem("Generate Truth Table");
-
-        pointerItem.setOnAction(e -> {
-            scene.setCursor(Cursor.DEFAULT);
-            circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.POINTER);
-            circuitCanvas.setCursor(Cursor.DEFAULT);
-        });
-
-        // grabbyItem.setOnAction(e -> {
-        // scene.setCursor(Cursor.OPEN_HAND);
-        // circuitCanvas.setCurrentCursorMode(CircuitCanvas.CursorMode.GRABBY);
-        // circuitCanvas.setCursor(Cursor.OPEN_HAND);
-        // });
 
         tableItem.setOnAction(e -> {
             circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
         });
 
         fileMenu.getItems().addAll(openItem, saveItem);
-        cursorMenu.getItems().addAll(pointerItem);
         optionsMenu.getItems().addAll(tableItem);
-
-        menuBar.getMenus().addAll(fileMenu, cursorMenu, optionsMenu);
+        editMenu.getItems().addAll(undoItem, redoItem, cutItem, copyItem, pasteItem, deleteItem);
+        menuBar.getMenus().addAll(fileMenu, optionsMenu);
+        helpMenu.getItems().addAll(aboutItem, shortcutsItem);
 
         openItem.setOnAction(e -> {
             if (!circuitCanvas.isEmpty()) {
