@@ -81,6 +81,15 @@ public class ConnectionManager {
                     LogicGate sourceGate = canvas.getLineToStartGateMap().get(canvas.getCurrentLine());
                     if (targetGate != null && sourceGate != null && targetGate != sourceGate) {
                         int inputIndex = canvas.getGateManager().findInputMarkerIndex(targetGate, inputMarker);
+
+                        if (!targetGate.getInputConnections(inputIndex).isEmpty()) {
+                            System.out.println("Input marker already has a connection.");
+                            canvas.getChildren().remove(canvas.getCurrentLine());
+                            startGate.removeOutputConnection(canvas.getCurrentLine());
+                            canvas.setCurrentLine(null);
+                            return false;
+                        }
+
                         targetGate.addInputConnection(canvas.getCurrentLine(), inputIndex);
                         targetGate.addInput(sourceGate);
                         sourceGate.addOutputConnection(canvas.getCurrentLine());
