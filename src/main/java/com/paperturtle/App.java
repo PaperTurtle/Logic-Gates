@@ -78,10 +78,13 @@ public class App extends Application {
         Menu editMenu = new Menu("Edit");
         MenuItem undoItem = new MenuItem("Undo");
         MenuItem redoItem = new MenuItem("Redo");
-        MenuItem cutItem = new MenuItem("Cut");
         MenuItem copyItem = new MenuItem("Copy");
         MenuItem pasteItem = new MenuItem("Paste");
         MenuItem deleteItem = new MenuItem("Delete");
+
+        copyItem.setOnAction(e -> circuitCanvas.getClipboardManager().copySelectedGatesToClipboard());
+        pasteItem.setOnAction(e -> circuitCanvas.getClipboardManager().pasteGatesFromClipboard());
+        deleteItem.setOnAction(e -> circuitCanvas.getGateManager().removeSelectedGates());
 
         Menu helpMenu = new Menu("Help");
         MenuItem aboutItem = new MenuItem("About");
@@ -111,7 +114,7 @@ public class App extends Application {
 
         fileMenu.getItems().addAll(openItem, saveItem, exitItem);
         optionsMenu.getItems().addAll(tableItem);
-        editMenu.getItems().addAll(undoItem, redoItem, cutItem, copyItem, pasteItem, deleteItem);
+        editMenu.getItems().addAll(undoItem, redoItem, copyItem, pasteItem, deleteItem);
         helpMenu.getItems().addAll(aboutItem, shortcutsItem);
         menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, helpMenu);
 
