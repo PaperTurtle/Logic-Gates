@@ -432,13 +432,13 @@ public class InteractionManager {
         List<LogicGate> selectedGates = canvas.getSelectedGates();
 
         SwitchGate switchGate = null;
-        LogicGate lightbulb = null;
+        Lightbulb lightbulb = null;
 
         for (LogicGate gate : selectedGates) {
             if (gate instanceof SwitchGate) {
                 switchGate = (SwitchGate) gate;
             } else if (gate instanceof Lightbulb) {
-                lightbulb = gate;
+                lightbulb = (Lightbulb) gate;
             }
         }
 
@@ -446,6 +446,8 @@ public class InteractionManager {
             System.out.println("SwitchGate or Lightbulb not found in the selected gates.");
             return;
         }
+
+        boolean initialState = switchGate.getState();
 
         Boolean[][] truthTableInputs = new Boolean[2][1];
         Boolean[] truthTableOutputs = new Boolean[2];
@@ -460,7 +462,9 @@ public class InteractionManager {
         truthTableInputs[1][0] = true;
         truthTableOutputs[1] = lightbulb.evaluate();
 
+        switchGate.setState(initialState);
         switchGate.propagateStateChange();
+        lightbulb.evaluate();
 
         displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
     }
