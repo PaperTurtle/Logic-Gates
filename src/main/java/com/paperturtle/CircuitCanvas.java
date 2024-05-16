@@ -348,6 +348,10 @@ public class CircuitCanvas extends Pane {
         return gateManager;
     }
 
+    public ClipboardManager getClipboardManager() {
+        return clipboardManager;
+    }
+
     public List<LogicGate> getSelectedGates() {
         return gateImageViews.entrySet().stream()
                 .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
