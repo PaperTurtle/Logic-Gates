@@ -108,8 +108,8 @@ public class FourBitDigitGate extends LogicGate {
         boolean newEvaluatedState = activeCount > 0;
         if (newEvaluatedState != state || activeCount != previousActiveCount) {
             state = newEvaluatedState;
-            updateVisualState();
         }
+        updateVisualState();
         return state;
     }
 
@@ -125,8 +125,9 @@ public class FourBitDigitGate extends LogicGate {
     public void removeInput(LogicGate input) {
         if (inputs.contains(input)) {
             inputs.remove(input);
-            evaluate();
-            updateVisualState();
+            this.evaluate();
+            this.updateVisualState();
+            this.propagateStateChange();
         }
     }
 
