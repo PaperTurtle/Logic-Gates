@@ -18,28 +18,16 @@ public class ConnectionManager {
     public void removeConnection(Line connection) {
         LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
         if (sourceGate != null) {
-            sourceGate.removeOutputConnection(connection);
-
             LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
             if (targetGate != null) {
                 int index = targetGate.findInputConnectionIndex(connection);
                 if (index != -1) {
-                    targetGate.removeInputConnection(connection, index);
-                    targetGate.removeInput(sourceGate);
+                    canvas.getCommandManager().executeCommand(
+                            new RemoveConnectionCommand(canvas, sourceGate, targetGate, connection, index));
                 }
-
-                targetGate.evaluate();
-                targetGate.propagateStateChange();
-                canvas.scheduleUpdate(targetGate);
+            } else {
+                System.out.println("No target gate found for the connection.");
             }
-
-            canvas.getChildren().remove(connection);
-            canvas.getLineToStartGateMap().remove(connection);
-
-            sourceGate.evaluate();
-            sourceGate.propagateStateChange();
-            sourceGate.setMaxOutputConnections(sourceGate.getMaxOutputConnections() + 1);
-            canvas.scheduleUpdate(sourceGate);
         } else {
             System.out.println("No source gate found for the connection.");
         }
@@ -49,23 +37,23 @@ public class ConnectionManager {
         new ArrayList<>(logicGate.getOutputConnections()).forEach(line -> {
             LogicGate targetGate = canvas.getLineToStartGateMap().get(line);
             if (targetGate != null) {
-                targetGate.removeInput(logicGate);
-                targetGate.evaluate();
-                targetGate.propagateStateChange();
+                int index = targetGate.findInputConnectionIndex(line);
+                if (index != -1) {
+                    canvas.getCommandManager()
+                            .executeCommand(new RemoveConnectionCommand(canvas, logicGate, targetGate, line, index));
+                }
             }
-            canvas.getLineToStartGateMap().remove(line);
-            canvas.getChildren().remove(line);
         });
 
         logicGate.getInputConnections().forEach(connections -> new ArrayList<>(connections).forEach(line -> {
             LogicGate sourceGate = canvas.getLineToStartGateMap().get(line);
             if (sourceGate != null) {
-                sourceGate.getOutputConnections().remove(line);
-                sourceGate.evaluate();
-                sourceGate.propagateStateChange();
+                int index = logicGate.findInputConnectionIndex(line);
+                if (index != -1) {
+                    canvas.getCommandManager()
+                            .executeCommand(new RemoveConnectionCommand(canvas, sourceGate, logicGate, line, index));
+                }
             }
-            canvas.getLineToStartGateMap().remove(line);
-            canvas.getChildren().remove(line);
         }));
     }
 
@@ -91,19 +79,12 @@ public class ConnectionManager {
                             return false;
                         }
 
-                        targetGate.addInputConnection(canvas.getCurrentLine(), inputIndex);
-                        targetGate.addInput(sourceGate);
-                        sourceGate.addOutputConnection(canvas.getCurrentLine());
-                        sourceGate.addOutputGate(targetGate);
-                        targetGate.evaluate();
-                        targetGate.propagateStateChange();
-                        sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
+                        Line connectionLine = canvas.getCurrentLine();
+                        canvas.setCurrentLine(null);
+                        canvas.getCommandManager().executeCommand(
+                                new AddConnectionCommand(canvas, sourceGate, targetGate, connectionLine, inputIndex));
 
-                        targetGate.getInputMarkers().forEach(marker -> marker.toFront());
-                        sourceGate.getOutputMarker().toFront();
-
-                        canvas.scheduleUpdate(targetGate);
-                        startGate = null;
+                        return true;
                     } else {
                         if (canvas.getCurrentLine() != null && startGate != null) {
                             canvas.getChildren().remove(canvas.getCurrentLine());
@@ -112,8 +93,6 @@ public class ConnectionManager {
                         }
                         return false;
                     }
-
-                    return true;
                 }
             }
         }
