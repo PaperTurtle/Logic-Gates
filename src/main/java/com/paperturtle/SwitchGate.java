@@ -16,6 +16,7 @@ public class SwitchGate extends LogicGate {
     private Image offImage;
     private Image onImage;
     private boolean isSelected = false;
+    private CircuitCanvas canvas;
 
     public SwitchGate() {
         super(null,
@@ -34,10 +35,8 @@ public class SwitchGate extends LogicGate {
     }
 
     public void toggle() {
-        state = !state;
-        updateVisualState();
-        updateOutputConnectionsColor();
-        propagateStateChange();
+        CommandManager commandManager = canvas.getCommandManager();
+        commandManager.executeCommand(new ToggleSwitchStateCommand(this));
     }
 
     public void updateOutputConnectionsColor() {
@@ -56,6 +55,7 @@ public class SwitchGate extends LogicGate {
 
     @Override
     public void createVisualRepresentation(Pane canvas) {
+        this.canvas = (CircuitCanvas) canvas;
         if (imageView != null) {
             canvas.getChildren().add(imageView);
             imageView.setOnMouseClicked(this::handleMouseClicked);
