@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.paperturtle.CircuitCanvas.CursorMode;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -610,9 +608,8 @@ public class InteractionManager {
         });
 
         canvas.setOnMouseReleased(event -> {
-            if (canvas.getCurrentCursorMode() == CursorMode.POINTER && isSelecting
-                    && (selectionRect.getWidth() > dragThreshold
-                            || selectionRect.getHeight() > dragThreshold)) {
+            if (isSelecting && (selectionRect.getWidth() > dragThreshold
+                    || selectionRect.getHeight() > dragThreshold)) {
                 this.selectGatesInRectangle();
             }
             selectionRect.setVisible(false);

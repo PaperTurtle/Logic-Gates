@@ -36,18 +36,11 @@ public class CircuitCanvas extends Pane {
     private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
     private ContextMenu openContextMenu = null;
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
-    private CursorMode currentCursorMode = CursorMode.POINTER;
+    private CommandManager commandManager;
     private InteractionManager interactionManager;
     private ConnectionManager connectionManager;
     private GateManager gateManager;
     private ClipboardManager clipboardManager;
-    private double lastMouseX;
-    private double lastMouseY;
-    private boolean dragging = false;
-
-    public enum CursorMode {
-        POINTER, GRABBY
-    }
 
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
@@ -56,6 +49,7 @@ public class CircuitCanvas extends Pane {
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);
 
+        this.commandManager = new CommandManager();
         this.interactionManager = new InteractionManager(this);
         this.connectionManager = new ConnectionManager(this);
         this.gateManager = new GateManager(this);
@@ -78,59 +72,15 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.A && event.isControlDown()) {
                 interactionManager.selectAllComponents();
                 event.consume();
+            } else if (event.getCode() == KeyCode.Z && event.isControlDown()) {
+                commandManager.undo();
+                event.consume();
+            } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
+                commandManager.redo();
+                event.consume();
             }
         });
 
-        this.getChildren().addListener((ListChangeListener<Node>) change -> updateCanvasSize());
-
-        this.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
-            if (currentCursorMode == CursorMode.GRABBY) {
-                lastMouseX = event.getSceneX();
-                lastMouseY = event.getSceneY();
-                dragging = true;
-            }
-        });
-
-        this.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
-            if (currentCursorMode == CursorMode.GRABBY && dragging) {
-                double deltaX = event.getSceneX() - lastMouseX;
-                double deltaY = event.getSceneY() - lastMouseY;
-
-                scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getWidth());
-                scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getHeight());
-
-                lastMouseX = event.getSceneX();
-                lastMouseY = event.getSceneY();
-            }
-        });
-
-        this.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
-            if (currentCursorMode == CursorMode.GRABBY) {
-                dragging = false;
-            }
-        });
-    }
-
-    public void updateCanvasSize() {
-        double maxWidth = 0;
-        double maxHeight = 0;
-
-        for (Node node : this.getChildren()) {
-            if (node.getBoundsInParent().getMaxX() > maxWidth) {
-                maxWidth = node.getBoundsInParent().getMaxX();
-            }
-            if (node.getBoundsInParent().getMaxY() > maxHeight) {
-                maxHeight = node.getBoundsInParent().getMaxY();
-            }
-        }
-
-        this.setPrefSize(maxWidth + 50, maxHeight + 50);
-    }
-
-    @Override
-    protected void layoutChildren() {
-        super.layoutChildren();
-        updateCanvasSize();
     }
 
     public void drawGate(LogicGate gate, double x, double y) {
@@ -141,7 +91,6 @@ public class CircuitCanvas extends Pane {
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
         }
-        updateCanvasSize();
     }
 
     public void drawTextLabel(TextLabel textLabel, double x, double y) {
@@ -150,7 +99,6 @@ public class CircuitCanvas extends Pane {
         textLabel.setLayoutY(y);
         textLabels.add(textLabel);
         interactionManager.setupDragHandlersForLabel(textLabel);
-        updateCanvasSize();
     }
 
     public void scheduleUpdate(LogicGate gate) {
@@ -255,7 +203,6 @@ public class CircuitCanvas extends Pane {
     public void removeTextLabel(TextLabel textLabel) {
         this.getChildren().remove(textLabel);
         textLabels.remove(textLabel);
-        updateCanvasSize();
     }
 
     public void clearCanvas() {
@@ -266,10 +213,6 @@ public class CircuitCanvas extends Pane {
         gateImageViews.clear();
         gateMarkers.clear();
         lineToStartGateMap.clear();
-    }
-
-    public void setCurrentCursorMode(CursorMode mode) {
-        this.currentCursorMode = mode;
     }
 
     public Point2D getLastMouseCoordinates() {
@@ -304,10 +247,6 @@ public class CircuitCanvas extends Pane {
         return textLabels;
     }
 
-    public CursorMode getCurrentCursorMode() {
-        return currentCursorMode;
-    }
-
     public ContextMenu getOpenContextMenu() {
         return openContextMenu;
     }
@@ -334,6 +273,10 @@ public class CircuitCanvas extends Pane {
 
     public Set<LogicGate> getGatesToBeUpdated() {
         return gatesToBeUpdated;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     public InteractionManager getInteractionManager() {

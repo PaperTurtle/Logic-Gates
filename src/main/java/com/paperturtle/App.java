@@ -203,7 +203,7 @@ public class App extends Application {
                 } else {
                     LogicGate gate = GateFactory.createGate(floatingImageView.getId());
                     if (gate != null) {
-                        circuitCanvas.drawGate(gate, x, y);
+                        circuitCanvas.getCommandManager().executeCommand(new AddGateCommand(circuitCanvas, gate, x, y));
                     }
                 }
                 borderPane.getChildren().remove(floatingImageView);
