@@ -16,6 +16,8 @@ public class PasteGatesCommand implements Command {
     private List<Line> pastedConnections = new ArrayList<>();
     private double offsetX;
     private double offsetY;
+    private static double globalOffsetX = 0;
+    private static double globalOffsetY = 0;
 
     public PasteGatesCommand(CircuitCanvas canvas, List<ClipboardData> clipboardData, double offsetX, double offsetY) {
         this.canvas = canvas;
@@ -26,6 +28,10 @@ public class PasteGatesCommand implements Command {
 
     @Override
     public void execute() {
+        canvas.getGateImageViews().values().forEach(gate -> {
+            gate.getImageView().getStyleClass().remove("selected");
+        });
+
         Map<String, LogicGate> createdGates = new HashMap<>();
 
         for (ClipboardData data : clipboardData) {
@@ -35,8 +41,8 @@ public class PasteGatesCommand implements Command {
                 continue;
             }
 
-            double newX = data.getPosition().getX() + offsetX;
-            double newY = data.getPosition().getY() + offsetY;
+            double newX = data.getPosition().getX() + offsetX + globalOffsetX;
+            double newY = data.getPosition().getY() + offsetY + globalOffsetY;
 
             gate.setPosition(newX, newY);
             gate.setId(data.getId());
@@ -80,6 +86,9 @@ public class PasteGatesCommand implements Command {
                 canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
             }
         }
+
+        globalOffsetX += 30;
+        globalOffsetY += 30;
     }
 
     @Override
@@ -102,5 +111,9 @@ public class PasteGatesCommand implements Command {
         for (LogicGate gate : pastedGates) {
             canvas.getGateManager().removeGate(gate.getImageView());
         }
+        pastedGates.clear();
+        pastedConnections.clear();
+        globalOffsetX -= 30;
+        globalOffsetY -= 30;
     }
 }
