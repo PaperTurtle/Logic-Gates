@@ -64,10 +64,10 @@ public class CircuitCanvas extends Pane {
                 clipboardManager.copySelectedGatesToClipboard();
                 event.consume();
             } else if (event.getCode() == KeyCode.V && event.isControlDown()) {
-                clipboardManager.pasteGatesFromClipboard();
+                commandManager.executeCommand(new PasteGatesCommand(this, clipboardManager.getClipboard(), 30, 30));
                 event.consume();
             } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
-                gateManager.removeSelectedGates();
+                commandManager.executeCommand(new RemoveSelectedGatesCommand(this));
                 event.consume();
             } else if (event.getCode() == KeyCode.A && event.isControlDown()) {
                 interactionManager.selectAllComponents();
@@ -78,6 +78,10 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
                 commandManager.redo();
                 event.consume();
+            } else if (event.getCode() == KeyCode.H) {
+                for (LogicGate gate : gateImageViews.values()) {
+                    System.out.println(gate.getImageView().getStyleClass());
+                }
             }
         });
 

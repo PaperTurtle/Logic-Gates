@@ -9,21 +9,26 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-public class ClipboardManager {
+public class PasteGatesCommand implements Command {
     private CircuitCanvas canvas;
-    private List<ClipboardData> clipboard = new ArrayList<>();
+    private List<ClipboardData> clipboardData;
+    private List<LogicGate> pastedGates = new ArrayList<>();
+    private List<Line> pastedConnections = new ArrayList<>();
+    private double offsetX;
+    private double offsetY;
 
-    public ClipboardManager(CircuitCanvas canvas) {
+    public PasteGatesCommand(CircuitCanvas canvas, List<ClipboardData> clipboardData, double offsetX, double offsetY) {
         this.canvas = canvas;
+        this.clipboardData = clipboardData;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
     }
 
-    public void pasteGatesFromClipboard() {
-        canvas.getGateManager().deselectAllGates();
+    @Override
+    public void execute() {
         Map<String, LogicGate> createdGates = new HashMap<>();
-        double offsetX = 30;
-        double offsetY = 30;
 
-        for (ClipboardData data : clipboard) {
+        for (ClipboardData data : clipboardData) {
             LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
             if (gate == null) {
                 System.out.println("Unable to create gate of type: " + data.getType());
@@ -37,10 +42,13 @@ public class ClipboardManager {
             gate.setId(data.getId());
             createdGates.put(data.getId(), gate);
             canvas.drawGate(gate, newX, newY);
-            gate.getImageView().getStyleClass().add("selected");
+            if (!gate.getImageView().getStyleClass().contains("selected")) {
+                gate.getImageView().getStyleClass().add("selected");
+            }
+            pastedGates.add(gate);
         }
 
-        for (ClipboardData data : clipboard) {
+        for (ClipboardData data : clipboardData) {
             LogicGate sourceGate = createdGates.get(data.getId());
             if (sourceGate == null)
                 continue;
@@ -61,24 +69,38 @@ public class ClipboardManager {
                 connectionLine.setStrokeWidth(3.5);
                 connectionLine.setStroke(Color.BLACK);
 
-                canvas.getChildren().add(connectionLine);
+                if (!canvas.getChildren().contains(connectionLine)) {
+                    canvas.getChildren().add(connectionLine);
+                }
                 sourceGate.addOutputConnection(connectionLine);
                 targetGate.addInputConnection(connectionLine, output.pointIndex);
+                if (!pastedConnections.contains(connectionLine)) {
+                    pastedConnections.add(connectionLine);
+                }
+                canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
             }
         }
     }
 
-    public void copySelectedGatesToClipboard() {
-        clipboard.clear();
-        canvas.getGateImageViews().entrySet().stream()
-                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
-                .forEach(entry -> {
-                    LogicGate gate = entry.getValue();
-                    clipboard.add(gate.getGateClipboardData());
-                });
-    }
+    @Override
+    public void undo() {
+        for (Line connection : pastedConnections) {
+            canvas.getChildren().remove(connection);
+            LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
+            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
+            if (sourceGate != null && targetGate != null) {
+                int index = targetGate.findInputConnectionIndex(connection);
+                if (index != -1) {
+                    sourceGate.removeOutputConnection(connection);
+                    targetGate.removeInputConnection(connection, index);
+                    targetGate.removeInput(sourceGate);
+                }
+            }
+            canvas.getLineToStartGateMap().remove(connection);
+        }
 
-    public List<ClipboardData> getClipboard() {
-        return clipboard;
+        for (LogicGate gate : pastedGates) {
+            canvas.getGateManager().removeGate(gate.getImageView());
+        }
     }
 }

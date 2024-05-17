@@ -37,6 +37,7 @@ public class SwitchGate extends LogicGate {
     public void toggle() {
         CommandManager commandManager = canvas.getCommandManager();
         commandManager.executeCommand(new ToggleSwitchStateCommand(this));
+        propagateStateChange();
     }
 
     public void updateOutputConnectionsColor() {
