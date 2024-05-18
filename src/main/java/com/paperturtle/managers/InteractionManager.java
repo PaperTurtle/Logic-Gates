@@ -2,7 +2,6 @@ package com.paperturtle.managers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.Lightbulb;
@@ -22,7 +21,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -66,32 +64,6 @@ public class InteractionManager {
     public InteractionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
         this.dragManager = new DragManager(canvas);
-    }
-
-    /**
-     * Handles mouse pressed events for a logic gate.
-     * 
-     * @param imageView the ImageView of the gate
-     * @param gate      the logic gate
-     * @param event     the mouse event
-     */
-    private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
-        if (highlightedGate != null && highlightedGate != gate) {
-            highlightedGate.getImageView().getStyleClass().remove("selected");
-        }
-        highlightedGate = gate;
-
-        if (!imageView.getStyleClass().contains("selected")) {
-            imageView.getStyleClass().add("selected");
-        }
-
-        double offsetX = event.getSceneX() - imageView.getLayoutX();
-        double offsetY = event.getSceneY() - imageView.getLayoutY();
-        imageView.setUserData(new Object[] { offsetX, offsetY, gate });
-
-        if (event.getButton() == MouseButton.SECONDARY) {
-            canvas.getContextMenuManager().showContextMenu(imageView, gate, event);
-        }
     }
 
     /**

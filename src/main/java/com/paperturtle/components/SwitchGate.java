@@ -6,12 +6,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import java.util.List;
 
 import com.paperturtle.CircuitCanvas;
 import com.paperturtle.commands.ToggleSwitchStateCommand;
-import com.paperturtle.managers.CommandManager;
 import com.paperturtle.utils.SvgUtil;
 
 import java.util.ArrayList;
@@ -38,12 +36,12 @@ public class SwitchGate extends LogicGate {
     /**
      * The image representing the off state of the switch gate.
      */
-    private Image offImage;
+    private final Image offImage;
 
     /**
      * The image representing the on state of the switch gate.
      */
-    private Image onImage;
+    private final Image onImage;
 
     /**
      * A flag indicating whether the switch gate is currently selected.
@@ -78,8 +76,7 @@ public class SwitchGate extends LogicGate {
      * Toggles the state of the Switch gate.
      */
     public void toggle() {
-        CommandManager commandManager = canvas.getCommandManager();
-        commandManager.executeCommand(new ToggleSwitchStateCommand(this));
+        canvas.getCommandManager().executeCommand(new ToggleSwitchStateCommand(this));
         propagateStateChange();
     }
 
@@ -88,9 +85,7 @@ public class SwitchGate extends LogicGate {
      */
     public void updateOutputConnectionsColor() {
         Color lineColor = state ? Color.RED : Color.BLACK;
-        for (Line line : outputConnections) {
-            line.setStroke(lineColor);
-        }
+        outputConnections.forEach(line -> line.setStroke(lineColor));
     }
 
     /**
@@ -112,7 +107,7 @@ public class SwitchGate extends LogicGate {
         }
         if (outputMarker != null) {
             canvas.getChildren().add(outputMarker);
-            ((CircuitCanvas) canvas).getInteractionManager().setupOutputInteraction(outputMarker, this);
+            this.canvas.getInteractionManager().setupOutputInteraction(outputMarker, this);
             updateMarkerPosition();
         }
     }
@@ -143,10 +138,10 @@ public class SwitchGate extends LogicGate {
 
     @Override
     public void propagateStateChange() {
-        for (LogicGate outputGate : outputGates) {
-            outputGate.evaluate();
-            outputGate.propagateStateChange();
-        }
+        outputGates.forEach(gate -> {
+            gate.evaluate();
+            gate.propagateStateChange();
+        });
     }
 
     @Override

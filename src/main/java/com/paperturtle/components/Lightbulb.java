@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.paperturtle.utils.SvgUtil;
 
@@ -51,10 +52,7 @@ public class Lightbulb extends LogicGate {
         offImage = SvgUtil.loadSvgImage("/com/paperturtle/LIGHTBULB_ANSI_Labelled.svg");
         onImage = SvgUtil.loadSvgImage("/com/paperturtle/LIGHTBULB_ON_ANSI_Labelled.svg");
         imageView = new javafx.scene.image.ImageView(offImage);
-        for (Point2D point : inputPoints) {
-            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-            inputMarkers.add(marker);
-        }
+        initializeMarkers();
     }
 
     /**
@@ -62,10 +60,9 @@ public class Lightbulb extends LogicGate {
      */
     private void initializeMarkers() {
         inputMarkers.clear();
-        for (Point2D point : inputPoints) {
-            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-            inputMarkers.add(marker);
-        }
+        inputMarkers.addAll(inputPoints.stream()
+                .map(point -> new Circle(point.getX(), point.getY(), 5, Color.BLUE))
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -102,11 +99,11 @@ public class Lightbulb extends LogicGate {
             canvas.getChildren().add(imageView);
         }
         initializeMarkers();
-        for (Circle marker : inputMarkers) {
+        inputMarkers.forEach(marker -> {
             if (marker != null) {
                 canvas.getChildren().add(marker);
             }
-        }
+        });
         updateMarkerPosition();
     }
 
@@ -142,16 +139,13 @@ public class Lightbulb extends LogicGate {
     @Override
     public void addInput(LogicGate input) {
         super.addInput(input);
-        this.evaluate();
-        this.updateVisualState();
+        evaluate();
     }
 
     @Override
     public void removeInput(LogicGate input) {
-        if (inputs.contains(input)) {
-            inputs.remove(input);
+        if (inputs.remove(input)) {
             evaluate();
-            updateVisualState();
         }
     }
 
@@ -176,9 +170,7 @@ public class Lightbulb extends LogicGate {
     @Override
     public void propagateStateChange() {
         if (evaluate()) {
-            for (LogicGate gate : outputGates) {
-                gate.propagateStateChange();
-            }
+            outputGates.forEach(LogicGate::propagateStateChange);
         }
     }
 

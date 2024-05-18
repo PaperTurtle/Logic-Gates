@@ -3,6 +3,7 @@ package com.paperturtle.components;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.paperturtle.utils.SvgUtil;
 
@@ -55,10 +56,7 @@ public class FourBitDigitGate extends LogicGate {
                 SvgUtil.loadSvgImage("/com/paperturtle/FOURBITDIGIT_3_ANSI_Labelled.svg"),
                 SvgUtil.loadSvgImage("/com/paperturtle/FOURBITDIGIT_4_ANSI_Labelled.svg"));
         imageView = new ImageView(images.get(0));
-        for (Point2D point : inputPoints) {
-            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-            inputMarkers.add(marker);
-        }
+        initializeMarkers();
     }
 
     /**
@@ -66,10 +64,9 @@ public class FourBitDigitGate extends LogicGate {
      */
     private void initializeMarkers() {
         inputMarkers.clear();
-        for (Point2D point : inputPoints) {
-            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-            inputMarkers.add(marker);
-        }
+        inputMarkers.addAll(inputPoints.stream()
+                .map(point -> new Circle(point.getX(), point.getY(), 5, Color.BLUE))
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -88,8 +85,7 @@ public class FourBitDigitGate extends LogicGate {
             int activeCount = (int) inputs.stream().filter(LogicGate::getOutput).count();
             if (activeCount != previousActiveCount) {
                 previousActiveCount = activeCount;
-                int index = Math.min(activeCount, images.size() - 1);
-                imageView.setImage(images.get(index));
+                imageView.setImage(images.get(Math.min(activeCount, images.size() - 1)));
                 updateMarkerPosition();
             }
         }
@@ -101,11 +97,11 @@ public class FourBitDigitGate extends LogicGate {
             canvas.getChildren().add(imageView);
         }
         initializeMarkers();
-        for (Circle marker : inputMarkers) {
+        inputMarkers.forEach(marker -> {
             if (marker != null) {
                 canvas.getChildren().add(marker);
             }
-        }
+        });
         updateMarkerPosition();
     }
 
@@ -113,7 +109,7 @@ public class FourBitDigitGate extends LogicGate {
      * Updates the position of the input markers.
      */
     private void updateMarkerPosition() {
-        if (imageView != null && inputMarkers != null) {
+        if (imageView != null) {
             for (int i = 0; i < inputMarkers.size(); i++) {
                 Circle marker = inputMarkers.get(i);
                 Point2D inputPoint = inputPoints.get(i);
@@ -138,17 +134,14 @@ public class FourBitDigitGate extends LogicGate {
     public void addInput(LogicGate input) {
         super.addInput(input);
         input.addOutputGate(this);
-        this.evaluate();
-        this.updateVisualState();
+        evaluate();
     }
 
     @Override
     public void removeInput(LogicGate input) {
-        if (inputs.contains(input)) {
-            inputs.remove(input);
-            this.evaluate();
-            this.updateVisualState();
-            this.propagateStateChange();
+        if (inputs.remove(input)) {
+            evaluate();
+            propagateStateChange();
         }
     }
 
@@ -164,9 +157,7 @@ public class FourBitDigitGate extends LogicGate {
     @Override
     public void propagateStateChange() {
         if (evaluate()) {
-            for (LogicGate gate : outputGates) {
-                gate.propagateStateChange();
-            }
+            outputGates.forEach(LogicGate::propagateStateChange);
         }
     }
 
