@@ -11,7 +11,28 @@ import com.paperturtle.components.TextLabel;
 
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Deserializer for TextLabel objects from JSON.
+ * Implements the JsonDeserializer interface to provide custom deserialization
+ * logic.
+ * 
+ * @see TextLabel
+ * @see JsonDeserializer
+ * @see com.google.gson.Gson
+ * @see TextLabelSerializer
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class TextLabelDeserializer implements JsonDeserializer<TextLabel> {
+    /**
+     * Deserializes a JSON element into a TextLabel object.
+     * 
+     * @param json    the JSON element to deserialize
+     * @param typeOfT the type of the Object to deserialize to
+     * @param context the context of the deserialization
+     * @return the deserialized TextLabel object
+     * @throws JsonParseException if the JSON is not in the expected format
+     */
     @Override
     public TextLabel deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {

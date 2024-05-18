@@ -10,7 +10,27 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import javafx.geometry.Point2D;
 
+/**
+ * Deserializer for Point2D objects from JSON.
+ * Implements the JsonDeserializer interface to provide custom deserialization
+ * logic.
+ * 
+ * @see JsonDeserializer
+ * @see com.google.gson.Gson
+ * @see Point2DSerializer
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class Point2DDeserializer implements JsonDeserializer<Point2D> {
+    /**
+     * Deserializes a JSON element into a Point2D object.
+     * 
+     * @param json    the JSON element to deserialize
+     * @param typeOfT the type of the Object to deserialize to
+     * @param context the context of the deserialization
+     * @return the deserialized Point2D object
+     * @throws JsonParseException if the JSON is not in the expected format
+     */
     @Override
     public Point2D deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {

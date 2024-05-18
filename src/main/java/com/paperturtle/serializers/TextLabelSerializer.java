@@ -8,7 +8,27 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.paperturtle.components.TextLabel;
 
+/**
+ * Serializer for TextLabel objects to JSON.
+ * Implements the JsonSerializer interface to provide custom serialization
+ * logic.
+ * 
+ * @see TextLabel
+ * @see JsonSerializer
+ * @see com.google.gson.Gson
+ * @see TextLabelDeserializer
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class TextLabelSerializer implements JsonSerializer<TextLabel> {
+    /**
+     * Serializes a TextLabel object into a JSON element.
+     * 
+     * @param src       the TextLabel object to serialize
+     * @param typeOfSrc the type of the source Object
+     * @param context   the context of the serialization
+     * @return the serialized JSON element
+     */
     @Override
     public JsonElement serialize(TextLabel src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
