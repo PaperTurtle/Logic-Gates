@@ -576,6 +576,7 @@ public class InteractionManager {
         selectionRect.setStrokeWidth(1);
         selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
         selectionRect.setVisible(false);
+        selectionRect.getStyleClass().add("selection-rectangle");
         canvas.getChildren().add(selectionRect);
         final double dragThreshold = 10.0;
 

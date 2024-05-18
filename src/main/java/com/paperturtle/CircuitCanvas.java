@@ -15,6 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -214,10 +215,19 @@ public class CircuitCanvas extends Pane {
     }
 
     public void clearCanvas() {
-        for (LogicGate gate : new ArrayList<>(gateImageViews.values())) {
-            gateManager.removeGate(gate.getImageView());
+        Node selectionRect = null;
+        for (Node node : this.getChildren()) {
+            if (node instanceof Rectangle && node.getStyleClass().contains("selection-rectangle")) {
+                selectionRect = node;
+                break;
+            }
         }
+
         this.getChildren().clear();
+        if (selectionRect != null) {
+            this.getChildren().add(selectionRect);
+        }
+
         gateImageViews.clear();
         gateMarkers.clear();
         lineToStartGateMap.clear();
