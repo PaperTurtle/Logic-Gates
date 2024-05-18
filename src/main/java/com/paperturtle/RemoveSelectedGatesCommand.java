@@ -1,5 +1,6 @@
 package com.paperturtle;
 
+import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Line;
 
@@ -13,6 +14,9 @@ public class RemoveSelectedGatesCommand implements Command {
     private List<LogicGate> removedGates = new ArrayList<>();
     private List<Line> removedConnections = new ArrayList<>();
     private List<TextLabel> removedLabels = new ArrayList<>();
+    private List<LogicGate> sourceGatesForConnections = new ArrayList<>();
+    private List<LogicGate> targetGatesForConnections = new ArrayList<>();
+    private List<Integer> inputIndices = new ArrayList<>();
 
     public RemoveSelectedGatesCommand(CircuitCanvas canvas) {
         this.canvas = canvas;
@@ -31,9 +35,22 @@ public class RemoveSelectedGatesCommand implements Command {
             LogicGate gate = canvas.getGate(imageView);
             if (gate != null) {
                 removedGates.add(gate);
-                removedConnections.addAll(gate.getOutputConnections());
-                removedConnections
-                        .addAll(gate.getInputConnections().stream().flatMap(List::stream).collect(Collectors.toList()));
+                for (Line connection : gate.getOutputConnections()) {
+                    removedConnections.add(connection);
+                    sourceGatesForConnections.add(gate);
+                    LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
+                    targetGatesForConnections.add(targetGate);
+                    inputIndices.add(targetGate != null ? targetGate.findInputConnectionIndex(connection) : -1);
+                }
+                for (List<Line> inputConnectionList : gate.getInputConnections()) {
+                    for (Line connection : inputConnectionList) {
+                        removedConnections.add(connection);
+                        LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
+                        sourceGatesForConnections.add(sourceGate);
+                        targetGatesForConnections.add(gate);
+                        inputIndices.add(gate != null ? gate.findInputConnectionIndex(connection) : -1);
+                    }
+                }
                 canvas.getGateManager().removeGate(imageView);
             }
         }
@@ -51,30 +68,52 @@ public class RemoveSelectedGatesCommand implements Command {
                 gate.getImageView().getStyleClass().add("selected");
             }
         }
-        for (Line connection : removedConnections) {
+
+        for (int i = 0; i < removedConnections.size(); i++) {
+            Line connection = removedConnections.get(i);
+            LogicGate sourceGate = sourceGatesForConnections.get(i);
+            LogicGate targetGate = targetGatesForConnections.get(i);
+            int inputIndex = inputIndices.get(i);
+
+            if (sourceGate != null) {
+                sourceGate.addOutputConnection(connection);
+            }
+
+            if (targetGate != null && inputIndex != -1) {
+                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+                Point2D targetPos = targetGate.getInputMarkers().get(inputIndex).localToParent(
+                        targetGate.getInputMarkers().get(inputIndex).getCenterX(),
+                        targetGate.getInputMarkers().get(inputIndex).getCenterY());
+
+                connection.setStartX(sourcePos.getX());
+                connection.setStartY(sourcePos.getY());
+                connection.setEndX(targetPos.getX());
+                connection.setEndY(targetPos.getY());
+
+                targetGate.addInputConnection(connection, inputIndex);
+                targetGate.addInput(sourceGate);
+            }
+
             if (!canvas.getChildren().contains(connection)) {
                 canvas.getChildren().add(connection);
             }
-            LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
-            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
-            if (sourceGate != null && targetGate != null) {
-                int index = targetGate.findInputConnectionIndex(connection);
-                if (index != -1) {
-                    sourceGate.addOutputConnection(connection);
-                    targetGate.addInputConnection(connection, index);
-                    targetGate.addInput(sourceGate);
-                }
-            }
+
             canvas.getLineToStartGateMap().put(connection, sourceGate);
         }
+
         for (TextLabel label : removedLabels) {
             canvas.drawTextLabel(label, label.getLayoutX(), label.getLayoutY());
             if (!label.getStyleClass().contains("selected")) {
                 label.getStyleClass().add("selected");
             }
         }
+
         removedGates.clear();
         removedConnections.clear();
         removedLabels.clear();
+        sourceGatesForConnections.clear();
+        targetGatesForConnections.clear();
+        inputIndices.clear();
     }
 }

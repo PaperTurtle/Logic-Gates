@@ -82,6 +82,8 @@ public class App extends Application {
         MenuItem pasteItem = new MenuItem("Paste");
         MenuItem deleteItem = new MenuItem("Delete");
 
+        undoItem.setOnAction(e -> circuitCanvas.getCommandManager().undo());
+        redoItem.setOnAction(e -> circuitCanvas.getCommandManager().redo());
         copyItem.setOnAction(e -> circuitCanvas.getClipboardManager().copySelectedGatesToClipboard());
         pasteItem.setOnAction(e -> circuitCanvas.getClipboardManager().pasteGatesFromClipboard());
         deleteItem.setOnAction(e -> circuitCanvas.getGateManager().removeSelectedGates());
@@ -101,7 +103,9 @@ public class App extends Application {
                     "Ctrl+C: Copy selected gates\n" +
                             "Ctrl+V: Paste gates from clipboard\n" +
                             "Ctrl+X: Cut selected gates\n" +
-                            "Ctrl+A: Select all components",
+                            "Ctrl+A: Select all components\n" +
+                            "Ctrl+Z: Undo\n" +
+                            "Ctrl+Y: Redo\n",
                     Alert.AlertType.INFORMATION);
         });
 
