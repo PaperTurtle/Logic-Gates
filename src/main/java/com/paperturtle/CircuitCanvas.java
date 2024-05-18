@@ -29,16 +29,27 @@ import com.paperturtle.components.SwitchGate;
 import com.paperturtle.components.TextLabel;
 import com.paperturtle.data.GateData;
 import com.paperturtle.data.GateData.ConnectionData;
-import com.paperturtle.managers.ClipboardManager;
-import com.paperturtle.managers.CommandManager;
-import com.paperturtle.managers.ConnectionManager;
-import com.paperturtle.managers.ContextMenuManager;
-import com.paperturtle.managers.GateManager;
-import com.paperturtle.managers.InteractionManager;
-import com.paperturtle.managers.KeyboardShortcutManager;
-import com.paperturtle.managers.SelectionManager;
+import com.paperturtle.managers.*;
 import com.paperturtle.utils.CircuitComponent;
 
+/**
+ * The CircuitCanvas class represents the canvas on which logic gates and
+ * connections are drawn and managed.
+ * It extends the JavaFX Pane class and provides methods to draw, load, and
+ * manage gates and connections.
+ * 
+ * @see LogicGate
+ * @see ClipboardManager
+ * @see CommandManager
+ * @see ConnectionManager
+ * @see ContextMenuManager
+ * @see GateManager
+ * @see InteractionManager
+ * @see KeyboardShortcutManager
+ * @see SelectionManager
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class CircuitCanvas extends Pane {
     private Line currentLine;
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
@@ -57,6 +68,13 @@ public class CircuitCanvas extends Pane {
     private ClipboardManager clipboardManager;
     private ContextMenuManager contextMenuManager;
 
+    /**
+     * Constructs a CircuitCanvas with the specified width, height, and scroll pane.
+     * 
+     * @param width      the width of the canvas
+     * @param height     the height of the canvas
+     * @param scrollPane the scroll pane that contains the canvas
+     */
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
         this.scrollPane = scrollPane;
@@ -75,10 +93,16 @@ public class CircuitCanvas extends Pane {
         selectionManager.initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
-
         new KeyboardShortcutManager(this);
     }
 
+    /**
+     * Draws a logic gate at the specified coordinates on the canvas.
+     * 
+     * @param gate the logic gate to draw
+     * @param x    the x-coordinate
+     * @param y    the y-coordinate
+     */
     public void drawGate(LogicGate gate, double x, double y) {
         gate.createVisualRepresentation(this);
         gate.setPosition(x, y);
@@ -89,6 +113,13 @@ public class CircuitCanvas extends Pane {
         }
     }
 
+    /**
+     * Draws a text label at the specified coordinates on the canvas.
+     * 
+     * @param textLabel the text label to draw
+     * @param x         the x-coordinate
+     * @param y         the y-coordinate
+     */
     public void drawTextLabel(TextLabel textLabel, double x, double y) {
         this.getChildren().add(textLabel);
         textLabel.setLayoutX(x);
@@ -97,11 +128,19 @@ public class CircuitCanvas extends Pane {
         interactionManager.setupDragHandlersForLabel(textLabel);
     }
 
+    /**
+     * Schedules an update for the specified logic gate.
+     * 
+     * @param gate the logic gate to update
+     */
     public void scheduleUpdate(LogicGate gate) {
         gatesToBeUpdated.add(gate);
         Platform.runLater(this::propagateUpdates);
     }
 
+    /**
+     * Propagates updates for all gates that need to be updated.
+     */
     public void propagateUpdates() {
         while (!gatesToBeUpdated.isEmpty()) {
             Set<LogicGate> currentBatch = new HashSet<>(gatesToBeUpdated);
@@ -110,6 +149,11 @@ public class CircuitCanvas extends Pane {
         }
     }
 
+    /**
+     * Gets the data for all gates on the canvas.
+     * 
+     * @return a list of GateData objects representing all gates
+     */
     public List<GateData> getAllGateData() {
         List<GateData> allData = new ArrayList<>();
         for (LogicGate gate : gateImageViews.values()) {
@@ -119,6 +163,11 @@ public class CircuitCanvas extends Pane {
         return allData;
     }
 
+    /**
+     * Gets all text labels on the canvas.
+     * 
+     * @return a list of TextLabel objects representing all text labels
+     */
     public List<TextLabel> getAllTextLabels() {
         List<TextLabel> allLabels = new ArrayList<>();
         for (Node node : this.getChildren()) {
@@ -129,6 +178,11 @@ public class CircuitCanvas extends Pane {
         return allLabels;
     }
 
+    /**
+     * Loads components onto the canvas from a list of CircuitComponent objects.
+     * 
+     * @param components the list of components to load
+     */
     public void loadComponents(List<CircuitComponent> components) {
         clearCanvas();
         Map<String, LogicGate> createdGates = new HashMap<>();
@@ -197,6 +251,13 @@ public class CircuitCanvas extends Pane {
         }
     }
 
+    /**
+     * Normalizes the type of a gate by removing the "Gate" suffix and converting to
+     * uppercase.
+     * 
+     * @param type the type to normalize
+     * @return the normalized type
+     */
     public String normalizeType(String type) {
         if (type.endsWith("Gate")) {
             type = type.substring(0, type.length() - 4);
@@ -204,15 +265,28 @@ public class CircuitCanvas extends Pane {
         return type.toUpperCase();
     }
 
+    /**
+     * Checks if the canvas is empty.
+     * 
+     * @return true if the canvas is empty, false otherwise
+     */
     public boolean isEmpty() {
         return gateImageViews.isEmpty();
     }
 
+    /**
+     * Removes a text label from the canvas.
+     * 
+     * @param textLabel the text label to remove
+     */
     public void removeTextLabel(TextLabel textLabel) {
         this.getChildren().remove(textLabel);
         textLabels.remove(textLabel);
     }
 
+    /**
+     * Clears all components from the canvas.
+     */
     public void clearCanvas() {
         Node selectionRect = null;
         for (Node node : this.getChildren()) {
@@ -232,94 +306,202 @@ public class CircuitCanvas extends Pane {
         lineToStartGateMap.clear();
     }
 
+    /**
+     * Gets the last mouse coordinates recorded on the canvas.
+     * 
+     * @return the last mouse coordinates
+     */
     public Point2D getLastMouseCoordinates() {
         return lastMouseCoordinates;
     }
 
+    /**
+     * Sets the last mouse coordinates recorded on the canvas.
+     * 
+     * @param coordinates the coordinates to set
+     */
     public void setLastMouseCoordinates(Point2D coordinates) {
         this.lastMouseCoordinates = coordinates;
     }
 
+    /**
+     * Adds a gate ImageView and its corresponding logic gate to the canvas.
+     * 
+     * @param imageView the ImageView of the gate
+     * @param gate      the logic gate
+     */
     public void addGateImageView(ImageView imageView, LogicGate gate) {
         gateImageViews.put(imageView, gate);
     }
 
+    /**
+     * Gets the logic gate corresponding to the specified ImageView.
+     * 
+     * @param imageView the ImageView of the gate
+     * @return the logic gate
+     */
     public LogicGate getGate(ImageView imageView) {
         return gateImageViews.get(imageView);
     }
 
+    /**
+     * Removes the specified gate ImageView from the canvas.
+     * 
+     * @param imageView the ImageView to remove
+     */
     public void removeGateImageView(ImageView imageView) {
         gateImageViews.remove(imageView);
     }
 
-    public ScrollPane getScrollPane() {
-        return scrollPane;
-    }
-
+    /**
+     * Gets the map of gate ImageViews to logic gates.
+     * 
+     * @return the map of gate ImageViews to logic gates
+     */
     public Map<ImageView, LogicGate> getGateImageViews() {
         return gateImageViews;
     }
 
+    /**
+     * Gets the list of text labels on the canvas.
+     * 
+     * @return the list of text labels
+     */
     public List<TextLabel> getTextLabels() {
         return textLabels;
     }
 
+    /**
+     * Gets the currently open context menu on the canvas.
+     * 
+     * @return the currently open context menu
+     */
     public ContextMenu getOpenContextMenu() {
         return openContextMenu;
     }
 
+    /**
+     * Sets the currently open context menu on the canvas.
+     * 
+     * @param openContextMenu the context menu to set
+     */
     public void setOpenContextMenu(ContextMenu openContextMenu) {
         this.openContextMenu = openContextMenu;
     }
 
+    /**
+     * Gets the current line being drawn on the canvas.
+     * 
+     * @return the current line
+     */
     public Line getCurrentLine() {
         return currentLine;
     }
 
+    /**
+     * Sets the current line being drawn on the canvas.
+     * 
+     * @param currentLine the current line to set
+     */
     public void setCurrentLine(Line currentLine) {
         this.currentLine = currentLine;
     }
 
+    /**
+     * Gets the map of gate markers.
+     * 
+     * @return the map of gate markers
+     */
     public Map<ImageView, List<Circle>> getGateMarkers() {
         return gateMarkers;
     }
 
+    /**
+     * Gets the map of lines to their starting gates.
+     * 
+     * @return the map of lines to their starting gates
+     */
     public Map<Line, LogicGate> getLineToStartGateMap() {
         return lineToStartGateMap;
     }
 
+    /**
+     * Gets the set of gates to be updated.
+     * 
+     * @return the set of gates to be updated
+     */
     public Set<LogicGate> getGatesToBeUpdated() {
         return gatesToBeUpdated;
     }
 
+    /**
+     * Gets the command manager.
+     * 
+     * @return the command manager
+     */
     public CommandManager getCommandManager() {
         return commandManager;
     }
 
+    /**
+     * Gets the interaction manager.
+     * 
+     * @return the interaction manager
+     */
     public InteractionManager getInteractionManager() {
         return interactionManager;
     }
 
+    /**
+     * Gets the connection manager.
+     * 
+     * @return the connection manager
+     */
     public ConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
+    /**
+     * Gets the gate manager.
+     * 
+     * @return the gate manager
+     */
     public GateManager getGateManager() {
         return gateManager;
     }
 
+    /**
+     * Gets the clipboard manager.
+     * 
+     * @return the clipboard manager
+     */
     public ClipboardManager getClipboardManager() {
         return clipboardManager;
     }
 
+    /**
+     * Gets the selection manager.
+     * 
+     * @return the selection manager
+     */
     public SelectionManager getSelectionManager() {
         return selectionManager;
     }
 
+    /**
+     * Gets the context menu manager.
+     * 
+     * @return the context menu manager
+     */
     public ContextMenuManager getContextMenuManager() {
         return contextMenuManager;
     }
 
+    /**
+     * Gets the list of selected gates on the canvas.
+     * 
+     * @return the list of selected gates
+     */
     public List<LogicGate> getSelectedGates() {
         return gateImageViews.entrySet().stream()
                 .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
