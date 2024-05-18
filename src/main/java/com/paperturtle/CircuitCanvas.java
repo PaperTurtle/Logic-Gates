@@ -190,6 +190,9 @@ public class CircuitCanvas extends Pane {
                     this.getChildren().add(connectionLine);
                     sourceGate.addOutputConnection(connectionLine);
                     targetGate.addInputConnection(connectionLine, output.pointIndex);
+
+                    sourceGate.addOutputGate(targetGate);
+                    targetGate.addInput(sourceGate);
                 }
             } else if (component instanceof TextLabel) {
                 TextLabel textLabel = (TextLabel) component;
