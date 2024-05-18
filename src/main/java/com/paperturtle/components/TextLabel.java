@@ -352,6 +352,9 @@ public class TextLabel extends Group implements CircuitComponent {
 
     /**
      * Updates the size of the preview text and background.
+     * 
+     * @param previewText       the preview text to update.
+     * @param previewBackground the preview background to update.
      */
     private void updatePreviewSize(Text previewText, Rectangle previewBackground) {
         double textWidth = previewText.getBoundsInLocal().getWidth() + 20;

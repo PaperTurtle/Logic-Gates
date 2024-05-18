@@ -16,6 +16,12 @@ import java.io.ByteArrayOutputStream;
  */
 public class SvgUtil {
     /**
+     * Default constructor for SvgUtil.
+     */
+    public SvgUtil() {
+    }
+
+    /**
      * Loads an SVG file from the specified path and converts it into a JavaFX
      * Image.
      * 

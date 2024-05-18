@@ -21,6 +21,12 @@ import java.lang.reflect.Type;
  */
 public class Point2DSerializer implements JsonSerializer<Point2D> {
     /**
+     * Default constructor for Point2DSerializer.
+     */
+    public Point2DSerializer() {
+    }
+
+    /**
      * Serializes a Point2D object into a JSON element.
      * 
      * @param src       the Point2D object to serialize

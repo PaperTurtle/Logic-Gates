@@ -23,6 +23,12 @@ import javafx.geometry.Point2D;
  */
 public class Point2DDeserializer implements JsonDeserializer<Point2D> {
     /**
+     * Default constructor for Point2DDeserializer.
+     */
+    public Point2DDeserializer() {
+    }
+
+    /**
      * Deserializes a JSON element into a Point2D object.
      * 
      * @param json    the JSON element to deserialize

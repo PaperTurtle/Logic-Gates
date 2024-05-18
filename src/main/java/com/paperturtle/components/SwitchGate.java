@@ -129,6 +129,8 @@ public class SwitchGate extends LogicGate {
 
     /**
      * Handles the mouse click event on the Switch gate.
+     * 
+     * @param event the mouse click event.
      */
     private void handleMouseClicked(MouseEvent event) {
         if (!isSelected) {

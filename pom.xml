@@ -143,9 +143,6 @@
                     <windowtitle>Logic Gate Simulator</windowtitle>
                     <linksource>true</linksource>
                     <author>true</author>
-                    <additionalOptions>
-                        <additionalOption>-Xdoclint:none</additionalOption>
-                    </additionalOptions>
                 </configuration>
                 <executions>
                     <execution>

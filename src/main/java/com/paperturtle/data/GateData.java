@@ -50,7 +50,14 @@ public class GateData implements CircuitComponent {
      * Stores the ID of the gate and the index of the connection point.
      */
     public static class ConnectionData {
+        /**
+         * The ID of the connected gate.
+         */
         public String gateId;
+
+        /**
+         * The index of the connection point.
+         */
         public int pointIndex;
 
         /**

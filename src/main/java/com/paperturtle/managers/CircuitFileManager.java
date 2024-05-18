@@ -56,8 +56,8 @@ public class CircuitFileManager {
     /**
      * Saves the current circuit to a JSON file.
      * 
-     * @param file  The file path where the circuit should be saved.
-     * @param gates The list of LogicGates to save.
+     * @param file       The file path where the circuit should be saved.
+     * @param components The list of CircuitComponents to save.
      * @throws IOException If an I/O error occurs.
      */
     public void saveCircuit(String file, List<CircuitComponent> components) throws IOException {

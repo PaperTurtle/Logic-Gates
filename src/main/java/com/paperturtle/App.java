@@ -48,11 +48,30 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.ButtonBar.ButtonData;
 
 public class App extends Application {
-
+    /**
+     * The scene containing the user interface of the application.
+     */
     private Scene scene;
+
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas circuitCanvas;
+
+    /**
+     * The image view used for displaying a floating image (e.g., when dragging a
+     * logic gate).
+     */
     private ImageView floatingImageView;
+
+    /**
+     * The main layout container for the application's user interface.
+     */
     private BorderPane borderPane = new BorderPane();
+
+    /**
+     * The sidebar containing the controls for the application.
+     */
     private VBox sidebar;
 
     @Override
@@ -238,6 +257,11 @@ public class App extends Application {
         circuitCanvas.requestFocus();
     }
 
+    /**
+     * Initializes the sidebar with the controls for the application.
+     * 
+     * @param sidebar The sidebar to initialize.
+     */
     private void initializeSidebar(VBox sidebar) {
         VBox inputsSection = new VBox(5);
         VBox outputsSection = new VBox(5);
@@ -269,12 +293,24 @@ public class App extends Application {
         addItemsToSection(utilitiesSection, utilityTypes);
     }
 
+    /**
+     * Creates a label for a section in the sidebar.
+     * 
+     * @param text The text of the label.
+     * @return The label for the section.
+     */
     private Label createSectionLabel(String text) {
         Label label = new Label(text);
         label.getStyleClass().add("label-style");
         return label;
     }
 
+    /**
+     * Creates an image view from a text label.
+     * 
+     * @param textLabel The text label to create an image view from.
+     * @return The image view created from the text label.
+     */
     private ImageView createImageViewFromTextLabel(TextLabel textLabel) {
         SnapshotParameters parameters = new SnapshotParameters();
         parameters.setFill(Color.TRANSPARENT);
@@ -293,6 +329,12 @@ public class App extends Application {
         return imageView;
     }
 
+    /**
+     * Adds items to a section in the sidebar.
+     * 
+     * @param section The section to add items to.
+     * @param types   The types of items to add.
+     */
     private void addItemsToSection(VBox section, String[] types) {
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(5, 0, 5, 0));
@@ -359,6 +401,12 @@ public class App extends Application {
         section.getChildren().add(gridPane);
     }
 
+    /**
+     * Returns the tooltip text for a given type.
+     * 
+     * @param type The type of the component.
+     * @return The tooltip text for the given type.
+     */
     private String getTooltipText(String type) {
         switch (type) {
             case "AND":
@@ -386,6 +434,12 @@ public class App extends Application {
         }
     }
 
+    /**
+     * Creates a floating image for dragging a logic gate.
+     * 
+     * @param sourceImageView The source image view.
+     * @param event           The mouse event.
+     */
     private void createFloatingImage(ImageView sourceImageView, MouseEvent event) {
         floatingImageView = new ImageView(sourceImageView.getImage());
         floatingImageView.setId(sourceImageView.getId());
@@ -400,6 +454,11 @@ public class App extends Application {
         borderPane.getChildren().add(floatingImageView);
     }
 
+    /**
+     * Saves the current work to a file.
+     * 
+     * @param stage The stage.
+     */
     private void saveCurrentWork(Stage stage) {
         List<GateData> gateData = circuitCanvas.getAllGateData();
         List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
@@ -430,6 +489,11 @@ public class App extends Application {
         }
     }
 
+    /**
+     * Opens a new file.
+     * 
+     * @param stage The stage.
+     */
     private void openNewFile(Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Circuit File");
@@ -447,6 +511,13 @@ public class App extends Application {
         }
     }
 
+    /**
+     * Shows an alert dialog.
+     * 
+     * @param title     The title of the alert.
+     * @param content   The content of the alert.
+     * @param alertType The type of the alert.
+     */
     private void showAlert(String title, String content, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

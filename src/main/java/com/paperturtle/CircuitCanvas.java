@@ -130,9 +130,8 @@ public class CircuitCanvas extends Pane {
     /**
      * Constructs a CircuitCanvas with the specified width, height, and scroll pane.
      * 
-     * @param width      the width of the canvas
-     * @param height     the height of the canvas
-     * @param scrollPane the scroll pane that contains the canvas
+     * @param width  the width of the canvas
+     * @param height the height of the canvas
      */
     public CircuitCanvas(double width, double height) {
         super();

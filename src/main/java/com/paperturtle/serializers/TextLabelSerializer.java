@@ -22,6 +22,12 @@ import com.paperturtle.components.TextLabel;
  */
 public class TextLabelSerializer implements JsonSerializer<TextLabel> {
     /**
+     * Default constructor for TextLabelSerializer.
+     */
+    public TextLabelSerializer() {
+    }
+
+    /**
      * Serializes a TextLabel object into a JSON element.
      * 
      * @param src       the TextLabel object to serialize

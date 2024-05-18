@@ -25,6 +25,12 @@ import javafx.scene.text.TextAlignment;
  */
 public class TextLabelDeserializer implements JsonDeserializer<TextLabel> {
     /**
+     * Default constructor for TextLabelDeserializer.
+     */
+    public TextLabelDeserializer() {
+    }
+
+    /**
      * Deserializes a JSON element into a TextLabel object.
      * 
      * @param json    the JSON element to deserialize

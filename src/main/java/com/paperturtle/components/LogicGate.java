@@ -120,6 +120,8 @@ public abstract class LogicGate implements CircuitComponent {
 
     /**
      * Abstract method to compute the output based on the inputs.
+     * 
+     * @return the output of the gate.
      */
     public abstract boolean evaluate();
 
