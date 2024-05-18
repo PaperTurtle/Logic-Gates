@@ -14,6 +14,18 @@ import com.paperturtle.components.Lightbulb;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.TextLabel;
 
+/**
+ * Command to remove all selected gates and their connections from the circuit
+ * canvas.
+ * Implements the Command interface to provide execute and undo functionality.
+ * 
+ * @see Command
+ * @see CircuitCanvas
+ * @see LogicGate
+ * @see TextLabel
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class RemoveSelectedGatesCommand implements Command {
     private CircuitCanvas canvas;
     private List<LogicGate> removedGates = new ArrayList<>();
@@ -23,10 +35,19 @@ public class RemoveSelectedGatesCommand implements Command {
     private List<LogicGate> targetGatesForConnections = new ArrayList<>();
     private List<Integer> inputIndices = new ArrayList<>();
 
+    /**
+     * Constructs a RemoveSelectedGatesCommand for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas from which the selected gates are removed
+     */
     public RemoveSelectedGatesCommand(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Executes the command to remove all selected gates and their connections from
+     * the canvas.
+     */
     @Override
     public void execute() {
         List<ImageView> selectedGates = canvas.getGateImageViews().entrySet().stream()
@@ -65,6 +86,10 @@ public class RemoveSelectedGatesCommand implements Command {
         }
     }
 
+    /**
+     * Undoes the command by re-adding the removed gates, connections, and labels to
+     * the canvas.
+     */
     @Override
     public void undo() {
         for (LogicGate gate : removedGates) {

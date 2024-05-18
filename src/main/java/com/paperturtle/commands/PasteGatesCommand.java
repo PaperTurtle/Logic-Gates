@@ -14,6 +14,15 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
+/**
+ * Command to paste logic gates and their connections from the clipboard onto
+ * the circuit canvas.
+ * Implements the Command interface to provide execute and undo functionality.
+ * 
+ * @see Command
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class PasteGatesCommand implements Command {
     private CircuitCanvas canvas;
     private List<ClipboardData> clipboardData;
@@ -24,6 +33,15 @@ public class PasteGatesCommand implements Command {
     private static double globalOffsetX = 0;
     private static double globalOffsetY = 0;
 
+    /**
+     * Constructs a PasteGatesCommand with the specified parameters.
+     * 
+     * @param canvas        the circuit canvas to which gates are pasted
+     * @param clipboardData the clipboard data representing gates and connections to
+     *                      be pasted
+     * @param offsetX       the x offset for pasting the gates
+     * @param offsetY       the y offset for pasting the gates
+     */
     public PasteGatesCommand(CircuitCanvas canvas, List<ClipboardData> clipboardData, double offsetX, double offsetY) {
         this.canvas = canvas;
         this.clipboardData = clipboardData;
@@ -31,6 +49,11 @@ public class PasteGatesCommand implements Command {
         this.offsetY = offsetY;
     }
 
+    /**
+     * Executes the command to paste logic gates and their connections onto the
+     * canvas.
+     * The gates and connections are positioned according to the provided offsets.
+     */
     @Override
     public void execute() {
         canvas.getGateImageViews().values().forEach(gate -> {
@@ -96,6 +119,10 @@ public class PasteGatesCommand implements Command {
         globalOffsetY += 30;
     }
 
+    /**
+     * Undoes the command by removing the pasted gates and connections from the
+     * canvas.
+     */
     @Override
     public void undo() {
         for (Line connection : pastedConnections) {

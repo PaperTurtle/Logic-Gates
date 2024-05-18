@@ -5,6 +5,14 @@ import com.paperturtle.components.LogicGate;
 
 import javafx.scene.shape.Line;
 
+/**
+ * Command to add a connection between two logic gates on a circuit canvas.
+ * Implements the Command interface to provide execute and undo functionality.
+ * 
+ * @see Command
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class AddConnectionCommand implements Command {
     private CircuitCanvas canvas;
     private LogicGate sourceGate;
@@ -12,6 +20,16 @@ public class AddConnectionCommand implements Command {
     private Line connectionLine;
     private int targetInputIndex;
 
+    /**
+     * Constructs an AddConnectionCommand with the specified parameters.
+     * 
+     * @param canvas           the circuit canvas on which the connection is added
+     * @param sourceGate       the source logic gate of the connection
+     * @param targetGate       the target logic gate of the connection
+     * @param connectionLine   the line representing the connection
+     * @param targetInputIndex the index of the target gate's input to which the
+     *                         connection is made
+     */
     public AddConnectionCommand(CircuitCanvas canvas, LogicGate sourceGate, LogicGate targetGate, Line connectionLine,
             int targetInputIndex) {
         this.canvas = canvas;
@@ -21,6 +39,11 @@ public class AddConnectionCommand implements Command {
         this.targetInputIndex = targetInputIndex;
     }
 
+    /**
+     * Executes the command to add a connection between the source and target logic
+     * gates.
+     * Updates the canvas and gate states accordingly.
+     */
     @Override
     public void execute() {
         if (!canvas.getChildren().contains(connectionLine)) {
@@ -43,6 +66,11 @@ public class AddConnectionCommand implements Command {
         canvas.scheduleUpdate(targetGate);
     }
 
+    /**
+     * Undoes the command by removing the connection between the source and target
+     * logic gates.
+     * Updates the canvas and gate states accordingly.
+     */
     @Override
     public void undo() {
         sourceGate.removeOutputConnection(connectionLine);
