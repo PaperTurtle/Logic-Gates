@@ -10,7 +10,6 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -59,28 +58,7 @@ public class CircuitCanvas extends Pane {
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
 
-        this.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.C && event.isControlDown()) {
-                clipboardManager.copySelectedGatesToClipboard();
-                event.consume();
-            } else if (event.getCode() == KeyCode.V && event.isControlDown()) {
-                commandManager.executeCommand(new PasteGatesCommand(this, clipboardManager.getClipboard(), 30, 30));
-                event.consume();
-            } else if (event.getCode() == KeyCode.X && event.isControlDown()) {
-                commandManager.executeCommand(new RemoveSelectedGatesCommand(this));
-                event.consume();
-            } else if (event.getCode() == KeyCode.A && event.isControlDown()) {
-                interactionManager.selectAllComponents();
-                event.consume();
-            } else if (event.getCode() == KeyCode.Z && event.isControlDown()) {
-                commandManager.undo();
-                event.consume();
-            } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
-                commandManager.redo();
-                event.consume();
-            }
-        });
-
+        new KeyboardShortcutManager(this);
     }
 
     public void drawGate(LogicGate gate, double x, double y) {
