@@ -5,7 +5,6 @@ import javafx.scene.layout.Pane;
 import java.util.List;
 
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -78,10 +77,6 @@ public class CircuitCanvas extends Pane {
             } else if (event.getCode() == KeyCode.Y && event.isControlDown()) {
                 commandManager.redo();
                 event.consume();
-            } else if (event.getCode() == KeyCode.H) {
-                for (LogicGate gate : gateImageViews.values()) {
-                    System.out.println(gate.getImageView().getStyleClass());
-                }
             }
         });
 
@@ -162,8 +157,10 @@ public class CircuitCanvas extends Pane {
                 GateData gateData = (GateData) component;
 
                 LogicGate sourceGate = createdGates.get(gateData.id);
-                if (sourceGate == null)
+                if (sourceGate == null) {
+                    System.out.println("Source gate not found for ID: " + gateData.id);
                     continue;
+                }
 
                 for (ConnectionData output : gateData.outputs) {
                     LogicGate targetGate = createdGates.get(output.gateId);
@@ -171,6 +168,13 @@ public class CircuitCanvas extends Pane {
                         System.out.println("Output gate not found for ID: " + output.gateId);
                         continue;
                     }
+
+                    if (output.pointIndex < 0 || output.pointIndex >= targetGate.getInputMarkers().size()) {
+                        System.out.println("Invalid point index: " + output.pointIndex + " for target gate: "
+                                + targetGate.getId());
+                        continue;
+                    }
+
                     Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
                             sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
                     Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
@@ -179,7 +183,7 @@ public class CircuitCanvas extends Pane {
 
                     Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(),
                             targetPos.getY());
-                    connectionLine.setStrokeWidth(2);
+                    connectionLine.setStrokeWidth(3.5);
                     connectionLine.setStroke(Color.BLACK);
 
                     this.getChildren().add(connectionLine);

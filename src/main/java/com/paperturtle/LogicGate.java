@@ -442,14 +442,25 @@ public abstract class LogicGate implements CircuitComponent {
         data.position = new Point2D(imageView.getX(), imageView.getY());
         data.state = currentState;
 
-        for (LogicGate input : inputs) {
-            data.inputs.add(
-                    new GateData.ConnectionData(input.getId(), input.outputGates.indexOf(this)));
+        System.out.println("Gate ID: " + data.id);
+
+        for (int i = 0; i < inputs.size(); i++) {
+            LogicGate input = inputs.get(i);
+            int pointIndex = i;
+            data.inputs.add(new GateData.ConnectionData(input.getId(), pointIndex));
         }
 
         for (LogicGate output : outputGates) {
-            data.outputs
-                    .add(new GateData.ConnectionData(output.getId(), output.inputs.indexOf(this)));
+            List<List<Line>> inputConnections = output.getInputConnections();
+            for (int i = 0; i < inputConnections.size(); i++) {
+                List<Line> connections = inputConnections.get(i);
+                for (Line connection : connections) {
+                    if (connection.getStartX() == this.getOutputMarker().getCenterX() &&
+                            connection.getStartY() == this.getOutputMarker().getCenterY()) {
+                        data.outputs.add(new GateData.ConnectionData(output.getId(), i));
+                    }
+                }
+            }
         }
 
         return data;

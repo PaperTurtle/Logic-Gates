@@ -111,13 +111,18 @@ public class App extends Application {
 
         Menu optionsMenu = new Menu("Options");
         MenuItem tableItem = new MenuItem("Generate Truth Table");
+        MenuItem clearItem = new MenuItem("Clear the canvas");
 
         tableItem.setOnAction(e -> {
             circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
         });
 
+        clearItem.setOnAction(e -> {
+            circuitCanvas.clearCanvas();
+        });
+
         fileMenu.getItems().addAll(openItem, saveItem, exitItem);
-        optionsMenu.getItems().addAll(tableItem);
+        optionsMenu.getItems().addAll(tableItem, clearItem);
         editMenu.getItems().addAll(undoItem, redoItem, copyItem, pasteItem, deleteItem);
         helpMenu.getItems().addAll(aboutItem, shortcutsItem);
         menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, helpMenu);
@@ -372,8 +377,6 @@ public class App extends Application {
         List<GateData> gateData = circuitCanvas.getAllGateData();
         List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
         List<CircuitComponent> components = new ArrayList<>();
-        System.out.println(textLabels);
-        System.out.println("Triggered");
         components.addAll(gateData);
         components.addAll(textLabels);
 
