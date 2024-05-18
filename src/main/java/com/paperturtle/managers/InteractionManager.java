@@ -38,8 +38,19 @@ import javafx.stage.Stage;
  * @author Seweryn Czabanowski
  */
 public class InteractionManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * A flag indicating whether a logic gate was just selected.
+     */
     private boolean justSelected = false;
+
+    /**
+     * The logic gate that is currently highlighted.
+     */
     private LogicGate highlightedGate = null;
 
     /**

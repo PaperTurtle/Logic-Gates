@@ -17,7 +17,6 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class LowConstantGate extends LogicGate {
-
     /**
      * Constructs a LowConstantGate object with predefined SVG image and output
      * point.

@@ -39,13 +39,45 @@ import javafx.scene.layout.StackPane;
  * @author Seweryn Czabanowski
  */
 public class TextLabel extends Group implements CircuitComponent {
+    /**
+     * The background rectangle of the text label.
+     */
     private Rectangle background;
+
+    /**
+     * The text of the label.
+     */
     private Text labelText;
+
+    /**
+     * The width of the text label.
+     */
     private double width;
+
+    /**
+     * The height of the text label.
+     */
     private double height;
+
+    /**
+     * A flag indicating whether the size of the text label is automatically
+     * adjusted to fit the text.
+     */
     private boolean isAutoSize;
+
+    /**
+     * The radio button for selecting fixed size mode.
+     */
     private RadioButton fixedSizeButton;
+
+    /**
+     * The text field for entering the width of the text label in fixed size mode.
+     */
     private TextField widthField;
+
+    /**
+     * The text field for entering the height of the text label in fixed size mode.
+     */
     private TextField heightField;
 
     /**

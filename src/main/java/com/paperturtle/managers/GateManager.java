@@ -22,6 +22,9 @@ import javafx.scene.shape.Line;
  * @author Seweryn Czabanowski
  */
 public class GateManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
 
     /**

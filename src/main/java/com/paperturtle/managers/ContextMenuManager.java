@@ -35,7 +35,14 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class ContextMenuManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The logic gate that is currently highlighted.
+     */
     private LogicGate highlightedGate = null;
 
     /**

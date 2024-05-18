@@ -30,10 +30,29 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class SwitchGate extends LogicGate {
+    /**
+     * The current state of the switch gate (true for on, false for off).
+     */
     private boolean state = false;
+
+    /**
+     * The image representing the off state of the switch gate.
+     */
     private Image offImage;
+
+    /**
+     * The image representing the on state of the switch gate.
+     */
     private Image onImage;
+
+    /**
+     * A flag indicating whether the switch gate is currently selected.
+     */
     private boolean isSelected = false;
+
+    /**
+     * The canvas on which the switch gate is drawn.
+     */
     private CircuitCanvas canvas;
 
     /**

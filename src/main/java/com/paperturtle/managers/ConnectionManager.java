@@ -30,7 +30,14 @@ import javafx.scene.shape.Line;
  * @author Seweryn Czabanowski
  */
 public class ConnectionManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The logic gate where the connection starts.
+     */
     private LogicGate startGate;
 
     /**

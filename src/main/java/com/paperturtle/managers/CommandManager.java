@@ -13,7 +13,14 @@ import com.paperturtle.commands.Command;
  * @author Seweryn Czabanowski
  */
 public class CommandManager {
+    /**
+     * The stack of executed commands that can be undone.
+     */
     private Stack<Command> undoStack = new Stack<>();
+
+    /**
+     * The stack of undone commands that can be redone.
+     */
     private Stack<Command> redoStack = new Stack<>();
 
     /**

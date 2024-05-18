@@ -15,6 +15,9 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class TriStateGate extends LogicGate {
+    /**
+     * Represents the enable state of the TriState gate.
+     */
     private boolean enable;
 
     /**

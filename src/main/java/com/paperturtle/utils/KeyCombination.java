@@ -12,7 +12,15 @@ import javafx.scene.input.KeyCode;
  * @author Seweryn Czabanowski
  */
 public class KeyCombination {
+    /**
+     * The key code that represents the key in this key combination.
+     */
     private final KeyCode keyCode;
+
+    /**
+     * A flag indicating whether the control key must be down for this key
+     * combination.
+     */
     private final boolean controlDown;
 
     /**

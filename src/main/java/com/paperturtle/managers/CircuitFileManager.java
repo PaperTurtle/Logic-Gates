@@ -33,6 +33,10 @@ import java.util.List;
  * @author Seweryn Czabanowski
  */
 public class CircuitFileManager {
+    /**
+     * An instance of Gson used for converting Java objects into their JSON
+     * representation and vice versa.
+     */
     private Gson gson = new Gson();
 
     /**

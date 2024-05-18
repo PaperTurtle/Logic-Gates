@@ -23,8 +23,19 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class FourBitDigitGate extends LogicGate {
+    /**
+     * The current state of the FourBitDigitGate (true for on, false for off).
+     */
     private boolean state = false;
+
+    /**
+     * The list of images representing the different states of the FourBitDigitGate.
+     */
     private List<Image> images;
+
+    /**
+     * The number of active inputs in the previous state of the FourBitDigitGate.
+     */
     private int previousActiveCount = 0;
 
     /**

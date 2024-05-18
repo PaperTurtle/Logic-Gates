@@ -19,7 +19,14 @@ import javafx.scene.input.KeyEvent;
  * @author Seweryn Czabanowski
  */
 public class KeyboardShortcutManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private final CircuitCanvas canvas;
+
+    /**
+     * A map associating each key combination with its corresponding action.
+     */
     private final Map<KeyCombination, Consumer<KeyEvent>> shortcuts = new HashMap<>();
 
     /**

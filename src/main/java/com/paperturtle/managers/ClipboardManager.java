@@ -23,7 +23,14 @@ import javafx.scene.shape.Line;
  * @author Seweryn Czabanowski
  */
 public class ClipboardManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The list of clipboard data representing the copied elements.
+     */
     private List<ClipboardData> clipboard = new ArrayList<>();
 
     /**

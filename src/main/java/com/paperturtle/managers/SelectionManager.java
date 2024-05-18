@@ -22,8 +22,19 @@ import javafx.scene.shape.Rectangle;
  * @author Seweryn Czabanowski
  */
 public class SelectionManager {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The rectangle used to visualize the selection area.
+     */
     private Rectangle selectionRect = new Rectangle();
+
+    /**
+     * A flag indicating whether a selection operation is currently in progress.
+     */
     private boolean isSelecting = false;
 
     /**

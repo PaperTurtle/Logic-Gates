@@ -25,8 +25,19 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public class Lightbulb extends LogicGate {
+    /**
+     * The current state of the lightbulb.
+     */
     private boolean state = false;
+
+    /**
+     * The image representing the off state of the lightbulb.
+     */
     private Image offImage;
+
+    /**
+     * The image representing the on state of the lightbulb.
+     */
     private Image onImage;
 
     /**

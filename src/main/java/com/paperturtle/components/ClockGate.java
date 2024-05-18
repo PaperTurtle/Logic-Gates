@@ -32,11 +32,34 @@ import javafx.animation.Timeline;
  * @author Seweryn Czabanowski
  */
 public class ClockGate extends LogicGate {
+    /**
+     * The current state of the ClockGate (true for on, false for off).
+     */
     private boolean state = false;
+
+    /**
+     * A flag indicating whether the ClockGate is currently running.
+     */
     private boolean isRunning = true;
+
+    /**
+     * The image representing the off state of the ClockGate.
+     */
     private Image offImage;
+
+    /**
+     * The image representing the on state of the ClockGate.
+     */
     private Image onImage;
+
+    /**
+     * The timeline used for scheduling the state changes of the ClockGate.
+     */
     private Timeline timeline;
+
+    /**
+     * The duration of the signal produced by the ClockGate, in seconds.
+     */
     private double signalDuration = 1.0;
 
     /**

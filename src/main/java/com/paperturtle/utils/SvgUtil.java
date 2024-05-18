@@ -15,7 +15,6 @@ import java.io.ByteArrayOutputStream;
  * @author Seweryn Czabanowski
  */
 public class SvgUtil {
-
     /**
      * Loads an SVG file from the specified path and converts it into a JavaFX
      * Image.
