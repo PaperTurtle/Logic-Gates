@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.application.Application;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.stage.FileChooser;
@@ -15,6 +17,8 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.HBox;
@@ -212,9 +216,10 @@ public class App extends Application {
 
         scene.setOnMouseClicked(event -> {
             if (floatingImageView != null && event.getTarget() == circuitCanvas) {
-                double sidebarWidth = sidebar.getWidth();
-                double x = event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2 - sidebarWidth;
-                double y = event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2;
+                double x = event.getSceneX() - circuitCanvas.getLayoutX()
+                        - floatingImageView.getBoundsInLocal().getWidth() / 2;
+                double y = event.getSceneY() - circuitCanvas.getLayoutY()
+                        - floatingImageView.getBoundsInLocal().getHeight() / 2;
                 if ("TextLabel".equals(floatingImageView.getId())) {
                     TextLabel gateLabel = new TextLabel("Label", 90, 40);
                     circuitCanvas.drawTextLabel(gateLabel, x, y);
@@ -278,17 +283,31 @@ public class App extends Application {
         WritableImage writableImage = textLabel.snapshot(parameters, null);
 
         ImageView imageView = new ImageView(writableImage);
-        imageView.setFitWidth(90);
+        imageView.setFitWidth(80);
         imageView.setFitHeight(40);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
+
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setPickOnBounds(true);
 
         return imageView;
     }
 
     private void addItemsToSection(VBox section, String[] types) {
-        HBox hbox = new HBox(10);
-        hbox.setPadding(new Insets(5, 0, 5, 0));
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(5, 0, 5, 0));
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+
+        // Add column constraints for equal width columns
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(30);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(30);
+        gridPane.getColumnConstraints().addAll(col1, col2);
+
         int count = 0;
 
         for (String type : types) {
@@ -301,7 +320,7 @@ public class App extends Application {
                         SvgUtil.loadSvgImage("/com/paperturtle/" + type + "_ANSI_Labelled.svg"));
             }
             imageView.setId(type);
-            imageView.setFitWidth(90);
+            imageView.setFitWidth(80);
             imageView.setFitHeight(40);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
@@ -328,17 +347,18 @@ public class App extends Application {
                 }
             });
 
-            hbox.getChildren().add(imageView);
+            int row = count / 2;
+            int col = count % 2;
+            gridPane.add(imageView, col, row);
+
+            // Align the imageView to the center of the cell
+            GridPane.setHalignment(imageView, HPos.CENTER);
+            GridPane.setValignment(imageView, VPos.CENTER);
+
             count++;
-            if (count % 2 == 0) {
-                section.getChildren().add(hbox);
-                hbox = new HBox(10);
-                hbox.setPadding(new Insets(5, 0, 5, 0));
-            }
         }
-        if (count % 2 != 0) {
-            section.getChildren().add(hbox);
-        }
+
+        section.getChildren().add(gridPane);
     }
 
     private String getTooltipText(String type) {
