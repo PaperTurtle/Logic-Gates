@@ -40,7 +40,7 @@ jobs:
            continue-on-error: true
 
          - name: Delete Release if Exists
-           if: ${{ steps.get_release.outputs.status == 200 }}
+           if: steps.get_release.outputs.status == '200'
            uses: octokit/request-action@v2.x
            with:
               route: DELETE /repos/${{ github.repository }}/releases/${{ fromJson(steps.get_release.outputs.data).id }}
