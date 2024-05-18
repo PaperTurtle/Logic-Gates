@@ -19,6 +19,8 @@ module com.paperturtle {
     requires batik.svggen;
     requires batik.util;
 
+    exports com.paperturtle to javafx.graphics;
+
     opens com.paperturtle to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.data to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.managers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;

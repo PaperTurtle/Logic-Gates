@@ -2,6 +2,7 @@ package com.paperturtle.components;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.paperturtle.CircuitCanvas;
 import com.paperturtle.data.ClipboardData;
@@ -11,7 +12,6 @@ import com.paperturtle.utils.SvgUtil;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -113,9 +113,7 @@ public abstract class LogicGate implements CircuitComponent {
         this.outputPoint = outputPoint;
         this.id = "Gate" + idCounter++;
 
-        for (int i = 0; i < this.inputPoints.size(); i++) {
-            inputConnections.add(new ArrayList<>());
-        }
+        inputPoints.forEach(point -> inputConnections.add(new ArrayList<>()));
     }
 
     /**
@@ -140,8 +138,7 @@ public abstract class LogicGate implements CircuitComponent {
     public void addInput(LogicGate input) {
         if (inputs.size() < inputPoints.size() && !inputs.contains(input)) {
             inputs.add(input);
-            evaluate();
-            propagateStateChange();
+            evaluateAndPropagate();
         }
     }
 
@@ -151,17 +148,10 @@ public abstract class LogicGate implements CircuitComponent {
      * @param input the LogicGate to be removed.
      */
     public void removeInput(LogicGate input) {
-        if (inputs.contains(input)) {
-            inputs.remove(input);
-            int index = inputs.indexOf(input);
-            if (index != -1) {
-                List<Line> connectionsToRemove = new ArrayList<>(inputConnections.get(index));
-                for (Line line : connectionsToRemove) {
-                    this.removeInputConnection(line, index);
-                }
-            }
-            evaluate();
-            propagateStateChange();
+        if (inputs.remove(input)) {
+            inputConnections.get(inputs.indexOf(input))
+                    .forEach(line -> removeInputConnection(line, inputs.indexOf(input)));
+            evaluateAndPropagate();
         }
     }
 
@@ -172,10 +162,7 @@ public abstract class LogicGate implements CircuitComponent {
      * @param inputIndex the index of the input connection.
      */
     public void addInputConnection(Line line, int inputIndex) {
-        List<Line> connections = getInputConnections(inputIndex);
-        if (connections != null) {
-            connections.add(line);
-        }
+        Optional.ofNullable(getInputConnections(inputIndex)).ifPresent(connections -> connections.add(line));
     }
 
     /**
@@ -185,9 +172,7 @@ public abstract class LogicGate implements CircuitComponent {
      * @param inputIndex the index of the input connection.
      */
     public void removeInputConnection(Line line, int inputIndex) {
-        if (inputIndex >= 0 && inputIndex < inputConnections.size()) {
-            inputConnections.get(inputIndex).remove(line);
-        }
+        Optional.ofNullable(getInputConnections(inputIndex)).ifPresent(connections -> connections.remove(line));
     }
 
     /**
@@ -209,18 +194,10 @@ public abstract class LogicGate implements CircuitComponent {
      * Updates the position of the markers and connections.
      */
     private void updateMarkers() {
-        if (outputMarker != null) {
-            outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
-            outputMarker.setCenterY(imageView.getY() + outputPoint.getY());
-            outputMarker.toFront();
-        }
+        Optional.ofNullable(outputMarker).ifPresent(marker -> setMarkerPosition(marker, outputPoint));
         for (int i = 0; i < inputPoints.size(); i++) {
             if (i < inputMarkers.size()) {
-                Circle marker = inputMarkers.get(i);
-                Point2D point = inputPoints.get(i);
-                marker.setCenterX(imageView.getX() + point.getX());
-                marker.setCenterY(imageView.getY() + point.getY());
-                marker.toFront();
+                setMarkerPosition(inputMarkers.get(i), inputPoints.get(i));
             } else {
                 System.err.println("No marker available for input point at index " + i);
             }
@@ -228,29 +205,54 @@ public abstract class LogicGate implements CircuitComponent {
     }
 
     /**
+     * Sets the position of the marker on the canvas.
+     * 
+     * @param marker the marker to set the position for.
+     * @param point  the point to set the position to.
+     */
+    private void setMarkerPosition(Circle marker, Point2D point) {
+        marker.setCenterX(imageView.getX() + point.getX());
+        marker.setCenterY(imageView.getY() + point.getY());
+        marker.toFront();
+    }
+
+    /**
      * Updates the position of the output connections.
      */
     private void updateConnections() {
-        if (outputMarker != null) {
-            Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
-            for (Line line : outputConnections) {
-                line.setStartX(outputPos.getX());
-                line.setStartY(outputPos.getY());
-            }
-        }
+        Optional.ofNullable(outputMarker).ifPresent(marker -> {
+            Point2D outputPos = marker.localToParent(marker.getCenterX(), marker.getCenterY());
+            outputConnections.forEach(line -> setLineStart(line, outputPos));
+        });
 
         for (int i = 0; i < inputMarkers.size(); i++) {
             Circle inputMarker = inputMarkers.get(i);
             Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
-
-            List<Line> connections = getInputConnections(i);
-            if (connections != null) {
-                for (Line inputLine : connections) {
-                    inputLine.setEndX(inputPos.getX());
-                    inputLine.setEndY(inputPos.getY());
-                }
-            }
+            Optional.ofNullable(getInputConnections(i))
+                    .ifPresent(connections -> connections.forEach(line -> setLineEnd(line, inputPos)));
         }
+    }
+
+    /**
+     * Sets the start position of the line.
+     * 
+     * @param line the Line to be added.
+     * @param pos  the position of the marker.
+     */
+    private void setLineStart(Line line, Point2D pos) {
+        line.setStartX(pos.getX());
+        line.setStartY(pos.getY());
+    }
+
+    /**
+     * Sets the end position of the line.
+     * 
+     * @param line the Line to be added.
+     * @param pos  the position of the marker.
+     */
+    private void setLineEnd(Line line, Point2D pos) {
+        line.setEndX(pos.getX());
+        line.setEndY(pos.getY());
     }
 
     /**
@@ -259,30 +261,37 @@ public abstract class LogicGate implements CircuitComponent {
      * @param canvas the canvas to draw the gate on.
      */
     public void createVisualRepresentation(Pane canvas) {
-        Image image = SvgUtil.loadSvgImage(getSvgFilePath());
-        imageView = new ImageView(image);
+        imageView = new ImageView(SvgUtil.loadSvgImage(svgFilePath));
         canvas.getChildren().add(imageView);
 
         if (outputPoint != null) {
-            outputMarker = new Circle(outputPoint.getX(), outputPoint.getY(), 5, Color.RED);
-            canvas.getChildren().add(outputMarker);
-            outputMarker.toFront();
+            outputMarker = createMarker(outputPoint, Color.RED, canvas);
         }
 
-        if (inputPoints != null) {
-            inputConnections.clear();
-            for (Point2D point : inputPoints) {
-                Circle inputMarker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
-                inputMarkers.add(inputMarker);
-                canvas.getChildren().add(inputMarker);
-                outputMarker.toFront();
-                inputConnections.add(new ArrayList<>());
-            }
-        }
+        inputPoints.forEach(point -> {
+            Circle inputMarker = createMarker(point, Color.BLUE, canvas);
+            inputMarkers.add(inputMarker);
+            inputConnections.add(new ArrayList<>());
+        });
 
         if (canvas instanceof CircuitCanvas && outputMarker != null) {
             ((CircuitCanvas) canvas).getInteractionManager().setupOutputInteraction(outputMarker, this);
         }
+    }
+
+    /**
+     * Creates a marker on the canvas.
+     * 
+     * @param point  the point to create the marker at.
+     * @param color  the color of the marker.
+     * @param canvas the canvas to draw the marker on.
+     * @return the Circle object representing the marker.
+     */
+    private Circle createMarker(Point2D point, Color color, Pane canvas) {
+        Circle marker = new Circle(point.getX(), point.getY(), 5, color);
+        canvas.getChildren().add(marker);
+        marker.toFront();
+        return marker;
     }
 
     /**
@@ -293,15 +302,11 @@ public abstract class LogicGate implements CircuitComponent {
         if (newState != currentState) {
             currentState = newState;
             updateOutputConnectionsColor(newState);
-
-            for (LogicGate gate : outputGates) {
-                gate.propagateStateChange();
-            }
-            for (LogicGate gate : outputGates) {
-                if (gate instanceof Lightbulb) {
-                    ((Lightbulb) gate).toggleLight(currentState);
-                }
-            }
+            outputGates.forEach(LogicGate::propagateStateChange);
+            outputGates.stream()
+                    .filter(gate -> gate instanceof Lightbulb)
+                    .map(gate -> (Lightbulb) gate)
+                    .forEach(lightbulb -> lightbulb.toggleLight(currentState));
         }
     }
 
@@ -312,9 +317,7 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public void updateOutputConnectionsColor(boolean state) {
         Color newColor = state ? Color.RED : Color.BLACK;
-        for (Line line : outputConnections) {
-            Platform.runLater(() -> line.setStroke(newColor));
-        }
+        outputConnections.forEach(line -> Platform.runLater(() -> line.setStroke(newColor)));
     }
 
     /**
@@ -354,12 +357,11 @@ public abstract class LogicGate implements CircuitComponent {
      * @return the index of the input connection.
      */
     public int findInputConnectionIndex(Line line) {
-        for (List<Line> connections : inputConnections) {
-            if (connections.contains(line)) {
-                return inputConnections.indexOf(connections);
-            }
-        }
-        return -1;
+        return inputConnections.stream()
+                .filter(connections -> connections.contains(line))
+                .findFirst()
+                .map(inputConnections::indexOf)
+                .orElse(-1);
     }
 
     /**
@@ -369,12 +371,11 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public void removeOutputConnection(Line line) {
         outputConnections.remove(line);
-        for (LogicGate gate : new ArrayList<>(outputGates)) {
+        new ArrayList<>(outputGates).forEach(gate -> {
             gate.removeInput(this);
             gate.removeInputConnection(line, gate.findInputConnectionIndex(line));
-            gate.evaluate();
-            gate.propagateStateChange();
-        }
+            gate.evaluateAndPropagate();
+        });
     }
 
     /**
@@ -383,13 +384,11 @@ public abstract class LogicGate implements CircuitComponent {
      * @param line the Line to be removed.
      */
     public void removeInputConnection(Line line) {
-        inputConnections.stream()
-                .filter(connections -> connections.contains(line))
-                .forEach(connections -> {
-                    connections.remove(line);
-                    evaluate();
-                    propagateStateChange();
-                });
+        inputConnections.forEach(connections -> {
+            if (connections.remove(line)) {
+                evaluateAndPropagate();
+            }
+        });
     }
 
     /**
@@ -426,10 +425,7 @@ public abstract class LogicGate implements CircuitComponent {
      * @return the list of input connections.
      */
     public List<Line> getInputConnections(int index) {
-        if (index >= 0 && index < inputConnections.size()) {
-            return inputConnections.get(index);
-        }
-        return null;
+        return index >= 0 && index < inputConnections.size() ? inputConnections.get(index) : null;
     }
 
     /**
@@ -530,31 +526,18 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public GateData getGateData() {
         GateData data = new GateData();
-        data.id = this.getId();
-        data.type = this.getClass().getSimpleName();
-        data.position = new Point2D(imageView.getX(), imageView.getY());
+        data.id = getId();
+        data.type = getClass().getSimpleName();
+        data.position = getPosition();
         data.state = currentState;
 
-        System.out.println("Gate ID: " + data.id);
-
-        for (int i = 0; i < inputs.size(); i++) {
-            LogicGate input = inputs.get(i);
-            int pointIndex = i;
-            data.inputs.add(new GateData.ConnectionData(input.getId(), pointIndex));
-        }
-
-        for (LogicGate output : outputGates) {
-            List<List<Line>> inputConnections = output.getInputConnections();
-            for (int i = 0; i < inputConnections.size(); i++) {
-                List<Line> connections = inputConnections.get(i);
-                for (Line connection : connections) {
-                    if (connection.getStartX() == this.getOutputMarker().getCenterX() &&
-                            connection.getStartY() == this.getOutputMarker().getCenterY()) {
-                        data.outputs.add(new GateData.ConnectionData(output.getId(), i));
-                    }
-                }
-            }
-        }
+        inputs.forEach(input -> data.inputs.add(new GateData.ConnectionData(input.getId(), inputs.indexOf(input))));
+        outputGates.forEach(output -> {
+            output.getInputConnections().forEach(connections -> connections.stream()
+                    .filter(this::isConnected)
+                    .forEach(line -> data.outputs.add(new GateData.ConnectionData(output.getId(),
+                            output.getInputConnections().indexOf(connections)))));
+        });
 
         return data;
     }
@@ -566,20 +549,15 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public ClipboardData getGateClipboardData() {
         ClipboardData data = new ClipboardData();
-        data.id = this.getId();
-        data.type = this.getClass().getSimpleName();
-        data.position = new Point2D(imageView.getX(), imageView.getY());
+        data.id = getId();
+        data.type = getClass().getSimpleName();
+        data.position = getPosition();
         data.state = currentState;
 
-        for (LogicGate input : inputs) {
-            data.inputs.add(
-                    new ClipboardData.ConnectionData(input.getId(), input.outputGates.indexOf(this)));
-        }
-
-        for (LogicGate output : outputGates) {
-            data.outputs
-                    .add(new ClipboardData.ConnectionData(output.getId(), output.inputs.indexOf(this)));
-        }
+        inputs.forEach(input -> data.inputs
+                .add(new ClipboardData.ConnectionData(input.getId(), input.outputGates.indexOf(this))));
+        outputGates.forEach(output -> data.outputs
+                .add(new ClipboardData.ConnectionData(output.getId(), output.inputs.indexOf(this))));
 
         return data;
     }
@@ -645,6 +623,24 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public boolean canAddOutputConnection() {
         return outputConnections.size() < maxOutputConnections;
+    }
+
+    /**
+     * Checks if the line is connected to the output marker.
+     * 
+     * @param line the line to be added.
+     * @return true if an input connection can be added, false otherwise.
+     */
+    private boolean isConnected(Line line) {
+        return line.getStartX() == getOutputMarker().getCenterX() && line.getStartY() == getOutputMarker().getCenterY();
+    }
+
+    /**
+     * Evaluates the gate and propagates the state change.
+     */
+    private void evaluateAndPropagate() {
+        evaluate();
+        propagateStateChange();
     }
 
 }
