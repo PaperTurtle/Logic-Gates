@@ -71,7 +71,7 @@ public class TextLabel extends Group implements CircuitComponent {
         MenuItem removeItem = new MenuItem("Remove");
         removeItem.setOnAction(e -> removeSelf());
         editItem.setOnAction(e -> showEditDialog());
-        contextMenu.getItems().add(editItem);
+        contextMenu.getItems().addAll(editItem, removeItem);
 
         this.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
