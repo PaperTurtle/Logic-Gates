@@ -19,11 +19,34 @@ import javafx.geometry.Point2D;
  * @author Seweryn Czabanowski
  */
 public class ClipboardData {
+    /**
+     * The unique ID of the clipboard data.
+     */
     public String id;
+
+    /**
+     * The type of the clipboard data.
+     */
     public String type;
+
+    /**
+     * The position of the clipboard data on the canvas.
+     */
     public Point2D position;
+
+    /**
+     * The state of the clipboard data (true for on, false for off).
+     */
     public boolean state;
+
+    /**
+     * The list of input connections associated with the clipboard data.
+     */
     public List<ConnectionData> inputs = new ArrayList<>();
+
+    /**
+     * The list of output connections associated with the clipboard data.
+     */
     public List<ConnectionData> outputs = new ArrayList<>();
 
     /**

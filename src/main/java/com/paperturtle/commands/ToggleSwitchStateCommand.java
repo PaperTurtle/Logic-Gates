@@ -12,8 +12,19 @@ import com.paperturtle.components.SwitchGate;
  * @author Seweryn Czabanowski
  */
 public class ToggleSwitchStateCommand implements Command {
+    /**
+     * The switch gate whose state is being toggled.
+     */
     private SwitchGate switchGate;
+
+    /**
+     * The previous state of the switch gate before the toggle.
+     */
     private boolean previousState;
+
+    /**
+     * The new state of the switch gate after the toggle.
+     */
     private boolean newState;
 
     /**

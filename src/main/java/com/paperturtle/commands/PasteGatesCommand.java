@@ -24,13 +24,44 @@ import javafx.scene.shape.Line;
  * @author Seweryn Czabanowski
  */
 public class PasteGatesCommand implements Command {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The data from the clipboard to be pasted.
+     */
     private List<ClipboardData> clipboardData;
+
+    /**
+     * The list of logic gates that have been pasted.
+     */
     private List<LogicGate> pastedGates = new ArrayList<>();
+
+    /**
+     * The list of connections that have been pasted.
+     */
     private List<Line> pastedConnections = new ArrayList<>();
+
+    /**
+     * The x-coordinate offset for pasting.
+     */
     private double offsetX;
+
+    /**
+     * The y-coordinate offset for pasting.
+     */
     private double offsetY;
+
+    /**
+     * The global x-coordinate offset for pasting.
+     */
     private static double globalOffsetX = 0;
+
+    /**
+     * The global y-coordinate offset for pasting.
+     */
     private static double globalOffsetY = 0;
 
     /**

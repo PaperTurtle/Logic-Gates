@@ -27,12 +27,39 @@ import com.paperturtle.components.TextLabel;
  * @author Seweryn Czabanowski
  */
 public class RemoveSelectedGatesCommand implements Command {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The list of logic gates that have been removed.
+     */
     private List<LogicGate> removedGates = new ArrayList<>();
+
+    /**
+     * The list of connections that have been removed.
+     */
     private List<Line> removedConnections = new ArrayList<>();
+
+    /**
+     * The list of labels that have been removed.
+     */
     private List<TextLabel> removedLabels = new ArrayList<>();
+
+    /**
+     * The list of source gates for the removed connections.
+     */
     private List<LogicGate> sourceGatesForConnections = new ArrayList<>();
+
+    /**
+     * The list of target gates for the removed connections.
+     */
     private List<LogicGate> targetGatesForConnections = new ArrayList<>();
+
+    /**
+     * The list of input indices for the removed connections.
+     */
     private List<Integer> inputIndices = new ArrayList<>();
 
     /**

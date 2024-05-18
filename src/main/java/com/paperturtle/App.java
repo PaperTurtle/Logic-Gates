@@ -70,16 +70,7 @@ public class App extends Application {
 
         initializeSidebar(sidebar);
 
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setPannable(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("-fx-background-color: white;");
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-
-        circuitCanvas = new CircuitCanvas(2000, 2000, scrollPane);
-        scrollPane.setContent(circuitCanvas);
+        circuitCanvas = new CircuitCanvas(2000, 2000);
 
         MenuBar menuBar = new MenuBar();
 

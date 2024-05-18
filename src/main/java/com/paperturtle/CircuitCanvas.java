@@ -51,21 +51,80 @@ import com.paperturtle.utils.CircuitComponent;
  * @author Seweryn Czabanowski
  */
 public class CircuitCanvas extends Pane {
+    /**
+     * The line currently being drawn on the canvas.
+     */
     private Line currentLine;
+
+    /**
+     * A map associating each ImageView with its corresponding list of Circle
+     * markers.
+     */
     private Map<ImageView, List<Circle>> gateMarkers = new HashMap<>();
+
+    /**
+     * A map associating each ImageView with its corresponding LogicGate.
+     */
     private Map<ImageView, LogicGate> gateImageViews = new HashMap<>();
+
+    /**
+     * A list of all text labels present on the canvas.
+     */
     private List<TextLabel> textLabels = new ArrayList<>();
+
+    /**
+     * The last recorded mouse coordinates on the canvas.
+     */
     private Point2D lastMouseCoordinates;
-    private ScrollPane scrollPane;
+
+    /**
+     * A map associating each Line with its corresponding starting LogicGate.
+     */
     private Map<Line, LogicGate> lineToStartGateMap = new HashMap<>();
+
+    /**
+     * The context menu currently open on the canvas.
+     */
     private ContextMenu openContextMenu = null;
+
+    /**
+     * A set of all LogicGates that need to be updated.
+     */
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
+
+    /**
+     * The manager responsible for handling commands.
+     */
     private CommandManager commandManager;
+
+    /**
+     * The manager responsible for handling interactions.
+     */
     private InteractionManager interactionManager;
+
+    /**
+     * The manager responsible for handling selections.
+     */
     private SelectionManager selectionManager;
+
+    /**
+     * The manager responsible for handling connections.
+     */
     private ConnectionManager connectionManager;
+
+    /**
+     * The manager responsible for handling gates.
+     */
     private GateManager gateManager;
+
+    /**
+     * The manager responsible for handling the clipboard.
+     */
     private ClipboardManager clipboardManager;
+
+    /**
+     * The manager responsible for handling context menus.
+     */
     private ContextMenuManager contextMenuManager;
 
     /**
@@ -75,9 +134,8 @@ public class CircuitCanvas extends Pane {
      * @param height     the height of the canvas
      * @param scrollPane the scroll pane that contains the canvas
      */
-    public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
+    public CircuitCanvas(double width, double height) {
         super();
-        this.scrollPane = scrollPane;
         this.setPrefSize(width, height);
         this.setStyle("-fx-background-color: white;");
         this.setFocusTraversable(true);

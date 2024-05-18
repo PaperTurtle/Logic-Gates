@@ -13,9 +13,24 @@ import com.paperturtle.managers.GateManager;
  * @author Seweryn Czabanowski
  */
 public class AddGateCommand implements Command {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The logic gate to be added to the canvas.
+     */
     private LogicGate gate;
+
+    /**
+     * The x-coordinate at which the gate is to be placed.
+     */
     private double x;
+
+    /**
+     * The y-coordinate at which the gate is to be placed.
+     */
     private double y;
 
     /**

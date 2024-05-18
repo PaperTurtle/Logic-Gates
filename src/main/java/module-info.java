@@ -1,3 +1,13 @@
+/**
+ * This package contains the main classes and interfaces for the Logic Gate
+ * Simulator
+ * application.
+ * 
+ * <p>
+ * It includes the main application class, core logic, and essential components
+ * that form the backbone of the application.
+ * </p>
+ */
 module com.paperturtle {
     requires transitive javafx.graphics;
     requires transitive javafx.controls;
@@ -10,6 +20,18 @@ module com.paperturtle {
     requires batik.util;
 
     opens com.paperturtle to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.data to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.managers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.commands to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.components to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.serializers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.utils to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
 
     exports com.paperturtle;
+    exports com.paperturtle.data;
+    exports com.paperturtle.commands;
+    exports com.paperturtle.components;
+    exports com.paperturtle.managers;
+    exports com.paperturtle.serializers;
+    exports com.paperturtle.utils;
 }

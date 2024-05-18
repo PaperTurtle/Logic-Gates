@@ -15,11 +15,34 @@ import com.paperturtle.utils.CircuitComponent;
  * @author Seweryn Czabanowski
  */
 public class GateData implements CircuitComponent {
+    /**
+     * The unique ID of the gate data.
+     */
     public String id;
+
+    /**
+     * The type of the gate data.
+     */
     public String type;
+
+    /**
+     * The position of the gate data on the canvas.
+     */
     public Point2D position;
+
+    /**
+     * The state of the gate data (true for on, false for off).
+     */
     public boolean state;
+
+    /**
+     * The list of input connections associated with the gate data.
+     */
     public List<ConnectionData> inputs = new ArrayList<>();
+
+    /**
+     * The list of output connections associated with the gate data.
+     */
     public List<ConnectionData> outputs = new ArrayList<>();
 
     /**

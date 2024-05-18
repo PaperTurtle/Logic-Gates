@@ -25,19 +25,77 @@ import javafx.util.Pair;
  * @author Seweryn Czabanowski
  */
 public abstract class LogicGate implements CircuitComponent {
+    /**
+     * The list of logic gates that serve as inputs to this gate.
+     */
     protected List<LogicGate> inputs;
+
+    /**
+     * The file path to the SVG file that represents this gate.
+     */
     protected String svgFilePath;
+
+    /**
+     * The list of points where input connections can be made to this gate.
+     */
     protected List<Point2D> inputPoints;
+
+    /**
+     * The point where output connections can be made from this gate.
+     */
     protected Point2D outputPoint;
+
+    /**
+     * The ImageView that displays this gate.
+     */
     protected ImageView imageView;
+
+    /**
+     * The list of markers that indicate where input connections can be made to this
+     * gate.
+     */
     protected List<Circle> inputMarkers = new ArrayList<>();
+
+    /**
+     * The marker that indicates where output connections can be made from this
+     * gate.
+     */
     protected Circle outputMarker;
+
+    /**
+     * The list of connections made to each input of this gate.
+     */
     protected List<List<Line>> inputConnections = new ArrayList<>();
+
+    /**
+     * The list of connections made from the output of this gate.
+     */
     protected List<Line> outputConnections = new ArrayList<>();
+
+    /**
+     * The list of gates that are connected to the output of this gate.
+     */
     protected List<LogicGate> outputGates = new ArrayList<>();
+
+    /**
+     * The current state of this gate (true for on, false for off).
+     */
     protected boolean currentState = false;
+
+    /**
+     * The maximum number of connections that can be made from the output of this
+     * gate.
+     */
     private int maxOutputConnections = 1;
+
+    /**
+     * A counter used to generate unique IDs for each instance of LogicGate.
+     */
     private static long idCounter = 0;
+
+    /**
+     * The unique ID of this gate.
+     */
     protected String id;
 
     /**

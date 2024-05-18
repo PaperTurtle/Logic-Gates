@@ -14,10 +14,29 @@ import javafx.scene.shape.Line;
  * @author Seweryn Czabanowski
  */
 public class AddConnectionCommand implements Command {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The source gate from which the connection originates.
+     */
     private LogicGate sourceGate;
+
+    /**
+     * The target gate to which the connection leads.
+     */
     private LogicGate targetGate;
+
+    /**
+     * The graphical representation of the connection.
+     */
     private Line connectionLine;
+
+    /**
+     * The index of the target input in the target gate.
+     */
     private int targetInputIndex;
 
     /**

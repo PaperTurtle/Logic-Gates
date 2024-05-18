@@ -14,9 +14,24 @@ import javafx.geometry.Point2D;
  * @author Seweryn Czabanowski
  */
 public class RemoveGateCommand implements Command {
+    /**
+     * The canvas on which the circuit is drawn.
+     */
     private CircuitCanvas canvas;
+
+    /**
+     * The logic gate to be removed from the canvas.
+     */
     private LogicGate gate;
+
+    /**
+     * The x-coordinate at which the gate is placed.
+     */
     private double x;
+
+    /**
+     * The y-coordinate at which the gate is placed.
+     */
     private double y;
 
     /**
