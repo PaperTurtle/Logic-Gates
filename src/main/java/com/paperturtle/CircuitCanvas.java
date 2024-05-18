@@ -572,4 +572,15 @@ public class CircuitCanvas extends Pane {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets the list of selected text labels on the canvas.
+     * 
+     * @return the list of selected text labels
+     */
+    public List<TextLabel> getSelectedTextLabels() {
+        return textLabels.stream()
+                .filter(textLabel -> textLabel.getStyleClass().contains("selected"))
+                .collect(Collectors.toList());
+    }
+
 }

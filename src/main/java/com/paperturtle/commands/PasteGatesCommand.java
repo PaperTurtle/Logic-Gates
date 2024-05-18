@@ -87,67 +87,19 @@ public class PasteGatesCommand implements Command {
      */
     @Override
     public void execute() {
-        canvas.getGateImageViews().values().forEach(gate -> {
-            gate.getImageView().getStyleClass().remove("selected");
-        });
-
-        Map<String, LogicGate> createdGates = new HashMap<>();
-
-        for (ClipboardData data : clipboardData) {
-            LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
-            if (gate == null) {
-                System.out.println("Unable to create gate of type: " + data.getType());
-                continue;
-            }
-
-            double newX = data.getPosition().getX() + offsetX + globalOffsetX;
-            double newY = data.getPosition().getY() + offsetY + globalOffsetY;
-
-            gate.setPosition(newX, newY);
-            gate.setId(data.getId());
-            createdGates.put(data.getId(), gate);
-            canvas.drawGate(gate, newX, newY);
-            if (!gate.getImageView().getStyleClass().contains("selected")) {
-                gate.getImageView().getStyleClass().add("selected");
-            }
-            pastedGates.add(gate);
-        }
+        canvas.getGateManager().deselectAllGates();
+        Map<String, LogicGate> createdGates = createGates();
 
         for (ClipboardData data : clipboardData) {
             LogicGate sourceGate = createdGates.get(data.getId());
-            if (sourceGate == null)
-                continue;
-
-            for (ClipboardData.ConnectionData output : data.getOutputs()) {
-                LogicGate targetGate = createdGates.get(output.gateId);
-                if (targetGate == null) {
-                    System.out.println("Output gate not found for ID: " + output.gateId);
-                    continue;
+            if (sourceGate != null) {
+                for (ClipboardData.ConnectionData output : data.getOutputs()) {
+                    createConnection(createdGates, sourceGate, output);
                 }
-                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-                Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
-
-                Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
-                connectionLine.setStrokeWidth(3.5);
-                connectionLine.setStroke(Color.BLACK);
-
-                if (!canvas.getChildren().contains(connectionLine)) {
-                    canvas.getChildren().add(connectionLine);
-                }
-                sourceGate.addOutputConnection(connectionLine);
-                targetGate.addInputConnection(connectionLine, output.pointIndex);
-                if (!pastedConnections.contains(connectionLine)) {
-                    pastedConnections.add(connectionLine);
-                }
-                canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
             }
         }
 
-        globalOffsetX += 30;
-        globalOffsetY += 30;
+        incrementGlobalOffset();
     }
 
     /**
@@ -156,7 +108,78 @@ public class PasteGatesCommand implements Command {
      */
     @Override
     public void undo() {
-        for (Line connection : pastedConnections) {
+        removeConnections();
+        removeGates();
+        decrementGlobalOffset();
+    }
+
+    /**
+     * Creates logic gates from the clipboard data and adds them to the canvas.
+     * 
+     * @return a map of the created gates, with the gate ID as the key
+     */
+    private Map<String, LogicGate> createGates() {
+        Map<String, LogicGate> createdGates = new HashMap<>();
+        clipboardData.forEach(data -> {
+            LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
+            if (gate != null) {
+                double newX = data.getPosition().getX() + offsetX + globalOffsetX;
+                double newY = data.getPosition().getY() + offsetY + globalOffsetY;
+
+                gate.setPosition(newX, newY);
+                gate.setId(data.getId());
+                createdGates.put(data.getId(), gate);
+                canvas.drawGate(gate, newX, newY);
+                gate.getImageView().getStyleClass().add("selected");
+                pastedGates.add(gate);
+            } else {
+                System.out.println("Unable to create gate of type: " + data.getType());
+            }
+        });
+        return createdGates;
+    }
+
+    /**
+     * Creates a connection between two logic gates based on the provided output
+     * 
+     * @param createdGates the map of created gates
+     * @param sourceGate   the source gate of the connection
+     * @param output       the output data for the connection
+     */
+    private void createConnection(Map<String, LogicGate> createdGates, LogicGate sourceGate,
+            ClipboardData.ConnectionData output) {
+        LogicGate targetGate = createdGates.get(output.gateId);
+        if (targetGate == null) {
+            System.out.println("Output gate not found for ID: " + output.gateId);
+            return;
+        }
+
+        Point2D sourcePos = sourceGate.getOutputMarker().localToParent(sourceGate.getOutputMarker().getCenterX(),
+                sourceGate.getOutputMarker().getCenterY());
+        Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+        Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+        connectionLine.setStrokeWidth(3.5);
+        connectionLine.setStroke(Color.BLACK);
+
+        if (!canvas.getChildren().contains(connectionLine)) {
+            canvas.getChildren().add(connectionLine);
+        }
+        sourceGate.addOutputConnection(connectionLine);
+        targetGate.addInputConnection(connectionLine, output.pointIndex);
+        if (!pastedConnections.contains(connectionLine)) {
+            pastedConnections.add(connectionLine);
+        }
+        canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
+    }
+
+    /**
+     * Removes the pasted connections from the canvas.
+     */
+    private void removeConnections() {
+        pastedConnections.forEach(connection -> {
             canvas.getChildren().remove(connection);
             LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
             LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
@@ -169,13 +192,30 @@ public class PasteGatesCommand implements Command {
                 }
             }
             canvas.getLineToStartGateMap().remove(connection);
-        }
-
-        for (LogicGate gate : pastedGates) {
-            canvas.getGateManager().removeGate(gate.getImageView());
-        }
-        pastedGates.clear();
+        });
         pastedConnections.clear();
+    }
+
+    /**
+     * Removes the pasted gates from the canvas.
+     */
+    private void removeGates() {
+        pastedGates.forEach(gate -> canvas.getGateManager().removeGate(gate.getImageView()));
+        pastedGates.clear();
+    }
+
+    /**
+     * Increments the global offset for pasting gates and connections.
+     */
+    private void incrementGlobalOffset() {
+        globalOffsetX += 30;
+        globalOffsetY += 30;
+    }
+
+    /**
+     * Decrements the global offset for pasting gates and connections.
+     */
+    private void decrementGlobalOffset() {
         globalOffsetX -= 30;
         globalOffsetY -= 30;
     }

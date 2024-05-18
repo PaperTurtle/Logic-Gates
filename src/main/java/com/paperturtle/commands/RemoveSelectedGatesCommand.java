@@ -1,16 +1,12 @@
 package com.paperturtle.commands;
 
 import javafx.geometry.Point2D;
-import javafx.scene.image.ImageView;
 import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.paperturtle.CircuitCanvas;
-import com.paperturtle.components.Lightbulb;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.TextLabel;
 
@@ -48,19 +44,52 @@ public class RemoveSelectedGatesCommand implements Command {
     private List<TextLabel> removedLabels = new ArrayList<>();
 
     /**
-     * The list of source gates for the removed connections.
+     * A list of ConnectionInfo objects representing the connections of the removed
+     * gates.
      */
-    private List<LogicGate> sourceGatesForConnections = new ArrayList<>();
+    private List<ConnectionInfo> removedConnectionInfos = new ArrayList<>();
 
     /**
-     * The list of target gates for the removed connections.
+     * A static inner class representing the connection information between two
+     * logic gates.
      */
-    private List<LogicGate> targetGatesForConnections = new ArrayList<>();
+    private static class ConnectionInfo {
+        /**
+         * The source logic gate of the connection.
+         */
+        LogicGate sourceGate;
 
-    /**
-     * The list of input indices for the removed connections.
-     */
-    private List<Integer> inputIndices = new ArrayList<>();
+        /**
+         * The target logic gate of the connection.
+         */
+        LogicGate targetGate;
+
+        /**
+         * The line representing the connection.
+         */
+        Line connection;
+
+        /**
+         * The index of the input where the connection is made.
+         */
+        int inputIndex;
+
+        /**
+         * Constructs a ConnectionInfo object with the given source gate, target gate,
+         * connection line, and input index.
+         *
+         * @param sourceGate the source logic gate of the connection
+         * @param targetGate the target logic gate of the connection
+         * @param connection the line representing the connection
+         * @param inputIndex the index of the input where the connection is made
+         */
+        ConnectionInfo(LogicGate sourceGate, LogicGate targetGate, Line connection, int inputIndex) {
+            this.sourceGate = sourceGate;
+            this.targetGate = targetGate;
+            this.connection = connection;
+            this.inputIndex = inputIndex;
+        }
+    }
 
     /**
      * Constructs a RemoveSelectedGatesCommand for the specified circuit canvas.
@@ -77,40 +106,8 @@ public class RemoveSelectedGatesCommand implements Command {
      */
     @Override
     public void execute() {
-        List<ImageView> selectedGates = canvas.getGateImageViews().entrySet().stream()
-                .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-        List<TextLabel> selectedLabels = canvas.getTextLabels().stream()
-                .filter(entry -> entry.getStyleClass().contains("selected")).collect(Collectors.toList());
-
-        for (ImageView imageView : selectedGates) {
-            LogicGate gate = canvas.getGate(imageView);
-            if (gate != null) {
-                removedGates.add(gate);
-                for (Line connection : gate.getOutputConnections()) {
-                    removedConnections.add(connection);
-                    sourceGatesForConnections.add(gate);
-                    LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
-                    targetGatesForConnections.add(targetGate);
-                    inputIndices.add(targetGate != null ? targetGate.findInputConnectionIndex(connection) : -1);
-                }
-                for (List<Line> inputConnectionList : gate.getInputConnections()) {
-                    for (Line connection : inputConnectionList) {
-                        removedConnections.add(connection);
-                        LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
-                        sourceGatesForConnections.add(sourceGate);
-                        targetGatesForConnections.add(gate);
-                        inputIndices.add(gate != null ? gate.findInputConnectionIndex(connection) : -1);
-                    }
-                }
-                canvas.getGateManager().removeGate(imageView);
-            }
-        }
-        for (TextLabel label : selectedLabels) {
-            removedLabels.add(label);
-            label.removeSelf();
-        }
+        removeGatesAndConnections(canvas.getSelectedGates());
+        removeLabels(canvas.getSelectedTextLabels());
     }
 
     /**
@@ -119,64 +116,127 @@ public class RemoveSelectedGatesCommand implements Command {
      */
     @Override
     public void undo() {
-        for (LogicGate gate : removedGates) {
+        reAddGates();
+        reAddConnections();
+        reAddLabels();
+        clearRemovedLists();
+    }
+
+    /**
+     * Redoes the command by removing the gates, connections, and labels that were
+     * 
+     * @param selectedGates the list of selected gates to be removed
+     */
+    private void removeGatesAndConnections(List<LogicGate> selectedGates) {
+        selectedGates.forEach(gate -> {
+            removedGates.add(gate);
+            collectConnections(gate);
+            canvas.getGateManager().removeGate(gate.getImageView());
+        });
+    }
+
+    /**
+     * Collects the connections of the specified logic gate and adds them to the
+     * 
+     * @param gate the logic gate from which connections are collected
+     */
+    private void collectConnections(LogicGate gate) {
+        gate.getOutputConnections().forEach(connection -> {
+            removedConnections.add(connection);
+            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
+            removedConnectionInfos.add(new ConnectionInfo(gate, targetGate, connection,
+                    targetGate != null ? targetGate.findInputConnectionIndex(connection) : -1));
+        });
+
+        gate.getInputConnections().forEach(connectionList -> connectionList.forEach(connection -> {
+            removedConnections.add(connection);
+            LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
+            removedConnectionInfos.add(new ConnectionInfo(sourceGate, gate, connection,
+                    gate != null ? gate.findInputConnectionIndex(connection) : -1));
+        }));
+    }
+
+    /**
+     * Removes the specified text labels from the canvas.
+     * 
+     * @param selectedLabels the list of text labels to be removed
+     */
+    private void removeLabels(List<TextLabel> selectedLabels) {
+        selectedLabels.forEach(label -> {
+            removedLabels.add(label);
+            label.removeSelf();
+        });
+    }
+
+    /**
+     * Re-adds the removed gates to the canvas.
+     */
+    private void reAddGates() {
+        removedGates.forEach(gate -> {
             canvas.drawGate(gate, gate.getPosition().getX(), gate.getPosition().getY());
-            if (!gate.getImageView().getStyleClass().contains("selected")) {
-                gate.getImageView().getStyleClass().add("selected");
+            gate.getImageView().getStyleClass().add("selected");
+        });
+    }
+
+    /**
+     * Re-adds the removed connections to the canvas.
+     */
+    private void reAddConnections() {
+        removedConnectionInfos.forEach(info -> {
+            if (info.sourceGate != null) {
+                info.sourceGate.addOutputConnection(info.connection);
             }
 
-            if (gate instanceof Lightbulb) {
-                System.out.println(gate.getInputMarkers());
-                System.out.println(gate.getOutputMarker());
-                break;
-            }
-        }
-
-        for (int i = 0; i < removedConnections.size(); i++) {
-            Line connection = removedConnections.get(i);
-            LogicGate sourceGate = sourceGatesForConnections.get(i);
-            LogicGate targetGate = targetGatesForConnections.get(i);
-            int inputIndex = inputIndices.get(i);
-
-            if (sourceGate != null) {
-                sourceGate.addOutputConnection(connection);
+            if (info.targetGate != null && info.inputIndex != -1) {
+                reconnect(info);
             }
 
-            if (targetGate != null && inputIndex != -1) {
-                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-                Point2D targetPos = targetGate.getInputMarkers().get(inputIndex).localToParent(
-                        targetGate.getInputMarkers().get(inputIndex).getCenterX(),
-                        targetGate.getInputMarkers().get(inputIndex).getCenterY());
-
-                connection.setStartX(sourcePos.getX());
-                connection.setStartY(sourcePos.getY());
-                connection.setEndX(targetPos.getX());
-                connection.setEndY(targetPos.getY());
-
-                targetGate.addInputConnection(connection, inputIndex);
-                targetGate.addInput(sourceGate);
+            if (!canvas.getChildren().contains(info.connection)) {
+                canvas.getChildren().add(info.connection);
             }
 
-            if (!canvas.getChildren().contains(connection)) {
-                canvas.getChildren().add(connection);
-            }
+            canvas.getLineToStartGateMap().put(info.connection, info.sourceGate);
+        });
+    }
 
-            canvas.getLineToStartGateMap().put(connection, sourceGate);
-        }
+    /**
+     * Reconnects the specified connection between the source and target gates.
+     * 
+     * @param info the connection information to be reconnected
+     */
+    private void reconnect(ConnectionInfo info) {
+        Point2D sourcePos = info.sourceGate.getOutputMarker().localToParent(
+                info.sourceGate.getOutputMarker().getCenterX(), info.sourceGate.getOutputMarker().getCenterY());
+        Point2D targetPos = info.targetGate.getInputMarkers().get(info.inputIndex).localToParent(
+                info.targetGate.getInputMarkers().get(info.inputIndex).getCenterX(),
+                info.targetGate.getInputMarkers().get(info.inputIndex).getCenterY());
 
-        for (TextLabel label : removedLabels) {
+        info.connection.setStartX(sourcePos.getX());
+        info.connection.setStartY(sourcePos.getY());
+        info.connection.setEndX(targetPos.getX());
+        info.connection.setEndY(targetPos.getY());
+
+        info.targetGate.addInputConnection(info.connection, info.inputIndex);
+        info.targetGate.addInput(info.sourceGate);
+    }
+
+    /**
+     * Re-adds the removed labels to the canvas.
+     */
+    private void reAddLabels() {
+        removedLabels.forEach(label -> {
             canvas.drawTextLabel(label, label.getLayoutX(), label.getLayoutY());
-            if (!label.getStyleClass().contains("selected")) {
-                label.getStyleClass().add("selected");
-            }
-        }
+            label.getStyleClass().add("selected");
+        });
+    }
 
+    /**
+     * Clears the removed gates, connections, labels, and connection information
+     */
+    private void clearRemovedLists() {
         removedGates.clear();
         removedConnections.clear();
         removedLabels.clear();
-        sourceGatesForConnections.clear();
-        targetGatesForConnections.clear();
-        inputIndices.clear();
+        removedConnectionInfos.clear();
     }
 }
