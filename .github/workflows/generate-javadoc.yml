@@ -1,4 +1,4 @@
-name: Build and Deploy Logic Gates Simulator
+name: Generate and Deploy Javadocs
 
 on:
    push:
@@ -8,7 +8,7 @@ on:
    workflow_dispatch:
 
 jobs:
-   build-and-release-jar:
+   build-and-release-javadoc:
       runs-on: ubuntu-latest
 
       steps:
@@ -24,14 +24,11 @@ jobs:
          - name: Build with Maven
            run: mvn clean package
 
-         - name: Rename JAR file
-           run: mv target/logic_gates-1.0-SNAPSHOT-shaded.jar target/logic_gate-1.0-SNAPSHOT.jar
+         - name: Generate Javadoc
+           run: mvn javadoc:javadoc
 
-         - name: Create ZIP archive
-           run: zip -j target/logic_gate-1.0-SNAPSHOT.zip target/logic_gate-1.0-SNAPSHOT.jar
-
-         - name: Create TAR.GZ archive
-           run: tar -czvf target/logic_gate-1.0-SNAPSHOT.tar.gz -C target logic_gate-1.0-SNAPSHOT.jar
+         - name: Zip Javadoc
+           run: zip -r javadoc.zip target/site/apidocs
 
          - name: Get Release by Tag
            id: get_release
@@ -43,7 +40,6 @@ jobs:
            continue-on-error: true
 
          - name: Delete Release if Exists
-           if: steps.get_release.outputs.status == 200
            uses: octokit/request-action@v2.x
            with:
               route: DELETE /repos/${{ github.repository }}/releases/${{ fromJson(steps.get_release.outputs.data).id }}
@@ -52,7 +48,6 @@ jobs:
 
          - name: Create Release
            id: create_release
-           if: github.event_name == 'workflow_dispatch'
            uses: actions/create-release@v1
            env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,24 +57,12 @@ jobs:
               draft: false
               prerelease: false
 
-         - name: Upload ZIP to Release
-           if: github.event_name == 'workflow_dispatch'
+         - name: Upload Javadoc to Release
            uses: actions/upload-release-asset@v1
            env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            with:
               upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: target/logic_gate-1.0-SNAPSHOT.zip
-              asset_name: logic_gate-1.0-SNAPSHOT.zip
+              asset_path: ./javadoc.zip
+              asset_name: javadoc.zip
               asset_content_type: application/zip
-
-         - name: Upload TAR.GZ to Release
-           if: github.event_name == 'workflow_dispatch'
-           uses: actions/upload-release-asset@v1
-           env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-           with:
-              upload_url: ${{ steps.create_release.outputs.upload_url }}
-              asset_path: target/logic_gate-1.0-SNAPSHOT.tar.gz
-              asset_name: logic_gate-1.0-SNAPSHOT.tar.gz
-              asset_content_type: application/gzip
