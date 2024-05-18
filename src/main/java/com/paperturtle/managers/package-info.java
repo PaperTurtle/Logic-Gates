@@ -1,6 +1,6 @@
 /**
  * This package contains the manager classes for handling different aspects of
- * the PaperTurtle application.
+ * the Logic Gate simulator application.
  * 
  * <p>
  * Managers in this package are responsible for managing keyboard shortcuts,
