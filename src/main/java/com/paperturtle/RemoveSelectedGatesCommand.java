@@ -67,6 +67,12 @@ public class RemoveSelectedGatesCommand implements Command {
             if (!gate.getImageView().getStyleClass().contains("selected")) {
                 gate.getImageView().getStyleClass().add("selected");
             }
+
+            if (gate instanceof Lightbulb) {
+                System.out.println(gate.getInputMarkers());
+                System.out.println(gate.getOutputMarker());
+                break;
+            }
         }
 
         for (int i = 0; i < removedConnections.size(); i++) {

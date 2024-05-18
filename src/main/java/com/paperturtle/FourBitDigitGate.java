@@ -61,6 +61,14 @@ public class FourBitDigitGate extends LogicGate {
 
     }
 
+    private void initializeMarkers() {
+        inputMarkers.clear();
+        for (Point2D point : inputPoints) {
+            Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
+            inputMarkers.add(marker);
+        }
+    }
+
     public void toggle() {
         state = !state;
         updateVisualState();
@@ -83,6 +91,7 @@ public class FourBitDigitGate extends LogicGate {
         if (imageView != null) {
             canvas.getChildren().add(imageView);
         }
+        initializeMarkers();
         for (Circle marker : inputMarkers) {
             if (marker != null) {
                 canvas.getChildren().add(marker);
