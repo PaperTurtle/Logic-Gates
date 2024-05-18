@@ -27,11 +27,4 @@ module com.paperturtle {
     opens com.paperturtle.serializers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.utils to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
 
-    exports com.paperturtle;
-    exports com.paperturtle.data;
-    exports com.paperturtle.commands;
-    exports com.paperturtle.components;
-    exports com.paperturtle.managers;
-    exports com.paperturtle.serializers;
-    exports com.paperturtle.utils;
 }
