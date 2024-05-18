@@ -16,11 +16,22 @@ import java.util.ArrayList;
 
 import javafx.util.Pair;
 
+/**
+ * Represents a Lightbulb in a digital circuit.
+ * A Lightbulb gate displays a visual representation of its state (on or off).
+ * 
+ * @see LogicGate
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class Lightbulb extends LogicGate {
     private boolean state = false;
     private Image offImage;
     private Image onImage;
 
+    /**
+     * Constructs a Lightbulb object with predefined SVG images and input points.
+     */
     public Lightbulb() {
         super(null,
                 Arrays.asList(new Point2D(5,
@@ -35,6 +46,9 @@ public class Lightbulb extends LogicGate {
         }
     }
 
+    /**
+     * Initializes the input markers for the Lightbulb.
+     */
     private void initializeMarkers() {
         inputMarkers.clear();
         for (Point2D point : inputPoints) {
@@ -43,16 +57,27 @@ public class Lightbulb extends LogicGate {
         }
     }
 
+    /**
+     * Toggles the state of the Lightbulb.
+     */
     public void toggle() {
         state = !state;
         updateVisualState();
     }
 
+    /**
+     * Toggles the light based on the current state.
+     * 
+     * @param currentState the current state of the Lightbulb.
+     */
     public void toggleLight(boolean currentState) {
         this.state = currentState;
         updateVisualState();
     }
 
+    /**
+     * Updates the visual state of the Lightbulb.
+     */
     private void updateVisualState() {
         if (imageView != null) {
             imageView.setImage(state ? onImage : offImage);
@@ -74,6 +99,9 @@ public class Lightbulb extends LogicGate {
         updateMarkerPosition();
     }
 
+    /**
+     * Updates the position of the input markers.
+     */
     private void updateMarkerPosition() {
         if (imageView != null && inputMarkers != null) {
             for (int i = 0; i < inputMarkers.size(); i++) {
@@ -85,6 +113,11 @@ public class Lightbulb extends LogicGate {
         }
     }
 
+    /**
+     * Evaluates the state of the Lightbulb based on its inputs.
+     * 
+     * @return true if at least one of the inputs is true, false otherwise.
+     */
     @Override
     public boolean evaluate() {
         boolean newEvaluatedState = inputs.stream().anyMatch(LogicGate::getOutput);
@@ -111,10 +144,20 @@ public class Lightbulb extends LogicGate {
         }
     }
 
+    /**
+     * Gets the ImageView object representing the Lightbulb.
+     * 
+     * @return the ImageView object representing the Lightbulb.
+     */
     public ImageView getImageView() {
         return imageView;
     }
 
+    /**
+     * Gets the output marker of the Lightbulb.
+     * 
+     * @return the output marker of the Lightbulb.
+     */
     public Circle getOutputMarker() {
         return outputMarker;
     }

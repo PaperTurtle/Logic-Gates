@@ -6,9 +6,21 @@ import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
+/**
+ * Represents a TriState gate in a digital circuit.
+ * A TriState gate has three states: high, low, and high-impedance.
+ * 
+ * @see LogicGate
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class TriStateGate extends LogicGate {
     private boolean enable;
 
+    /**
+     * Constructs a TriStateGate object with predefined SVG image, input points, and
+     * output point.
+     */
     public TriStateGate() {
         super("/com/paperturtle/TRISTATE_ANSI_Labelled.svg",
                 Arrays.asList(new Point2D(15, 25), new Point2D(66, 0)),

@@ -8,18 +8,13 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The XnorGate class extends the LogicGate class and represents an XNOR gate in
- * a digital circuit.
- * An XNOR gate (also known as equivalence gate) is a digital logic gate that
- * outputs true or '1' only when the number of true inputs is even.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * calculates the number of true inputs and returns true if the number is even.
+ * Represents an XNOR gate in a digital circuit.
+ * An XNOR gate (also known as equivalence gate) outputs true or '1' only when
+ * the
+ * number of true inputs is even.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class XnorGate extends LogicGate {

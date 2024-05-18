@@ -8,18 +8,13 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The NotGate class extends the LogicGate class and represents a NOT gate in
- * a digital circuit.
- * A NOT gate is a digital logic gate that outputs true or '1' only when the
- * input is false or '0'.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the input and returns the inverse of it.
+ * Represents a NOT gate in a digital circuit.
+ * A NOT gate outputs true or '1' only when the input is false or '0'.
  * 
  * @see LogicGate
+ * @see Point2D
+ * @see Pair
+ * 
  * @author Seweryn Czabanowski
  */
 public class NotGate extends LogicGate {

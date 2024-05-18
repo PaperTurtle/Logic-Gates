@@ -8,18 +8,13 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The XorGate class extends the LogicGate class and represents an XOR gate in
- * a digital circuit.
- * An XOR gate (also known as exclusive OR gate) is a digital logic gate that
- * outputs true or '1' only when the number of true inputs is odd.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * calculates the number of true inputs and returns true if the number is odd.
+ * Represents an XOR gate in a digital circuit.
+ * An XOR gate (also known as exclusive OR gate) outputs true or '1' only when
+ * the
+ * number of true inputs is odd.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class XorGate extends LogicGate {

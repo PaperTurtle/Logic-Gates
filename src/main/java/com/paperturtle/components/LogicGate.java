@@ -6,7 +6,6 @@ import java.util.List;
 import com.paperturtle.CircuitCanvas;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.data.GateData;
-import com.paperturtle.data.ClipboardData.ConnectionData;
 import com.paperturtle.utils.CircuitComponent;
 import com.paperturtle.utils.SvgUtil;
 
@@ -20,6 +19,11 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
+/**
+ * Abstract class representing a logic gate in a digital circuit.
+ * 
+ * @author Seweryn Czabanowski
+ */
 public abstract class LogicGate implements CircuitComponent {
     protected List<LogicGate> inputs;
     protected String svgFilePath;
@@ -36,6 +40,14 @@ public abstract class LogicGate implements CircuitComponent {
     private static long idCounter = 0;
     protected String id;
 
+    /**
+     * Constructs a LogicGate object with the specified SVG file path, input points,
+     * and output point.
+     * 
+     * @param svgFilePath the path to the SVG file representing the gate.
+     * @param inputPoints the list of input points.
+     * @param outputPoint the output point.
+     */
     public LogicGate(String svgFilePath, List<Point2D> inputPoints, Point2D outputPoint) {
         this.inputs = new ArrayList<>();
         this.svgFilePath = svgFilePath;
@@ -119,61 +131,6 @@ public abstract class LogicGate implements CircuitComponent {
     }
 
     /**
-     * Returns the current output value of the gate.
-     * This method will invoke evaluate() to ensure the latest input is returned.
-     * 
-     * @return the current output of the logic gate.
-     */
-    public boolean getOutput() {
-        return evaluate();
-    }
-
-    /**
-     * Returns the path to the SVG file for this gate.
-     * 
-     * @return the path to the SVG file.
-     */
-    public String getSvgFilePath() {
-        return svgFilePath;
-    }
-
-    /**
-     * Returns the list of input points for this gate.
-     * 
-     * @return the list of input points.
-     */
-    public List<Point2D> getInputPoints() {
-        return inputPoints;
-    }
-
-    /**
-     * Sets the list of input points for this gate.
-     * 
-     * @param inputPoints the list of input points.
-     */
-    public void setInputPoints(List<Point2D> inputPoints) {
-        this.inputPoints = inputPoints;
-    }
-
-    /**
-     * Returns the output point for this gate.
-     * 
-     * @return the output point.
-     */
-    public Point2D getOutputPoint() {
-        return outputPoint;
-    }
-
-    /**
-     * Sets the output point for this gate.
-     * 
-     * @param outputPoint the output point.
-     */
-    public void setOutputPoint(Point2D outputPoint) {
-        this.outputPoint = outputPoint;
-    }
-
-    /**
      * Sets the position of the gate on the canvas.
      * 
      * @param x the x-coordinate.
@@ -234,19 +191,6 @@ public abstract class LogicGate implements CircuitComponent {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the input connections for the given index.
-     * 
-     * @param index the index of the input connection.
-     * @return the list of input connections.
-     */
-    public List<Line> getInputConnections(int index) {
-        if (index >= 0 && index < inputConnections.size()) {
-            return inputConnections.get(index);
-        }
-        return null;
     }
 
     /**
@@ -332,6 +276,11 @@ public abstract class LogicGate implements CircuitComponent {
         outputConnections.add(line);
     }
 
+    /**
+     * Adds an output gate to this gate.
+     * 
+     * @param gate the LogicGate to be added.
+     */
     public void addOutputGate(LogicGate gate) {
         if (gate != null && !outputGates.contains(gate)) {
             outputGates.add(gate);
@@ -383,6 +332,11 @@ public abstract class LogicGate implements CircuitComponent {
                 });
     }
 
+    /**
+     * Returns the list of input gates for this gate.
+     * 
+     * @return the list of input gates.
+     */
     public List<LogicGate> getInputs() {
         return inputs;
     }
@@ -403,6 +357,19 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public List<List<Line>> getInputConnections() {
         return inputConnections;
+    }
+
+    /**
+     * Returns the input connections for the given index.
+     * 
+     * @param index the index of the input connection.
+     * @return the list of input connections.
+     */
+    public List<Line> getInputConnections(int index) {
+        if (index >= 0 && index < inputConnections.size()) {
+            return inputConnections.get(index);
+        }
+        return null;
     }
 
     /**
@@ -439,6 +406,61 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public List<LogicGate> getOutputGates() {
         return outputGates;
+    }
+
+    /**
+     * Returns the current output value of the gate.
+     * This method will invoke evaluate() to ensure the latest input is returned.
+     * 
+     * @return the current output of the logic gate.
+     */
+    public boolean getOutput() {
+        return evaluate();
+    }
+
+    /**
+     * Returns the path to the SVG file for this gate.
+     * 
+     * @return the path to the SVG file.
+     */
+    public String getSvgFilePath() {
+        return svgFilePath;
+    }
+
+    /**
+     * Returns the list of input points for this gate.
+     * 
+     * @return the list of input points.
+     */
+    public List<Point2D> getInputPoints() {
+        return inputPoints;
+    }
+
+    /**
+     * Sets the list of input points for this gate.
+     * 
+     * @param inputPoints the list of input points.
+     */
+    public void setInputPoints(List<Point2D> inputPoints) {
+        this.inputPoints = inputPoints;
+    }
+
+    /**
+     * Returns the output point for this gate.
+     * 
+     * @return the output point.
+     */
+    public Point2D getOutputPoint() {
+        return outputPoint;
+    }
+
+    /**
+     * Sets the output point for this gate.
+     * 
+     * @param outputPoint the output point.
+     */
+    public void setOutputPoint(Point2D outputPoint) {
+        this.outputPoint = outputPoint;
     }
 
     /**

@@ -8,19 +8,11 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The NandGate class extends the LogicGate class and represents a NAND gate in
- * a digital circuit.
- * A NAND gate is a digital logic gate that outputs true or '1' only when not
- * all the
- * inputs are true or '1'.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the inputs and returns true only if not all of them are true.
+ * Represents a NAND gate in a digital circuit.
+ * A NAND gate outputs true or '1' only when not all the inputs are true or '1'.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class NandGate extends LogicGate {
@@ -37,7 +29,7 @@ public class NandGate extends LogicGate {
     /**
      * Evaluates the state of the NAND gate based on its inputs.
      * 
-     * @return true if not all the inputs are true, false otherwise.
+     * @return true if not all the inputs are true, otherwise false.
      */
     @Override
     public boolean evaluate() {

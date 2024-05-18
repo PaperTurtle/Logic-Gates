@@ -31,6 +31,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
+/**
+ * Represents a text label in a digital circuit.
+ * A TextLabel displays a label with customizable properties such as font,
+ * color, and size.
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class TextLabel extends Group implements CircuitComponent {
     private Rectangle background;
     private Text labelText;
@@ -41,6 +48,13 @@ public class TextLabel extends Group implements CircuitComponent {
     private TextField widthField;
     private TextField heightField;
 
+    /**
+     * Constructs a TextLabel object with specified label, width, and height.
+     * 
+     * @param label  the text to display.
+     * @param width  the width of the label.
+     * @param height the height of the label.
+     */
     public TextLabel(String label, double width, double height) {
         this.width = width;
         this.height = height;
@@ -61,6 +75,9 @@ public class TextLabel extends Group implements CircuitComponent {
         setupContextMenu();
     }
 
+    /**
+     * Removes the TextLabel from its parent.
+     */
     public void removeSelf() {
         Parent parent = this.getParent();
         if (parent instanceof CircuitCanvas) {
@@ -68,6 +85,9 @@ public class TextLabel extends Group implements CircuitComponent {
         }
     }
 
+    /**
+     * Sets up the context menu for the TextLabel.
+     */
     private void setupContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editItem = new MenuItem("Edit");
@@ -85,6 +105,9 @@ public class TextLabel extends Group implements CircuitComponent {
         });
     }
 
+    /**
+     * Shows the edit dialog for the TextLabel.
+     */
     private void showEditDialog() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Edit Text Label");
@@ -295,6 +318,9 @@ public class TextLabel extends Group implements CircuitComponent {
         dialog.showAndWait();
     }
 
+    /**
+     * Updates the size of the preview text and background.
+     */
     private void updatePreviewSize(Text previewText, Rectangle previewBackground) {
         double textWidth = previewText.getBoundsInLocal().getWidth() + 20;
         double textHeight = previewText.getBoundsInLocal().getHeight() + 20;
@@ -320,79 +346,169 @@ public class TextLabel extends Group implements CircuitComponent {
         previewText.setLayoutY((textHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
     }
 
+    /**
+     * Returns the height of the TextLabel.
+     * 
+     * @return the height of the TextLabel.
+     */
     public double getHeight() {
         return height;
     }
 
+    /**
+     * Returns the width of the TextLabel.
+     * 
+     * @return the width of the TextLabel.
+     */
     public double getWidth() {
         return width;
     }
 
+    /**
+     * Returns the label of the TextLabel.
+     * 
+     * @return the label of the TextLabel.
+     */
     @Override
     public String getComponentType() {
         return "textLabel";
     }
 
+    /**
+     * Returns the label of the TextLabel.
+     * 
+     * @return the label of the TextLabel.
+     */
     public String getLabel() {
         return labelText.getText();
     }
 
+    /**
+     * Sets the label of the TextLabel.
+     * 
+     * @param label the new label for the TextLabel.
+     */
     public void setLabel(String label) {
         labelText.setText(label);
     }
 
+    /**
+     * Sets the width of the TextLabel.
+     * 
+     * @param width the new width for the TextLabel.
+     */
     public void setWidth(double width) {
         this.width = width;
         background.setWidth(width);
     }
 
+    /**
+     * Sets the height of the TextLabel.
+     * 
+     * @param height the new height for the TextLabel.
+     */
     public void setHeight(double height) {
         this.height = height;
         background.setHeight(height);
     }
 
+    /**
+     * Sets the auto size property of the TextLabel.
+     * 
+     * @param isAutoSize the new auto size value for the TextLabel.
+     */
     public void setAutoSize(boolean isAutoSize) {
         this.isAutoSize = isAutoSize;
     }
 
+    /**
+     * Returns the auto size property of the TextLabel.
+     * 
+     * @return the auto size property of the TextLabel.
+     */
     public boolean isAutoSize() {
         return isAutoSize;
     }
 
+    /**
+     * Sets the font family of the TextLabel.
+     * 
+     * @param fontFamily the new font family for the TextLabel.
+     */
     public void setFontFamily(String fontFamily) {
         labelText.setFont(new Font(fontFamily, labelText.getFont().getSize()));
     }
 
+    /**
+     * Returns the font family of the TextLabel.
+     * 
+     * @return the font family of the TextLabel.
+     */
     public String getFontFamily() {
         return labelText.getFont().getFamily();
     }
 
+    /**
+     * Sets the font size of the TextLabel.
+     * 
+     * @param fontSize the new font size for the TextLabel.
+     */
     public void setFontSize(int fontSize) {
         labelText.setFont(new Font(labelText.getFont().getFamily(), fontSize));
     }
 
+    /**
+     * Returns the font size of the TextLabel.
+     * 
+     * @return the font size of the TextLabel.
+     */
     public int getFontSize() {
         return (int) labelText.getFont().getSize();
     }
 
+    /**
+     * Sets the fill color of the TextLabel.
+     * 
+     * @param color the new fill color for the TextLabel.
+     */
     public void setFillColor(Color color) {
         labelText.setFill(color);
     }
 
+    /**
+     * Sets the fill color of the TextLabel.
+     * 
+     * @param color the new fill color for the TextLabel, specified as a web color
+     *              string.
+     */
     public void setFillColor(String color) {
         setFillColor(Color.web(color));
     }
 
+    /**
+     * Returns the fill color of the TextLabel.
+     * 
+     * @return the fill color of the TextLabel.
+     */
     public Color getFillColor() {
         return (Color) labelText.getFill();
     }
 
+    /**
+     * Sets the text alignment of the TextLabel.
+     * 
+     * @param alignment the new text alignment for the TextLabel.
+     */
     public void setTextAlignment(TextAlignment alignment) {
         labelText.setTextAlignment(alignment);
     }
 
+    /**
+     * Returns the text alignment of the TextLabel.
+     * 
+     * @return the text alignment of the TextLabel.
+     */
     public TextAlignment getTextAlignment() {
         return labelText.getTextAlignment();
     }
-
 }

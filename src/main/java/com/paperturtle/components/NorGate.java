@@ -8,18 +8,11 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The NorGate class extends the LogicGate class and represents a NOR gate in
- * a digital circuit.
- * A NOR gate is a digital logic gate that outputs true or '1' only when all the
- * inputs are false or '0'.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the inputs and returns true only if all of them are false.
+ * Represents a NOR gate in a digital circuit.
+ * A NOR gate outputs true or '1' only when all the inputs are false or '0'.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class NorGate extends LogicGate {
@@ -36,7 +29,7 @@ public class NorGate extends LogicGate {
     /**
      * Evaluates the state of the NOR gate based on its inputs.
      * 
-     * @return true if all the inputs are false, false otherwise.
+     * @return true if all the inputs are false, otherwise false.
      */
     @Override
     public boolean evaluate() {

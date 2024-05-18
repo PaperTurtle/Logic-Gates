@@ -8,19 +8,13 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The BufferGate class extends the LogicGate class and represents a Buffer gate
- * in
- * a digital circuit.
- * A Buffer gate is a digital logic gate that outputs the same value as its
- * input.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the input and returns the same value.
+ * Represents a Buffer gate in a digital circuit.
+ * A Buffer gate outputs the same value as its input.
  * 
  * @see LogicGate
+ * @see Point2D
+ * @see Pair
+ * 
  * @author Seweryn Czabanowski
  */
 public class BufferGate extends LogicGate {
@@ -46,7 +40,7 @@ public class BufferGate extends LogicGate {
 
         return inputs.get(0).getOutput();
     }
-
+   
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
         List<Pair<Boolean[], Boolean>> list = new ArrayList<>();

@@ -8,19 +8,11 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 
 /**
- * The AndGate class extends the LogicGate class and represents an AND gate in
- * a digital circuit.
- * An AND gate is a digital logic gate that outputs true or '1' only when all
- * the
- * inputs are true or '1'.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the inputs and returns true only if all of them are true.
+ * Represents an AND gate in a digital circuit.
+ * An AND gate outputs true or '1' only when all the inputs are true or '1'.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class AndGate extends LogicGate {

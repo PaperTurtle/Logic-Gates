@@ -17,11 +17,20 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 
+/**
+ * Represents a Clock gate in a digital circuit.
+ * A Clock gate oscillates between on and off states at a specified interval.
+ * 
+ * @see LogicGate
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class ClockGate extends LogicGate {
     private boolean state = false;
     private boolean isRunning = true;
@@ -30,6 +39,9 @@ public class ClockGate extends LogicGate {
     private Timeline timeline;
     private double signalDuration = 1.0;
 
+    /**
+     * Constructs a ClockGate object with predefined SVG images and output point.
+     */
     public ClockGate() {
         super(null,
                 null,
@@ -53,6 +65,11 @@ public class ClockGate extends LogicGate {
                 new Pair<>(new Boolean[] {}, true));
     }
 
+    /**
+     * Sets up the clock with the specified duration.
+     * 
+     * @param duration the duration for the clock signal
+     */
     private void setupClock(double duration) {
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(duration), event -> toggle()));
@@ -60,6 +77,9 @@ public class ClockGate extends LogicGate {
         timeline.play();
     }
 
+    /**
+     * Toggles the state of the clock gate.
+     */
     private void toggle() {
         state = !state;
         updateOutputConnectionsColor();
@@ -67,6 +87,9 @@ public class ClockGate extends LogicGate {
         propagateStateChange();
     }
 
+    /**
+     * Updates the visual state of the clock gate.
+     */
     private void updateVisualState() {
         if (imageView != null) {
             imageView.setImage(state ? onImage : offImage);
@@ -86,6 +109,9 @@ public class ClockGate extends LogicGate {
         }
     }
 
+    /**
+     * Updates the position of the output marker.
+     */
     private void updateMarkerPosition() {
         if (imageView != null && outputMarker != null) {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
@@ -93,13 +119,19 @@ public class ClockGate extends LogicGate {
         }
     }
 
+    /**
+     * Updates the color of the output connections.
+     */
     private void updateOutputConnectionsColor() {
-        javafx.scene.paint.Color lineColor = state ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.BLACK;
-        for (javafx.scene.shape.Line line : outputConnections) {
+        Color lineColor = state ? Color.RED : Color.BLACK;
+        for (Line line : outputConnections) {
             line.setStroke(lineColor);
         }
     }
 
+    /**
+     * Stops the clock.
+     */
     public void stopClock() {
         if (timeline != null) {
             timeline.stop();
@@ -107,6 +139,9 @@ public class ClockGate extends LogicGate {
         }
     }
 
+    /**
+     * Starts the clock.
+     */
     public void startClock() {
         if (timeline != null) {
             timeline.play();
@@ -114,10 +149,20 @@ public class ClockGate extends LogicGate {
         }
     }
 
+    /**
+     * Gets the signal duration.
+     * 
+     * @return the signal duration
+     */
     public double getSignalDuration() {
         return signalDuration;
     }
 
+    /**
+     * Sets the signal duration.
+     * 
+     * @param duration the new signal duration
+     */
     public void setSignalDuration(double duration) {
         signalDuration = duration;
         if (timeline != null) {
@@ -127,6 +172,9 @@ public class ClockGate extends LogicGate {
         }
     }
 
+    /**
+     * Shows a dialog to edit the clock signal duration.
+     */
     public void showTimeEditDialog() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Edit Clock Signal Duration");

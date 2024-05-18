@@ -15,27 +15,11 @@ import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 
 /**
- * The FourBitDigitGate class extends the LogicGate class and represents a
- * four-bit digit gate in a digital circuit.
- * 
- * A FourBitDigitGate is a digital logic gate that handles four bits of input
- * and output.
- * 
- * The class constructor sets the SVG image representing the gate, the list of
- * input points, and the output point.
- * 
- * The evaluate method overrides the abstract method in the LogicGate class. It
- * checks the inputs and returns the corresponding four-bit output.
- * 
- * The state field represents the current state of the gate (true or false).
- * 
- * The images field is a list of images that represent the different states of
- * the gate.
- * 
- * The previousActiveCount field keeps track of the number of active inputs from
- * the previous state of the gate.
+ * Represents a four-bit digit gate in a digital circuit.
+ * A FourBitDigitGate handles four bits of input and output.
  * 
  * @see LogicGate
+ * 
  * @author Seweryn Czabanowski
  */
 public class FourBitDigitGate extends LogicGate {
@@ -43,6 +27,10 @@ public class FourBitDigitGate extends LogicGate {
     private List<Image> images;
     private int previousActiveCount = 0;
 
+    /**
+     * Constructs a FourBitDigitGate object with predefined SVG images and input
+     * points.
+     */
     public FourBitDigitGate() {
         super(null,
                 Arrays.asList(new Point2D(5, 71), new Point2D(5, 53),
@@ -60,9 +48,11 @@ public class FourBitDigitGate extends LogicGate {
             Circle marker = new Circle(point.getX(), point.getY(), 5, Color.BLUE);
             inputMarkers.add(marker);
         }
-
     }
 
+    /**
+     * Initializes the input markers.
+     */
     private void initializeMarkers() {
         inputMarkers.clear();
         for (Point2D point : inputPoints) {
@@ -71,11 +61,17 @@ public class FourBitDigitGate extends LogicGate {
         }
     }
 
+    /**
+     * Toggles the state of the four-bit digit gate.
+     */
     public void toggle() {
         state = !state;
         updateVisualState();
     }
 
+    /**
+     * Updates the visual state of the four-bit digit gate.
+     */
     private void updateVisualState() {
         if (imageView != null && !inputs.isEmpty()) {
             int activeCount = (int) inputs.stream().filter(LogicGate::getOutput).count();
@@ -102,6 +98,9 @@ public class FourBitDigitGate extends LogicGate {
         updateMarkerPosition();
     }
 
+    /**
+     * Updates the position of the input markers.
+     */
     private void updateMarkerPosition() {
         if (imageView != null && inputMarkers != null) {
             for (int i = 0; i < inputMarkers.size(); i++) {
@@ -142,6 +141,11 @@ public class FourBitDigitGate extends LogicGate {
         }
     }
 
+    /**
+     * Gets the image view of the four-bit digit gate.
+     * 
+     * @return the image view
+     */
     public ImageView getImageView() {
         return imageView;
     }

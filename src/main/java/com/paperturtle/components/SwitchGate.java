@@ -17,6 +17,18 @@ import com.paperturtle.utils.SvgUtil;
 import java.util.ArrayList;
 import javafx.util.Pair;
 
+/**
+ * Represents a Switch gate in a digital circuit.
+ * A Switch gate toggles its state (on or off) when clicked.
+ * 
+ * @see LogicGate
+ * @see Point2D
+ * @see Pair
+ * @see SvgUtil
+ * @see CircuitCanvas
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class SwitchGate extends LogicGate {
     private boolean state = false;
     private Image offImage;
@@ -24,6 +36,9 @@ public class SwitchGate extends LogicGate {
     private boolean isSelected = false;
     private CircuitCanvas canvas;
 
+    /**
+     * Constructs a SwitchGate object with predefined SVG images and output point.
+     */
     public SwitchGate() {
         super(null,
                 null,
@@ -40,12 +55,18 @@ public class SwitchGate extends LogicGate {
         return state;
     }
 
+    /**
+     * Toggles the state of the Switch gate.
+     */
     public void toggle() {
         CommandManager commandManager = canvas.getCommandManager();
         commandManager.executeCommand(new ToggleSwitchStateCommand(this));
         propagateStateChange();
     }
 
+    /**
+     * Updates the color of the output connections based on the state.
+     */
     public void updateOutputConnectionsColor() {
         Color lineColor = state ? Color.RED : Color.BLACK;
         for (Line line : outputConnections) {
@@ -53,6 +74,9 @@ public class SwitchGate extends LogicGate {
         }
     }
 
+    /**
+     * Updates the visual state of the Switch gate.
+     */
     private void updateVisualState() {
         if (imageView != null) {
             imageView.setImage(state ? onImage : offImage);
@@ -74,6 +98,9 @@ public class SwitchGate extends LogicGate {
         }
     }
 
+    /**
+     * Updates the position of the output marker.
+     */
     private void updateMarkerPosition() {
         if (imageView != null && outputMarker != null) {
             outputMarker.setCenterX(imageView.getX() + outputPoint.getX());
@@ -81,6 +108,9 @@ public class SwitchGate extends LogicGate {
         }
     }
 
+    /**
+     * Handles the mouse click event on the Switch gate.
+     */
     private void handleMouseClicked(MouseEvent event) {
         if (!isSelected) {
             isSelected = true;
@@ -106,18 +136,38 @@ public class SwitchGate extends LogicGate {
         return list;
     }
 
+    /**
+     * Sets the selection state of the Switch gate.
+     * 
+     * @param selected true if the gate is selected, false otherwise.
+     */
     public void setSelected(boolean selected) {
         isSelected = selected;
     }
 
+    /**
+     * Returns the selection state of the Switch gate.
+     * 
+     * @return true if the gate is selected, false otherwise.
+     */
     public boolean isSelected() {
         return isSelected;
     }
 
+    /**
+     * Returns the current state of the Switch gate.
+     * 
+     * @return the current state of the gate.
+     */
     public boolean getState() {
         return state;
     }
 
+    /**
+     * Sets the state of the Switch gate.
+     * 
+     * @param state the state to set.
+     */
     public void setState(boolean state) {
         this.state = state;
         updateVisualState();
