@@ -26,6 +26,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
@@ -81,6 +84,12 @@ public class App extends Application {
         MenuItem copyItem = new MenuItem("Copy");
         MenuItem pasteItem = new MenuItem("Paste");
         MenuItem deleteItem = new MenuItem("Delete");
+
+        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN));
+        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN));
+        copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+        pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
+        deleteItem.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
 
         undoItem.setOnAction(e -> circuitCanvas.getCommandManager().undo());
         redoItem.setOnAction(e -> circuitCanvas.getCommandManager().redo());
