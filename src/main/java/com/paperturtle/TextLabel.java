@@ -1,9 +1,11 @@
 package com.paperturtle;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -16,6 +18,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.paint.Color;
@@ -85,6 +89,7 @@ public class TextLabel extends Group implements CircuitComponent {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
 
         TextField textField = new TextField(labelText.getText());
         ColorPicker backgroundColorPicker = new ColorPicker((Color) background.getFill());
@@ -116,6 +121,24 @@ public class TextLabel extends Group implements CircuitComponent {
         Label widthLabel = new Label("Width:");
         Label heightLabel = new Label("Height:");
 
+        CheckBox boldCheckBox = new CheckBox("Bold");
+        CheckBox italicCheckBox = new CheckBox("Italic");
+        CheckBox underlineCheckBox = new CheckBox("Underline");
+        CheckBox strikethroughCheckBox = new CheckBox("Strikethrough");
+
+        if (labelText.getFont().getStyle().contains("Bold")) {
+            boldCheckBox.setSelected(true);
+        }
+        if (labelText.getFont().getStyle().contains("Italic")) {
+            italicCheckBox.setSelected(true);
+        }
+        if (labelText.isUnderline()) {
+            underlineCheckBox.setSelected(true);
+        }
+        if (labelText.isStrikethrough()) {
+            strikethroughCheckBox.setSelected(true);
+        }
+
         if (isAutoSize) {
             autoSizeButton.setSelected(true);
         }
@@ -123,6 +146,8 @@ public class TextLabel extends Group implements CircuitComponent {
         Text previewText = new Text(labelText.getText());
         previewText.setFill(labelText.getFill());
         previewText.setFont(labelText.getFont());
+        previewText.setUnderline(labelText.isUnderline());
+        previewText.setStrikethrough(labelText.isStrikethrough());
         Rectangle previewBackground = new Rectangle(100, 30);
         previewBackground.setFill(background.getFill());
 
@@ -130,7 +155,10 @@ public class TextLabel extends Group implements CircuitComponent {
 
         fontSizeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                Font newFont = new Font(labelText.getFont().getFamily(), newVal);
+                Font newFont = Font.font(labelText.getFont().getFamily(),
+                        boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                        italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                        newVal);
                 previewText.setFont(newFont);
                 if (isAutoSize) {
                     adjustPreviewSize(previewText, previewBackground);
@@ -143,7 +171,10 @@ public class TextLabel extends Group implements CircuitComponent {
         });
 
         fontPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            Font newFont = new Font(newVal, labelText.getFont().getSize());
+            Font newFont = Font.font(newVal,
+                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    fontSizeComboBox.getValue());
             previewText.setFont(newFont);
             if (isAutoSize) {
                 adjustPreviewSize(previewText, previewBackground);
@@ -158,28 +189,60 @@ public class TextLabel extends Group implements CircuitComponent {
             previewText.setFill(newVal);
         });
 
-        grid.add(textField, 0, 0);
-        grid.add(backgroundColorPicker, 0, 1);
-        grid.add(textColorPicker, 0, 2);
+        boldCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            Font newFont = Font.font(fontPicker.getValue(),
+                    newVal ? FontWeight.BOLD : FontWeight.NORMAL,
+                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    fontSizeComboBox.getValue());
+            previewText.setFont(newFont);
+        });
+
+        italicCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            Font newFont = Font.font(fontPicker.getValue(),
+                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                    newVal ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    fontSizeComboBox.getValue());
+            previewText.setFont(newFont);
+        });
+
+        underlineCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            previewText.setUnderline(newVal);
+        });
+
+        strikethroughCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            previewText.setStrikethrough(newVal);
+        });
+
+        grid.add(new Label("Text:"), 0, 0);
+        grid.add(textField, 1, 0);
+        grid.add(new Label("Background Color:"), 0, 1);
+        grid.add(backgroundColorPicker, 1, 1);
+        grid.add(new Label("Text Color:"), 0, 2);
+        grid.add(textColorPicker, 1, 2);
         grid.add(new Label("Font:"), 0, 3);
-        grid.add(fontPicker, 0, 4);
-        grid.add(new Label("Font size:"), 0, 5);
-        grid.add(fontSizeComboBox, 0, 6);
+        grid.add(fontPicker, 1, 3);
+        grid.add(new Label("Font size:"), 0, 4);
+        grid.add(fontSizeComboBox, 1, 4);
+        grid.add(boldCheckBox, 0, 5);
+        grid.add(italicCheckBox, 1, 5);
+        grid.add(underlineCheckBox, 0, 6);
+        grid.add(strikethroughCheckBox, 1, 6);
         grid.add(new Label("Size:"), 0, 7);
-        grid.add(autoSizeButton, 0, 8);
-        grid.add(fixedSizeButton, 0, 9);
+        grid.add(autoSizeButton, 1, 7);
+        grid.add(fixedSizeButton, 1, 8);
 
         if (!isAutoSize) {
             fixedSizeButton.setSelected(true);
-            grid.add(widthLabel, 0, 10);
-            grid.add(widthField, 0, 11);
-            grid.add(heightLabel, 0, 12);
-            grid.add(heightField, 0, 13);
+            grid.add(widthLabel, 0, 9);
+            grid.add(widthField, 1, 9);
+            grid.add(heightLabel, 0, 10);
+            grid.add(heightField, 1, 10);
         }
 
-        grid.add(alignmentComboBox, 0, 14);
-
-        grid.add(previewBox, 0, 15);
+        grid.add(new Label("Alignment:"), 0, 11);
+        grid.add(alignmentComboBox, 1, 11);
+        grid.add(new Label("Preview:"), 0, 12);
+        grid.add(previewBox, 1, 12);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(() -> textField.requestFocus());
@@ -204,16 +267,16 @@ public class TextLabel extends Group implements CircuitComponent {
                 heightField.setText(String.valueOf(newHeight));
             } else {
                 if (!grid.getChildren().contains(widthLabel)) {
-                    grid.add(widthLabel, 0, 6);
+                    grid.add(widthLabel, 0, 9);
                 }
                 if (!grid.getChildren().contains(widthField)) {
-                    grid.add(widthField, 0, 7);
+                    grid.add(widthField, 1, 9);
                 }
                 if (!grid.getChildren().contains(heightLabel)) {
-                    grid.add(heightLabel, 0, 8);
+                    grid.add(heightLabel, 0, 10);
                 }
                 if (!grid.getChildren().contains(heightField)) {
-                    grid.add(heightField, 0, 9);
+                    grid.add(heightField, 1, 10);
                 }
                 try {
                     double newWidth = Double.parseDouble(widthField.getText());
@@ -254,8 +317,13 @@ public class TextLabel extends Group implements CircuitComponent {
                 labelText.setText(textField.getText());
                 labelText.setFill(textColorPicker.getValue());
                 background.setFill(backgroundColorPicker.getValue());
-                Font newFont = new Font(fontPicker.getValue(), fontSizeComboBox.getValue());
+                Font newFont = Font.font(fontPicker.getValue(),
+                        boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                        italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                        fontSizeComboBox.getValue());
                 labelText.setFont(newFont);
+                labelText.setUnderline(underlineCheckBox.isSelected());
+                labelText.setStrikethrough(strikethroughCheckBox.isSelected());
                 if (fixedSizeButton.isSelected()) {
                     try {
                         width = Double.parseDouble(widthField.getText());
