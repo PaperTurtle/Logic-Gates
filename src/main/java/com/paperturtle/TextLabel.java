@@ -1,6 +1,7 @@
 package com.paperturtle;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Parent;
@@ -33,6 +34,9 @@ public class TextLabel extends Group implements CircuitComponent {
     private double width;
     private double height;
     private boolean isAutoSize;
+    private RadioButton fixedSizeButton;
+    private TextField widthField;
+    private TextField heightField;
 
     public TextLabel(String label, double width, double height) {
         this.width = width;
@@ -96,7 +100,7 @@ public class TextLabel extends Group implements CircuitComponent {
         ColorPicker textColorPicker = new ColorPicker((Color) labelText.getFill());
 
         RadioButton autoSizeButton = new RadioButton("Automatic size");
-        RadioButton fixedSizeButton = new RadioButton("Fixed size");
+        fixedSizeButton = new RadioButton("Fixed size");
         ToggleGroup sizeGroup = new ToggleGroup();
         autoSizeButton.setToggleGroup(sizeGroup);
         fixedSizeButton.setToggleGroup(sizeGroup);
@@ -109,8 +113,8 @@ public class TextLabel extends Group implements CircuitComponent {
         alignmentComboBox.getItems().addAll("Left", "Center", "Right");
         alignmentComboBox.setValue("Center");
 
-        TextField widthField = new TextField(String.valueOf(width));
-        TextField heightField = new TextField(String.valueOf(height));
+        widthField = new TextField(String.valueOf(width));
+        heightField = new TextField(String.valueOf(height));
 
         ComboBox<Integer> fontSizeComboBox = new ComboBox<>();
         for (int i = 1; i <= 48; i++) {
@@ -148,38 +152,23 @@ public class TextLabel extends Group implements CircuitComponent {
         previewText.setFont(labelText.getFont());
         previewText.setUnderline(labelText.isUnderline());
         previewText.setStrikethrough(labelText.isStrikethrough());
-        Rectangle previewBackground = new Rectangle(100, 30);
+        Rectangle previewBackground = new Rectangle(width, height); // Set initial width and height
         previewBackground.setFill(background.getFill());
 
         StackPane previewBox = new StackPane(previewBackground, previewText);
 
-        fontSizeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                Font newFont = Font.font(labelText.getFont().getFamily(),
-                        boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
-                        italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
-                        newVal);
-                previewText.setFont(newFont);
-                if (isAutoSize) {
-                    adjustPreviewSize(previewText, previewBackground);
-                }
-            }
-        });
+        ChangeListener<Object> previewChangeListener = (obs, oldVal, newVal) -> {
+            previewText.setText(textField.getText()); // Update the preview text
+            updatePreviewSize(previewText, previewBackground);
+        };
 
-        textField.textProperty().addListener((obs, oldVal, newVal) -> {
-            previewText.setText(newVal);
-        });
-
-        fontPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            Font newFont = Font.font(newVal,
-                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
-                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
-                    fontSizeComboBox.getValue());
-            previewText.setFont(newFont);
-            if (isAutoSize) {
-                adjustPreviewSize(previewText, previewBackground);
-            }
-        });
+        fontSizeComboBox.valueProperty().addListener(previewChangeListener);
+        textField.textProperty().addListener(previewChangeListener);
+        fontPicker.valueProperty().addListener(previewChangeListener);
+        boldCheckBox.selectedProperty().addListener(previewChangeListener);
+        italicCheckBox.selectedProperty().addListener(previewChangeListener);
+        underlineCheckBox.selectedProperty().addListener(previewChangeListener);
+        strikethroughCheckBox.selectedProperty().addListener(previewChangeListener);
 
         backgroundColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             previewBackground.setFill(newVal);
@@ -187,30 +176,6 @@ public class TextLabel extends Group implements CircuitComponent {
 
         textColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             previewText.setFill(newVal);
-        });
-
-        boldCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            Font newFont = Font.font(fontPicker.getValue(),
-                    newVal ? FontWeight.BOLD : FontWeight.NORMAL,
-                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
-                    fontSizeComboBox.getValue());
-            previewText.setFont(newFont);
-        });
-
-        italicCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            Font newFont = Font.font(fontPicker.getValue(),
-                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
-                    newVal ? FontPosture.ITALIC : FontPosture.REGULAR,
-                    fontSizeComboBox.getValue());
-            previewText.setFont(newFont);
-        });
-
-        underlineCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            previewText.setUnderline(newVal);
-        });
-
-        strikethroughCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            previewText.setStrikethrough(newVal);
         });
 
         grid.add(new Label("Text:"), 0, 0);
@@ -250,21 +215,7 @@ public class TextLabel extends Group implements CircuitComponent {
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == autoSizeButton) {
                 grid.getChildren().removeAll(widthLabel, widthField, heightLabel, heightField);
-                double newWidth = previewText.getBoundsInLocal().getWidth() + 20;
-                double newHeight = previewText.getBoundsInLocal().getHeight() + 20;
-                previewBackground.setWidth(newWidth);
-                previewBackground.setHeight(newHeight);
-                switch (alignmentComboBox.getValue()) {
-                    case "Left":
-                        previewText.setLayoutX(10);
-                        break;
-                    case "Right":
-                        previewText.setLayoutX(newWidth - previewText.getBoundsInLocal().getWidth() - 10);
-                        break;
-                }
-                previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
-                widthField.setText(String.valueOf(newWidth));
-                heightField.setText(String.valueOf(newHeight));
+                updatePreviewSize(previewText, previewBackground);
             } else {
                 if (!grid.getChildren().contains(widthLabel)) {
                     grid.add(widthLabel, 0, 9);
@@ -278,39 +229,12 @@ public class TextLabel extends Group implements CircuitComponent {
                 if (!grid.getChildren().contains(heightField)) {
                     grid.add(heightField, 1, 10);
                 }
-                try {
-                    double newWidth = Double.parseDouble(widthField.getText());
-                    double newHeight = Double.parseDouble(heightField.getText());
-                    previewBackground.setWidth(newWidth);
-                    previewBackground.setHeight(newHeight);
-                    previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
-                    previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
-                } catch (NumberFormatException e) {
-                }
+                updatePreviewSize(previewText, previewBackground);
             }
         });
 
-        widthField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (fixedSizeButton.isSelected()) {
-                try {
-                    double newWidth = Double.parseDouble(newVal);
-                    previewBackground.setWidth(newWidth);
-                    previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
-                } catch (NumberFormatException e) {
-                }
-            }
-        });
-
-        heightField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (fixedSizeButton.isSelected()) {
-                try {
-                    double newHeight = Double.parseDouble(newVal);
-                    previewBackground.setHeight(newHeight);
-                    previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
-                } catch (NumberFormatException e) {
-                }
-            }
-        });
+        widthField.textProperty().addListener(previewChangeListener);
+        heightField.textProperty().addListener(previewChangeListener);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
@@ -368,21 +292,37 @@ public class TextLabel extends Group implements CircuitComponent {
         dialog.showAndWait();
     }
 
+    private void updatePreviewSize(Text previewText, Rectangle previewBackground) {
+        double textWidth = previewText.getBoundsInLocal().getWidth() + 20;
+        double textHeight = previewText.getBoundsInLocal().getHeight() + 20;
+
+        if (fixedSizeButton.isSelected()) {
+            try {
+                double currentWidth = Double.parseDouble(widthField.getText());
+                double currentHeight = Double.parseDouble(heightField.getText());
+
+                if (textWidth > currentWidth) {
+                    currentWidth = textWidth;
+                    widthField.setText(String.valueOf(currentWidth));
+                }
+
+                textHeight = Math.max(textHeight, currentHeight);
+            } catch (NumberFormatException e) {
+            }
+        }
+
+        previewBackground.setWidth(textWidth);
+        previewBackground.setHeight(textHeight);
+        previewText.setLayoutX((textWidth - previewText.getBoundsInLocal().getWidth()) / 2);
+        previewText.setLayoutY((textHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
+    }
+
     public double getHeight() {
         return height;
     }
 
     public double getWidth() {
         return width;
-    }
-
-    private void adjustPreviewSize(Text previewText, Rectangle previewBackground) {
-        double newWidth = previewText.getBoundsInLocal().getWidth() + 20;
-        double newHeight = previewText.getBoundsInLocal().getHeight() + 20;
-        previewBackground.setWidth(newWidth);
-        previewBackground.setHeight(newHeight);
-        previewText.setLayoutX((newWidth - previewText.getBoundsInLocal().getWidth()) / 2);
-        previewText.setLayoutY((newHeight / 2) + (previewText.getBoundsInLocal().getHeight() / 4));
     }
 
     @Override
