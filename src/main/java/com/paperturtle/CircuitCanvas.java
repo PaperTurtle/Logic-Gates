@@ -23,7 +23,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.paperturtle.GateData.ConnectionData;
+import com.paperturtle.components.GateFactory;
+import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.SwitchGate;
+import com.paperturtle.components.TextLabel;
+import com.paperturtle.data.GateData;
+import com.paperturtle.data.GateData.ConnectionData;
+import com.paperturtle.managers.ClipboardManager;
+import com.paperturtle.managers.CommandManager;
+import com.paperturtle.managers.ConnectionManager;
+import com.paperturtle.managers.ContextMenuManager;
+import com.paperturtle.managers.GateManager;
+import com.paperturtle.managers.InteractionManager;
+import com.paperturtle.managers.KeyboardShortcutManager;
+import com.paperturtle.managers.SelectionManager;
+import com.paperturtle.utils.CircuitComponent;
 
 public class CircuitCanvas extends Pane {
     private Line currentLine;
@@ -37,9 +51,11 @@ public class CircuitCanvas extends Pane {
     private Set<LogicGate> gatesToBeUpdated = new HashSet<>();
     private CommandManager commandManager;
     private InteractionManager interactionManager;
+    private SelectionManager selectionManager;
     private ConnectionManager connectionManager;
     private GateManager gateManager;
     private ClipboardManager clipboardManager;
+    private ContextMenuManager contextMenuManager;
 
     public CircuitCanvas(double width, double height, ScrollPane scrollPane) {
         super();
@@ -50,11 +66,13 @@ public class CircuitCanvas extends Pane {
 
         this.commandManager = new CommandManager();
         this.interactionManager = new InteractionManager(this);
+        this.selectionManager = new SelectionManager(this);
         this.connectionManager = new ConnectionManager(this);
         this.gateManager = new GateManager(this);
         this.clipboardManager = new ClipboardManager(this);
+        this.contextMenuManager = new ContextMenuManager(this);
 
-        interactionManager.initializeSelectionMechanism();
+        selectionManager.initializeSelectionMechanism();
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
 
@@ -64,7 +82,7 @@ public class CircuitCanvas extends Pane {
     public void drawGate(LogicGate gate, double x, double y) {
         gate.createVisualRepresentation(this);
         gate.setPosition(x, y);
-        interactionManager.setupDragHandlers(gate.imageView, gate);
+        interactionManager.setupDragHandlers(gate.getImageView(), gate);
         gateImageViews.put(gate.getImageView(), gate);
         if (gate instanceof SwitchGate) {
             ((SwitchGate) gate).updateOutputConnectionsColor();
@@ -292,6 +310,14 @@ public class CircuitCanvas extends Pane {
 
     public ClipboardManager getClipboardManager() {
         return clipboardManager;
+    }
+
+    public SelectionManager getSelectionManager() {
+        return selectionManager;
+    }
+
+    public ContextMenuManager getContextMenuManager() {
+        return contextMenuManager;
     }
 
     public List<LogicGate> getSelectedGates() {

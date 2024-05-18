@@ -6,6 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.paperturtle.commands.AddGateCommand;
+import com.paperturtle.components.GateFactory;
+import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.TextLabel;
+import com.paperturtle.data.GateData;
+import com.paperturtle.managers.CircuitFileManager;
+import com.paperturtle.utils.CircuitComponent;
+import com.paperturtle.utils.SvgUtil;
+
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -21,7 +30,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.layout.HBox;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -164,7 +172,6 @@ public class App extends Application {
             openNewFile(stage);
         });
 
-        // Set action for saveItem
         saveItem.setOnAction(e -> {
             List<GateData> gateData = circuitCanvas.getAllGateData();
             List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
