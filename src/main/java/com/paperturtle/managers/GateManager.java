@@ -52,6 +52,7 @@ public class GateManager {
             canvas.getChildren().remove(gate);
             canvas.getGateImageViews().remove(gate);
             canvas.getGateMarkers().remove(gate);
+
             logicGate.getInputs().forEach(inputGate -> {
                 inputGate.getOutputGates().remove(logicGate);
                 inputGate.evaluate();
@@ -63,8 +64,8 @@ public class GateManager {
                 outputGate.evaluate();
                 outputGate.propagateStateChange();
             });
-            logicGate.getInputMarkers().clear();
 
+            logicGate.getInputMarkers().clear();
         }
         canvas.propagateUpdates();
     }
@@ -105,13 +106,10 @@ public class GateManager {
      *         found
      */
     public LogicGate findGateForInputMarker(Circle inputMarker) {
-        for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
-            LogicGate gate = entry.getValue();
-            if (gate.getInputMarkers().contains(inputMarker)) {
-                return gate;
-            }
-        }
-        return null;
+        return canvas.getGateImageViews().values().stream()
+                .filter(gate -> gate.getInputMarkers().contains(inputMarker))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -134,11 +132,10 @@ public class GateManager {
      *         not found
      */
     public LogicGate findTargetGate(Line connection) {
-        for (LogicGate gate : canvas.getGateImageViews().values()) {
-            if (gate.getInputConnections().stream().anyMatch(list -> list.contains(connection))) {
-                return gate;
-            }
-        }
-        return null;
+        return canvas.getGateImageViews().values().stream()
+                .filter(gate -> gate.getInputConnections().stream()
+                        .anyMatch(list -> list.contains(connection)))
+                .findFirst()
+                .orElse(null);
     }
 }

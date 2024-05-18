@@ -147,8 +147,6 @@ public class CircuitCanvas extends Pane {
         this.clipboardManager = new ClipboardManager(this);
         this.contextMenuManager = new ContextMenuManager(this);
 
-        selectionManager.initializeSelectionMechanism();
-
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
         new KeyboardShortcutManager(this);
     }
@@ -212,12 +210,9 @@ public class CircuitCanvas extends Pane {
      * @return a list of GateData objects representing all gates
      */
     public List<GateData> getAllGateData() {
-        List<GateData> allData = new ArrayList<>();
-        for (LogicGate gate : gateImageViews.values()) {
-            allData.add(gate.getGateData());
-        }
-
-        return allData;
+        return gateImageViews.values().stream()
+                .map(LogicGate::getGateData)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -226,13 +221,10 @@ public class CircuitCanvas extends Pane {
      * @return a list of TextLabel objects representing all text labels
      */
     public List<TextLabel> getAllTextLabels() {
-        List<TextLabel> allLabels = new ArrayList<>();
-        for (Node node : this.getChildren()) {
-            if (node instanceof TextLabel) {
-                allLabels.add((TextLabel) node);
-            }
-        }
-        return allLabels;
+        return getChildren().stream()
+                .filter(node -> node instanceof TextLabel)
+                .map(node -> (TextLabel) node)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -244,67 +236,84 @@ public class CircuitCanvas extends Pane {
         clearCanvas();
         Map<String, LogicGate> createdGates = new HashMap<>();
 
-        for (CircuitComponent component : components) {
+        components.forEach(component -> {
             if (component instanceof GateData) {
-                GateData gateData = (GateData) component;
-                String normalizedType = normalizeType(gateData.type);
-                LogicGate gate = GateFactory.createGate(normalizedType);
-                if (gate == null) {
-                    System.out.println("Failed to create gate for type: " + gateData.type);
-                    continue;
-                }
-                gate.setPosition(gateData.position.getX(), gateData.position.getY());
-                gate.setId(gateData.id);
-                createdGates.put(gateData.id, gate);
-                drawGate(gate, gateData.position.getX(), gateData.position.getY());
+                createAndDrawGate((GateData) component, createdGates);
             }
-        }
+        });
 
-        for (CircuitComponent component : components) {
+        components.forEach(component -> {
             if (component instanceof GateData) {
-                GateData gateData = (GateData) component;
-
-                LogicGate sourceGate = createdGates.get(gateData.id);
-                if (sourceGate == null) {
-                    System.out.println("Source gate not found for ID: " + gateData.id);
-                    continue;
-                }
-
-                for (ConnectionData output : gateData.outputs) {
-                    LogicGate targetGate = createdGates.get(output.gateId);
-                    if (targetGate == null) {
-                        System.out.println("Output gate not found for ID: " + output.gateId);
-                        continue;
-                    }
-
-                    if (output.pointIndex < 0 || output.pointIndex >= targetGate.getInputMarkers().size()) {
-                        System.out.println("Invalid point index: " + output.pointIndex + " for target gate: "
-                                + targetGate.getId());
-                        continue;
-                    }
-
-                    Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                            sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-                    Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
-                            targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
-                            targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
-
-                    Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(),
-                            targetPos.getY());
-                    connectionLine.setStrokeWidth(3.5);
-                    connectionLine.setStroke(Color.BLACK);
-
-                    this.getChildren().add(connectionLine);
-                    sourceGate.addOutputConnection(connectionLine);
-                    targetGate.addInputConnection(connectionLine, output.pointIndex);
-
-                    sourceGate.addOutputGate(targetGate);
-                    targetGate.addInput(sourceGate);
-                }
+                connectGateOutputs((GateData) component, createdGates);
             } else if (component instanceof TextLabel) {
                 TextLabel textLabel = (TextLabel) component;
                 drawTextLabel(textLabel, textLabel.getLayoutX(), textLabel.getLayoutY());
             }
+        });
+    }
+
+    /**
+     * Creates and draws a gate on the canvas based on the specified GateData
+     * object.
+     * 
+     * @param gateData     the GateData object to use
+     * @param createdGates a map of created gates
+     */
+    private void createAndDrawGate(GateData gateData, Map<String, LogicGate> createdGates) {
+        String normalizedType = normalizeType(gateData.type);
+        LogicGate gate = GateFactory.createGate(normalizedType);
+        if (gate == null) {
+            System.out.println("Failed to create gate for type: " + gateData.type);
+            return;
+        }
+        gate.setPosition(gateData.position.getX(), gateData.position.getY());
+        gate.setId(gateData.id);
+        createdGates.put(gateData.id, gate);
+        drawGate(gate, gateData.position.getX(), gateData.position.getY());
+    }
+
+    /**
+     * Connects the outputs of a gate to other gates on the canvas.
+     * 
+     * @param gateData     the GateData object to use
+     * @param createdGates a map of created gates
+     */
+    private void connectGateOutputs(GateData gateData, Map<String, LogicGate> createdGates) {
+        LogicGate sourceGate = createdGates.get(gateData.id);
+        if (sourceGate == null) {
+            System.out.println("Source gate not found for ID: " + gateData.id);
+            return;
+        }
+
+        for (ConnectionData output : gateData.outputs) {
+            LogicGate targetGate = createdGates.get(output.gateId);
+            if (targetGate == null) {
+                System.out.println("Output gate not found for ID: " + output.gateId);
+                continue;
+            }
+
+            if (output.pointIndex < 0 || output.pointIndex >= targetGate.getInputMarkers().size()) {
+                System.out.println(
+                        "Invalid point index: " + output.pointIndex + " for target gate: " + targetGate.getId());
+                continue;
+            }
+
+            Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                    sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+            Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                    targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                    targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+            Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+            connectionLine.setStrokeWidth(3.5);
+            connectionLine.setStroke(Color.BLACK);
+
+            getChildren().add(connectionLine);
+            sourceGate.addOutputConnection(connectionLine);
+            targetGate.addInputConnection(connectionLine, output.pointIndex);
+
+            sourceGate.addOutputGate(targetGate);
+            targetGate.addInput(sourceGate);
         }
     }
 
@@ -345,17 +354,14 @@ public class CircuitCanvas extends Pane {
      * Clears all components from the canvas.
      */
     public void clearCanvas() {
-        Node selectionRect = null;
-        for (Node node : this.getChildren()) {
-            if (node instanceof Rectangle && node.getStyleClass().contains("selection-rectangle")) {
-                selectionRect = node;
-                break;
-            }
-        }
+        Node selectionRect = getChildren().stream()
+                .filter(node -> node instanceof Rectangle && node.getStyleClass().contains("selection-rectangle"))
+                .findFirst()
+                .orElse(null);
 
-        this.getChildren().clear();
+        getChildren().clear();
         if (selectionRect != null) {
-            this.getChildren().add(selectionRect);
+            getChildren().add(selectionRect);
         }
 
         gateImageViews.clear();

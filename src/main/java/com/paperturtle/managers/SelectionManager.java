@@ -38,63 +38,205 @@ public class SelectionManager {
     private boolean isSelecting = false;
 
     /**
+     * The threshold for the drag operation.
+     */
+    private static final double DRAG_THRESHOLD = 10.0;
+
+    /**
      * Constructs a SelectionManager for the specified circuit canvas.
      * 
      * @param canvas the circuit canvas to manage
      */
     public SelectionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
+        initializeSelectionMechanism();
     }
 
     /**
      * Initializes the selection mechanism for the circuit canvas.
      */
-    public void initializeSelectionMechanism() {
+    private void initializeSelectionMechanism() {
+        configureSelectionRect();
+        canvas.getChildren().add(selectionRect);
+
+        canvas.setOnMousePressed(event -> startSelection(event.getX(), event.getY()));
+        canvas.setOnMouseDragged(event -> updateSelection(event.getX(), event.getY()));
+        canvas.setOnMouseReleased(event -> finalizeSelection());
+    }
+
+    /**
+     * Configures the selection rectangle.
+     */
+    private void configureSelectionRect() {
         selectionRect.setStroke(Color.BLUE);
         selectionRect.setStrokeWidth(1);
         selectionRect.setFill(Color.BLUE.deriveColor(0, 1.2, 1, 0.2));
         selectionRect.setVisible(false);
         selectionRect.getStyleClass().add("selection-rectangle");
-        canvas.getChildren().add(selectionRect);
-        final double dragThreshold = 10.0;
+    }
 
-        canvas.setOnMousePressed(event -> {
-            double startX = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
-            double startY = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
-            canvas.setLastMouseCoordinates(new Point2D(startX, startY));
-            selectionRect.setX(startX);
-            selectionRect.setY(startY);
-            selectionRect.setWidth(0);
-            selectionRect.setHeight(0);
-            selectionRect.setVisible(true);
-            isSelecting = true;
+    /**
+     * Finalizes the selection operation.
+     */
+    private void finalizeSelection() {
+        if (isSelecting && (selectionRect.getWidth() > DRAG_THRESHOLD || selectionRect.getHeight() > DRAG_THRESHOLD)) {
+            selectComponentsInRectangle();
+        }
+        selectionRect.setVisible(false);
+        canvas.getInteractionManager().setJustSelected(false);
+        isSelecting = false;
+    }
+
+    /**
+     * Starts the selection operation.
+     * 
+     * @param x the x-coordinate of the starting point
+     * @param y the y-coordinate of the starting point
+     */
+    private void startSelection(double x, double y) {
+        double startX = clamp(x, 0, canvas.getWidth());
+        double startY = clamp(y, 0, canvas.getHeight());
+        canvas.setLastMouseCoordinates(new Point2D(startX, startY));
+        selectionRect.setX(startX);
+        selectionRect.setY(startY);
+        selectionRect.setWidth(0);
+        selectionRect.setHeight(0);
+        selectionRect.setVisible(true);
+        isSelecting = true;
+    }
+
+    /**
+     * Updates the selection rectangle.
+     * 
+     * @param x the x-coordinate of the current point
+     * @param y the y-coordinate of the current point
+     */
+    private void updateSelection(double x, double y) {
+        if (isSelecting) {
+            double endX = clamp(x, 0, canvas.getWidth());
+            double endY = clamp(y, 0, canvas.getHeight());
+            double minX = Math.min(canvas.getLastMouseCoordinates().getX(), endX);
+            double maxX = Math.max(canvas.getLastMouseCoordinates().getX(), endX);
+            double minY = Math.min(canvas.getLastMouseCoordinates().getY(), endY);
+            double maxY = Math.max(canvas.getLastMouseCoordinates().getY(), endY);
+
+            selectionRect.setX(minX);
+            selectionRect.setY(minY);
+            selectionRect.setWidth(maxX - minX);
+            selectionRect.setHeight(maxY - minY);
+        }
+    }
+
+    /**
+     * Selects components within the selection rectangle.
+     */
+    private void selectComponentsInRectangle() {
+        selectGates();
+        selectLabels();
+    }
+
+    /**
+     * Selects gates within the selection rectangle.
+     */
+    private void selectGates() {
+        canvas.getGateImageViews().forEach((imageView, gate) -> {
+            boolean intersects = imageView.getBoundsInParent().intersects(selectionRect.getBoundsInParent());
+            updateSelectionState(imageView, gate, intersects);
         });
+    }
 
-        canvas.setOnMouseDragged(event -> {
-            if (isSelecting) {
-                double endX = Math.max(0, Math.min(event.getX(), canvas.getWidth()));
-                double endY = Math.max(0, Math.min(event.getY(), canvas.getHeight()));
-                double minX = Math.min(canvas.getLastMouseCoordinates().getX(), endX);
-                double maxX = Math.max(canvas.getLastMouseCoordinates().getX(), endX);
-                double minY = Math.min(canvas.getLastMouseCoordinates().getY(), endY);
-                double maxY = Math.max(canvas.getLastMouseCoordinates().getY(), endY);
+    /**
+     * Selects labels within the selection rectangle.
+     */
+    private void selectLabels() {
+        canvas.getTextLabels().forEach(label -> {
+            boolean intersects = selectionRect.getBoundsInParent()
+                    .intersects(label.localToScene(label.getBoundsInLocal()));
+            updateSelectionState(label, intersects);
+        });
+    }
 
-                selectionRect.setX(minX);
-                selectionRect.setY(minY);
-                selectionRect.setWidth(maxX - minX);
-                selectionRect.setHeight(maxY - minY);
+    /**
+     * Updates the selection state of the specified ImageView.
+     * 
+     * @param imageView  the ImageView to update
+     * @param gate       the LogicGate associated with the ImageView
+     * @param intersects a flag indicating whether the ImageView intersects the
+     *                   selection rectangle
+     */
+    private void updateSelectionState(ImageView imageView, LogicGate gate, boolean intersects) {
+        if (intersects) {
+            addSelection(imageView, gate);
+        } else {
+            removeSelection(imageView, gate);
+        }
+    }
+
+    /**
+     * Updates the selection state of the specified TextLabel.
+     * 
+     * @param label      the TextLabel to update
+     * @param intersects a flag indicating whether the TextLabel intersects the
+     *                   selection rectangle
+     */
+    private void updateSelectionState(TextLabel label, boolean intersects) {
+        if (intersects) {
+            addSelection(label);
+        } else {
+            removeSelection(label);
+        }
+    }
+
+    /**
+     * Adds a selection to the specified ImageView.
+     * 
+     * @param imageView the ImageView to add the selection to
+     * @param gate      the LogicGate associated with the ImageView
+     */
+    private void addSelection(ImageView imageView, LogicGate gate) {
+        if (!imageView.getStyleClass().contains("selected")) {
+            imageView.getStyleClass().add("selected");
+            if (gate instanceof SwitchGate) {
+                ((SwitchGate) gate).setSelected(true);
             }
-        });
+        }
+    }
 
-        canvas.setOnMouseReleased(event -> {
-            if (isSelecting && (selectionRect.getWidth() > dragThreshold
-                    || selectionRect.getHeight() > dragThreshold)) {
-                this.selectGatesInRectangle();
+    /**
+     * Removes a selection from the specified ImageView.
+     * 
+     * @param imageView the ImageView to remove the selection from
+     * @param gate      the LogicGate associated with the ImageView
+     */
+    private void removeSelection(ImageView imageView, LogicGate gate) {
+        if (imageView.getStyleClass().contains("selected")) {
+            imageView.getStyleClass().remove("selected");
+            if (gate instanceof SwitchGate) {
+                ((SwitchGate) gate).setSelected(false);
             }
-            selectionRect.setVisible(false);
-            canvas.getInteractionManager().setJustSelected(false);
-            isSelecting = false;
-        });
+        }
+    }
+
+    /**
+     * Adds a selection to the specified TextLabel.
+     * 
+     * @param label the TextLabel to add the selection to
+     */
+    private void addSelection(TextLabel label) {
+        if (!label.getStyleClass().contains("selected")) {
+            label.getStyleClass().add("selected");
+        }
+    }
+
+    /**
+     * Removes a selection from the specified TextLabel.
+     * 
+     * @param label the TextLabel to remove the selection from
+     */
+    private void removeSelection(TextLabel label) {
+        if (label.getStyleClass().contains("selected")) {
+            label.getStyleClass().remove("selected");
+        }
     }
 
     /**
@@ -170,9 +312,7 @@ public class SelectionManager {
      * Deselects all labels in the circuit canvas.
      */
     public void deselectAllLabels() {
-        for (TextLabel label : canvas.getTextLabels()) {
-            label.getStyleClass().remove("selected");
-        }
+        canvas.getTextLabels().forEach(label -> label.getStyleClass().remove("selected"));
     }
 
     /**
@@ -181,28 +321,29 @@ public class SelectionManager {
      * @param textLabel the TextLabel to keep selected
      */
     public void deselectAllLabelsExcept(TextLabel textLabel) {
-        for (TextLabel label : canvas.getTextLabels()) {
-            if (!label.equals(textLabel)) {
-                label.getStyleClass().remove("selected");
-            }
-        }
+        canvas.getTextLabels().stream()
+                .filter(label -> !label.equals(textLabel))
+                .forEach(label -> label.getStyleClass().remove("selected"));
     }
 
     /**
      * Selects all components in the circuit canvas.
      */
     public void selectAllComponents() {
-        for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
-            ImageView gateView = entry.getKey();
-            if (!gateView.getStyleClass().contains("selected")) {
-                gateView.getStyleClass().add("selected");
+        canvas.getGateImageViews().keySet().forEach(imageView -> {
+            if (!imageView.getStyleClass().contains("selected")) {
+                imageView.getStyleClass().add("selected");
             }
-        }
+        });
 
-        for (TextLabel textLabel : canvas.getTextLabels()) {
-            if (!textLabel.getStyleClass().contains("selected")) {
-                textLabel.getStyleClass().add("selected");
+        canvas.getTextLabels().forEach(label -> {
+            if (!label.getStyleClass().contains("selected")) {
+                label.getStyleClass().add("selected");
             }
-        }
+        });
+    }
+
+    private double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(value, max));
     }
 }

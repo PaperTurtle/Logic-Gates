@@ -1,6 +1,8 @@
 package com.paperturtle.managers;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import com.paperturtle.CircuitCanvas;
 import com.paperturtle.commands.AddConnectionCommand;
@@ -16,16 +18,7 @@ import javafx.scene.shape.Line;
  * The ConnectionManager class is responsible for managing connections between
  * logic gates in the circuit canvas.
  * 
- * @see CircuitCanvas
- * @see AddConnectionCommand
- * @see RemoveConnectionCommand
  * @see LogicGate
- * @see Line
- * @see Circle
- * 
- * @see Point2D
- * @see Node
- * @see CommandManager
  * 
  * @author Seweryn Czabanowski
  */
@@ -55,21 +48,21 @@ public class ConnectionManager {
      * @param connection the connection line to remove
      */
     public void removeConnection(Line connection) {
-        LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
-        if (sourceGate != null) {
-            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
-            if (targetGate != null) {
-                int index = targetGate.findInputConnectionIndex(connection);
-                if (index != -1) {
-                    canvas.getCommandManager().executeCommand(
-                            new RemoveConnectionCommand(canvas, sourceGate, targetGate, connection, index));
-                }
-            } else {
-                System.out.println("No target gate found for the connection.");
-            }
-        } else {
-            System.out.println("No source gate found for the connection.");
-        }
+        Optional.ofNullable(canvas.getLineToStartGateMap().get(connection))
+                .ifPresentOrElse(sourceGate -> {
+                    LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
+                    if (targetGate != null) {
+                        int index = targetGate.findInputConnectionIndex(connection);
+                        if (index != -1) {
+                            canvas.getCommandManager().executeCommand(
+                                    new RemoveConnectionCommand(canvas, sourceGate, targetGate, connection, index));
+                        } else {
+                            System.out.println("No input index found for the connection.");
+                        }
+                    } else {
+                        System.out.println("No target gate found for the connection.");
+                    }
+                }, () -> System.out.println("No source gate found for the connection."));
     }
 
     /**
@@ -78,27 +71,27 @@ public class ConnectionManager {
      * @param logicGate the logic gate whose connections are to be removed
      */
     public void removeAllConnections(LogicGate logicGate) {
-        new ArrayList<>(logicGate.getOutputConnections()).forEach(line -> {
-            LogicGate targetGate = canvas.getLineToStartGateMap().get(line);
-            if (targetGate != null) {
-                int index = targetGate.findInputConnectionIndex(line);
-                if (index != -1) {
-                    canvas.getCommandManager()
-                            .executeCommand(new RemoveConnectionCommand(canvas, logicGate, targetGate, line, index));
-                }
-            }
-        });
+        removeConnections(logicGate.getOutputConnections(), logicGate);
+        logicGate.getInputConnections().forEach(connections -> removeConnections(connections, logicGate));
+    }
 
-        logicGate.getInputConnections().forEach(connections -> new ArrayList<>(connections).forEach(line -> {
-            LogicGate sourceGate = canvas.getLineToStartGateMap().get(line);
-            if (sourceGate != null) {
-                int index = logicGate.findInputConnectionIndex(line);
-                if (index != -1) {
-                    canvas.getCommandManager()
-                            .executeCommand(new RemoveConnectionCommand(canvas, sourceGate, logicGate, line, index));
-                }
-            }
-        }));
+    /**
+     * Removes all connections for the specified logic gate.
+     * 
+     * @param connections the connections to remove
+     * @param logicGate   the logic gate whose connections are to be removed
+     */
+    private void removeConnections(List<Line> connections, LogicGate logicGate) {
+        new ArrayList<>(connections).forEach(line -> {
+            Optional.ofNullable(canvas.getLineToStartGateMap().get(line))
+                    .ifPresent(targetGate -> {
+                        int index = targetGate.findInputConnectionIndex(line);
+                        if (index != -1) {
+                            canvas.getCommandManager().executeCommand(
+                                    new RemoveConnectionCommand(canvas, logicGate, targetGate, line, index));
+                        }
+                    });
+        });
     }
 
     /**
@@ -111,49 +104,92 @@ public class ConnectionManager {
      */
     public boolean finalizeConnection(double x, double y, Circle outputMarker) {
         for (Node node : canvas.getChildren()) {
-            if (node instanceof Circle && node != outputMarker) {
-                Circle inputMarker = (Circle) node;
-                if (inputMarker.contains(x, y) && inputMarker.getOpacity() == 1.0) {
-                    Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
-                    canvas.getCurrentLine().setEndX(inputPos.getX());
-                    canvas.getCurrentLine().setEndY(inputPos.getY());
-
-                    LogicGate targetGate = canvas.getGateManager().findGateForInputMarker(inputMarker);
-                    LogicGate sourceGate = canvas.getLineToStartGateMap().get(canvas.getCurrentLine());
-                    if (targetGate != null && sourceGate != null && targetGate != sourceGate) {
-                        int inputIndex = canvas.getGateManager().findInputMarkerIndex(targetGate, inputMarker);
-
-                        if (!targetGate.getInputConnections(inputIndex).isEmpty()) {
-                            System.out.println("Input marker already has a connection.");
-                            canvas.getChildren().remove(canvas.getCurrentLine());
-                            startGate.removeOutputConnection(canvas.getCurrentLine());
-                            canvas.setCurrentLine(null);
-                            return false;
-                        }
-
-                        Line connectionLine = canvas.getCurrentLine();
-                        canvas.setCurrentLine(null);
-                        canvas.getCommandManager().executeCommand(
-                                new AddConnectionCommand(canvas, sourceGate, targetGate, connectionLine, inputIndex));
-
-                        return true;
-                    } else {
-                        if (canvas.getCurrentLine() != null && startGate != null) {
-                            canvas.getChildren().remove(canvas.getCurrentLine());
-                            startGate.removeOutputConnection(canvas.getCurrentLine());
-                            canvas.setCurrentLine(null);
-                        }
-                        return false;
-                    }
-                }
+            if (node instanceof Circle inputMarker && node != outputMarker && inputMarker.contains(x, y)
+                    && inputMarker.getOpacity() == 1.0) {
+                return tryToConnect(inputMarker, outputMarker);
             }
         }
+        cleanupCurrentLine();
+        return false;
+    }
+
+    /**
+     * Attempts to connect the output marker of the source gate to the input marker
+     * of
+     * 
+     * @param inputMarker  The input marker to connect to
+     * @param outputMarker The output marker to connect from
+     * @return true if the connection is successfully finalized, false otherwise
+     */
+    private boolean tryToConnect(Circle inputMarker, Circle outputMarker) {
+        Point2D inputPos = inputMarker.localToParent(inputMarker.getCenterX(), inputMarker.getCenterY());
+        Line currentLine = canvas.getCurrentLine();
+        currentLine.setEndX(inputPos.getX());
+        currentLine.setEndY(inputPos.getY());
+
+        LogicGate targetGate = canvas.getGateManager().findGateForInputMarker(inputMarker);
+        LogicGate sourceGate = canvas.getLineToStartGateMap().get(currentLine);
+
+        if (isConnectionValid(targetGate, sourceGate, inputMarker)) {
+            int inputIndex = canvas.getGateManager().findInputMarkerIndex(targetGate, inputMarker);
+            if (isInputAvailable(targetGate, inputIndex)) {
+                finalizeConnection(sourceGate, targetGate, currentLine, inputIndex);
+                return true;
+            } else {
+                System.out.println("Input marker already has a connection.");
+            }
+        }
+        cleanupCurrentLine();
+        return false;
+    }
+
+    /**
+     * Checks if the connection is valid.
+     * 
+     * @param targetGate the target gate of the connection
+     * @param sourceGate the source gate of the connection
+     * 
+     * @return true if the connection is valid, false otherwise
+     */
+    private boolean isConnectionValid(LogicGate targetGate, LogicGate sourceGate, Circle inputMarker) {
+        return targetGate != null && sourceGate != null && targetGate != sourceGate;
+    }
+
+    /**
+     * Checks if the input marker is available for connection.
+     * 
+     * @param targetGate the target gate of the connection
+     * @param inputIndex the index of the input marker
+     * 
+     * @return true if the input marker is available, false otherwise
+     */
+    private boolean isInputAvailable(LogicGate targetGate, int inputIndex) {
+        return targetGate.getInputConnections(inputIndex).isEmpty();
+    }
+
+    /**
+     * Finalizes the connection between the source gate and the target gate.
+     * 
+     * @param sourceGate     the source gate of the connection
+     * @param targetGate     the target gate of the connection
+     * @param connectionLine the connection line
+     * @param inputIndex     the index of the input marker
+     */
+    private void finalizeConnection(LogicGate sourceGate, LogicGate targetGate, Line connectionLine, int inputIndex) {
+        canvas.setCurrentLine(null);
+        canvas.getCommandManager().executeCommand(
+                new AddConnectionCommand(canvas, sourceGate, targetGate, connectionLine, inputIndex));
+    }
+
+    /**
+     * Cleans up the current line.
+     */
+    private void cleanupCurrentLine() {
         if (canvas.getCurrentLine() != null && startGate != null) {
             canvas.getChildren().remove(canvas.getCurrentLine());
             startGate.removeOutputConnection(canvas.getCurrentLine());
             canvas.setCurrentLine(null);
         }
-        return false;
     }
 
     /**

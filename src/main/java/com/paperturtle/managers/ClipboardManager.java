@@ -34,6 +34,16 @@ public class ClipboardManager {
     private List<ClipboardData> clipboard = new ArrayList<>();
 
     /**
+     * The x-offset for pasting the copied gates.
+     */
+    private static final double OFFSET_X = 30;
+
+    /**
+     * The y-offset for pasting the copied gates.
+     */
+    private static final double OFFSET_Y = 30;
+
+    /**
      * Constructs a ClipboardManager for the specified circuit canvas.
      * 
      * @param canvas the circuit canvas to manage
@@ -48,52 +58,58 @@ public class ClipboardManager {
     public void pasteGatesFromClipboard() {
         canvas.getGateManager().deselectAllGates();
         Map<String, LogicGate> createdGates = new HashMap<>();
-        double offsetX = 30;
-        double offsetY = 30;
 
-        for (ClipboardData data : clipboard) {
+        clipboard.forEach(data -> {
             LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
             if (gate == null) {
                 System.out.println("Unable to create gate of type: " + data.getType());
-                continue;
+                return;
             }
 
-            double newX = data.getPosition().getX() + offsetX;
-            double newY = data.getPosition().getY() + offsetY;
+            double newX = data.getPosition().getX() + OFFSET_X;
+            double newY = data.getPosition().getY() + OFFSET_Y;
 
             gate.setPosition(newX, newY);
             gate.setId(data.getId());
             createdGates.put(data.getId(), gate);
             canvas.drawGate(gate, newX, newY);
             gate.getImageView().getStyleClass().add("selected");
-        }
+        });
 
-        for (ClipboardData data : clipboard) {
-            LogicGate sourceGate = createdGates.get(data.getId());
-            if (sourceGate == null)
-                continue;
+        clipboard.forEach(data -> createConnections(data, createdGates));
+    }
 
-            for (ClipboardData.ConnectionData output : data.getOutputs()) {
-                LogicGate targetGate = createdGates.get(output.gateId);
-                if (targetGate == null) {
-                    System.out.println("Output gate not found for ID: " + output.gateId);
-                    continue;
-                }
-                Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                        sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-                Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
-                        targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+    /**
+     * Creates the connections between the gates based on the clipboard data.
+     * 
+     * @param data         the clipboard data
+     * @param createdGates the map of created gates
+     */
+    private void createConnections(ClipboardData data, Map<String, LogicGate> createdGates) {
+        LogicGate sourceGate = createdGates.get(data.getId());
+        if (sourceGate == null)
+            return;
 
-                Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
-                connectionLine.setStrokeWidth(3.5);
-                connectionLine.setStroke(Color.BLACK);
-
-                canvas.getChildren().add(connectionLine);
-                sourceGate.addOutputConnection(connectionLine);
-                targetGate.addInputConnection(connectionLine, output.pointIndex);
+        data.getOutputs().forEach(output -> {
+            LogicGate targetGate = createdGates.get(output.gateId);
+            if (targetGate == null) {
+                System.out.println("Output gate not found for ID: " + output.gateId);
+                return;
             }
-        }
+            Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
+                    sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
+            Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                    targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                    targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+            Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+            connectionLine.setStrokeWidth(3.5);
+            connectionLine.setStroke(Color.BLACK);
+
+            canvas.getChildren().add(connectionLine);
+            sourceGate.addOutputConnection(connectionLine);
+            targetGate.addInputConnection(connectionLine, output.pointIndex);
+        });
     }
 
     /**
