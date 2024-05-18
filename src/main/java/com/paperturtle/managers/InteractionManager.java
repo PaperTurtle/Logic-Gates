@@ -28,15 +28,36 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
+/**
+ * The InteractionManager class is responsible for handling user interactions
+ * with the circuit canvas, including dragging, clicking, and creating
+ * connections.
+ * 
+ * @see CircuitCanvas
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class InteractionManager {
     private CircuitCanvas canvas;
     private boolean justSelected = false;
     private LogicGate highlightedGate = null;
 
+    /**
+     * Constructs an InteractionManager for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas to manage
+     */
     public InteractionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Handles mouse pressed events for a logic gate.
+     * 
+     * @param imageView the ImageView of the gate
+     * @param gate      the logic gate
+     * @param event     the mouse event
+     */
     private void handleMousePressedForGate(ImageView imageView, LogicGate gate, MouseEvent event) {
         if (highlightedGate != null && highlightedGate != gate) {
             highlightedGate.getImageView().getStyleClass().remove("selected");
@@ -56,6 +77,12 @@ public class InteractionManager {
         }
     }
 
+    /**
+     * Sets up drag handlers for a logic gate.
+     * 
+     * @param imageView the ImageView of the gate
+     * @param gate      the logic gate
+     */
     public void setupDragHandlers(ImageView imageView, LogicGate gate) {
         imageView.setPickOnBounds(true);
 
@@ -145,6 +172,11 @@ public class InteractionManager {
         });
     }
 
+    /**
+     * Sets up drag handlers for a text label.
+     * 
+     * @param textLabel the text label
+     */
     public void setupDragHandlersForLabel(TextLabel textLabel) {
         textLabel.setOnMousePressed(event -> {
             double offsetX = event.getSceneX() - textLabel.getLayoutX();
@@ -242,6 +274,11 @@ public class InteractionManager {
         });
     }
 
+    /**
+     * Handles canvas click events.
+     * 
+     * @param event the mouse event
+     */
     public void handleCanvasClick(MouseEvent event) {
         if (!(event.getTarget() instanceof ImageView)) {
             if (justSelected) {
@@ -269,6 +306,9 @@ public class InteractionManager {
         }
     }
 
+    /**
+     * Generates and displays the complete truth table for the selected gates.
+     */
     public void generateAndDisplayCompleteTruthTable() {
         List<LogicGate> selectedGates = canvas.getSelectedGates();
 
@@ -321,6 +361,12 @@ public class InteractionManager {
         displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
     }
 
+    /**
+     * Displays the simplified truth table.
+     * 
+     * @param inputs  the input values of the truth table
+     * @param outputs the output values of the truth table
+     */
     private void displaySimplifiedTruthTable(Boolean[][] inputs, Boolean[] outputs) {
         TableView<List<String>> table = new TableView<>();
         ObservableList<List<String>> data = FXCollections.observableArrayList();
@@ -354,6 +400,9 @@ public class InteractionManager {
         stage.show();
     }
 
+    /**
+     * Sets up connection handlers for creating connections between logic gates.
+     */
     public void setupConnectionHandlers() {
         canvas.setOnMouseMoved(mouseMoveEvent -> {
             if (canvas.getCurrentLine() != null) {
@@ -392,11 +441,20 @@ public class InteractionManager {
 
     }
 
+    /**
+     * Resets the interaction handlers.
+     */
     private void resetInteractionHandlers() {
         canvas.setOnMouseMoved(null);
         canvas.setOnMouseClicked(null);
     }
 
+    /**
+     * Sets up output interaction for a logic gate.
+     * 
+     * @param outputMarker the output marker of the gate
+     * @param gate         the logic gate
+     */
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null
@@ -416,14 +474,29 @@ public class InteractionManager {
         });
     }
 
+    /**
+     * Sets the highlighted gate.
+     * 
+     * @param highlightedGate the highlighted gate to set
+     */
     public void setHighlightedGate(LogicGate highlightedGate) {
         this.highlightedGate = highlightedGate;
     }
 
+    /**
+     * Checks if the gate was just selected.
+     * 
+     * @return true if the gate was just selected, false otherwise
+     */
     public boolean isJustSelected() {
         return justSelected;
     }
 
+    /**
+     * Sets the justSelected flag.
+     * 
+     * @param justSelected the flag to set
+     */
     public void setJustSelected(boolean justSelected) {
         this.justSelected = justSelected;
     }

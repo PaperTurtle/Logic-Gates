@@ -9,20 +9,35 @@ import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.data.ClipboardData;
-import com.paperturtle.data.ClipboardData.ConnectionData;
 
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
+/**
+ * The ClipboardManager class is responsible for handling copy and paste
+ * operations of logic gates in the circuit canvas.
+ * 
+ * @see ClipboardData
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class ClipboardManager {
     private CircuitCanvas canvas;
     private List<ClipboardData> clipboard = new ArrayList<>();
 
+    /**
+     * Constructs a ClipboardManager for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas to manage
+     */
     public ClipboardManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Pastes the gates from the clipboard onto the circuit canvas.
+     */
     public void pasteGatesFromClipboard() {
         canvas.getGateManager().deselectAllGates();
         Map<String, LogicGate> createdGates = new HashMap<>();
@@ -74,6 +89,9 @@ public class ClipboardManager {
         }
     }
 
+    /**
+     * Copies the selected gates to the clipboard.
+     */
     public void copySelectedGatesToClipboard() {
         clipboard.clear();
         canvas.getGateImageViews().entrySet().stream()
@@ -84,6 +102,11 @@ public class ClipboardManager {
                 });
     }
 
+    /**
+     * Gets the clipboard data.
+     * 
+     * @return the list of ClipboardData
+     */
     public List<ClipboardData> getClipboard() {
         return clipboard;
     }

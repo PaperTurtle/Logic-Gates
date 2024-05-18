@@ -20,15 +20,25 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * The CircuitFileManager class is responsible for saving and loading circuits
- * 
+ * The CircuitFileManager class is responsible for saving and loading circuits.
  * The class uses the Gson library to serialize and deserialize the circuit data
  * to and from JSON format.
+ * 
+ * @see Point2DSerializer
+ * @see Point2DDeserializer
+ * @see TextLabelSerializer
+ * @see TextLabelDeserializer
+ * @see ComponentAdapter
+ * 
+ * @author Seweryn Czabanowski
  */
 public class CircuitFileManager {
-
     private Gson gson = new Gson();
 
+    /**
+     * Constructs a CircuitFileManager and initializes the Gson instance with custom
+     * serializers and deserializers.
+     */
     public CircuitFileManager() {
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(Point2D.class, new Point2DSerializer())

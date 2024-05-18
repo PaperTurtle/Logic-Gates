@@ -12,14 +12,41 @@ import javafx.scene.Node;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
+/**
+ * The ConnectionManager class is responsible for managing connections between
+ * logic gates in the circuit canvas.
+ * 
+ * @see CircuitCanvas
+ * @see AddConnectionCommand
+ * @see RemoveConnectionCommand
+ * @see LogicGate
+ * @see Line
+ * @see Circle
+ * 
+ * @see Point2D
+ * @see Node
+ * @see CommandManager
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class ConnectionManager {
     private CircuitCanvas canvas;
     private LogicGate startGate;
 
+    /**
+     * Constructs a ConnectionManager for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas to manage
+     */
     public ConnectionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Removes a connection line from the circuit canvas.
+     * 
+     * @param connection the connection line to remove
+     */
     public void removeConnection(Line connection) {
         LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
         if (sourceGate != null) {
@@ -38,6 +65,11 @@ public class ConnectionManager {
         }
     }
 
+    /**
+     * Removes all connections for the specified logic gate.
+     * 
+     * @param logicGate the logic gate whose connections are to be removed
+     */
     public void removeAllConnections(LogicGate logicGate) {
         new ArrayList<>(logicGate.getOutputConnections()).forEach(line -> {
             LogicGate targetGate = canvas.getLineToStartGateMap().get(line);
@@ -62,6 +94,14 @@ public class ConnectionManager {
         }));
     }
 
+    /**
+     * Finalizes a connection between logic gates.
+     * 
+     * @param x            the x-coordinate of the end point
+     * @param y            the y-coordinate of the end point
+     * @param outputMarker the output marker of the source gate
+     * @return true if the connection is successfully finalized, false otherwise
+     */
     public boolean finalizeConnection(double x, double y, Circle outputMarker) {
         for (Node node : canvas.getChildren()) {
             if (node instanceof Circle && node != outputMarker) {
@@ -109,10 +149,20 @@ public class ConnectionManager {
         return false;
     }
 
+    /**
+     * Sets the start gate for the connection.
+     * 
+     * @param startGate the start gate to set
+     */
     public void setStartGate(LogicGate startGate) {
         this.startGate = startGate;
     }
 
+    /**
+     * Gets the start gate for the connection.
+     * 
+     * @return the start gate
+     */
     public LogicGate getStartGate() {
         return startGate;
     }

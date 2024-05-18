@@ -12,15 +12,32 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * The SelectionManager class is responsible for managing the selection of
+ * components in the circuit canvas.
+ * 
+ * @see CircuitCanvas
+ * @see LogicGate
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class SelectionManager {
     private CircuitCanvas canvas;
     private Rectangle selectionRect = new Rectangle();
     private boolean isSelecting = false;
 
+    /**
+     * Constructs a SelectionManager for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas to manage
+     */
     public SelectionManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Initializes the selection mechanism for the circuit canvas.
+     */
     public void initializeSelectionMechanism() {
         selectionRect.setStroke(Color.BLUE);
         selectionRect.setStrokeWidth(1);
@@ -69,6 +86,9 @@ public class SelectionManager {
         });
     }
 
+    /**
+     * Selects gates within the selection rectangle.
+     */
     public void selectGatesInRectangle() {
         for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
             ImageView gateView = entry.getKey();
@@ -106,6 +126,9 @@ public class SelectionManager {
         }
     }
 
+    /**
+     * Deselects all gates in the circuit canvas.
+     */
     public void deselectAllGates() {
         canvas.getGateImageViews().values().forEach(gate -> {
             gate.getImageView().getStyleClass().remove("selected");
@@ -116,6 +139,11 @@ public class SelectionManager {
         canvas.getInteractionManager().setHighlightedGate(null);
     }
 
+    /**
+     * Deselects all gates except the specified ImageView.
+     * 
+     * @param exceptImageView the ImageView to keep selected
+     */
     public void deselectAllGatesExcept(ImageView exceptImageView) {
         canvas.getGateImageViews().entrySet().stream()
                 .filter(entry -> entry.getKey() != exceptImageView)
@@ -127,12 +155,20 @@ public class SelectionManager {
                 });
     }
 
+    /**
+     * Deselects all labels in the circuit canvas.
+     */
     public void deselectAllLabels() {
         for (TextLabel label : canvas.getTextLabels()) {
             label.getStyleClass().remove("selected");
         }
     }
 
+    /**
+     * Deselects all labels except the specified TextLabel.
+     * 
+     * @param textLabel the TextLabel to keep selected
+     */
     public void deselectAllLabelsExcept(TextLabel textLabel) {
         for (TextLabel label : canvas.getTextLabels()) {
             if (!label.equals(textLabel)) {
@@ -141,6 +177,9 @@ public class SelectionManager {
         }
     }
 
+    /**
+     * Selects all components in the circuit canvas.
+     */
     public void selectAllComponents() {
         for (Map.Entry<ImageView, LogicGate> entry : canvas.getGateImageViews().entrySet()) {
             ImageView gateView = entry.getKey();

@@ -28,14 +28,32 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+/**
+ * The ContextMenuManager class is responsible for managing the context menu for
+ * logic gates in the circuit canvas.
+ * 
+ * @author Seweryn Czabanowski
+ */
 public class ContextMenuManager {
     private CircuitCanvas canvas;
     private LogicGate highlightedGate = null;
 
+    /**
+     * Constructs a ContextMenuManager for the specified circuit canvas.
+     * 
+     * @param canvas the circuit canvas to manage
+     */
     public ContextMenuManager(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Shows the context menu for the specified logic gate.
+     * 
+     * @param imageView the ImageView of the gate
+     * @param gate      the logic gate for which the context menu is shown
+     * @param event     the mouse event that triggered the context menu
+     */
     public void showContextMenu(ImageView imageView, LogicGate gate, MouseEvent event) {
         if (canvas.getOpenContextMenu() != null) {
             canvas.getOpenContextMenu().hide();
@@ -64,6 +82,11 @@ public class ContextMenuManager {
         event.consume();
     }
 
+    /**
+     * Shows the properties dialog for the specified logic gate.
+     * 
+     * @param gate the logic gate for which the properties dialog is shown
+     */
     private void showPropertiesDialog(LogicGate gate) {
         if (canvas.getOpenContextMenu() != null) {
             canvas.getOpenContextMenu().hide();
