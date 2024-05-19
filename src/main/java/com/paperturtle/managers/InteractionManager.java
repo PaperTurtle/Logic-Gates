@@ -1,5 +1,8 @@
 package com.paperturtle.managers;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -21,9 +25,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -202,11 +208,61 @@ public class InteractionManager {
 
         table.setItems(data);
 
+        Button exportButton = new Button("Export to CSV");
+        exportButton.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+
+        VBox vbox = new VBox(exportButton, table);
+
         Stage stage = new Stage();
         stage.setTitle("Simplified Truth Table");
-        Scene scene = new Scene(table, 400, 300);
+        Scene scene = new Scene(vbox, 400, 300);
         stage.setScene(scene);
+
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem exportCsv = new MenuItem("Export to CSV");
+        exportCsv.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+        contextMenu.getItems().add(exportCsv);
+
+        table.setContextMenu(contextMenu);
+
         stage.show();
+    }
+
+    /**
+     * Exports the truth table to a CSV file.
+     * 
+     * @param inputs  the input values of the truth table
+     * @param outputs the output values of the truth table
+     */
+    private void exportTruthTableToCsv(Boolean[][] inputs, Boolean[] outputs) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        fileChooser.setInitialFileName("truth_table.csv");
+        Stage stage = new Stage();
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try (FileWriter writer = new FileWriter(file)) {
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < inputs[0].length; i++) {
+                    sb.append("I").append(i + 1).append(",");
+                }
+                sb.append("O1\n");
+
+                for (int i = 0; i < inputs.length; i++) {
+                    for (Boolean input : inputs[i]) {
+                        sb.append(input ? "true" : "false").append(",");
+                    }
+                    sb.append(outputs[i] ? "true" : "false").append("\n");
+                }
+
+                writer.write(sb.toString());
+                System.out.println("Truth table exported to " + file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
