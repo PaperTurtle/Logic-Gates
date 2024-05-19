@@ -19,7 +19,7 @@ This project is a fully-fledged logic gates simulator designed to simulate the b
 
 ### 🔌 Supported Gates
 
-The SVGs that were used from this project are from [Wikipedia](https://en.wikipedia.org/wiki/Logic_gate) and [SVGREPO](https://www.svgrepo.com/), which minor alterations
+The SVGs that were used from this project are from [Wikipedia](https://en.wikipedia.org/wiki/Logic_gate) and [SVGREPO](https://www.svgrepo.com/), with minor alterations
 
 | Gate/Component | SVG                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------ |
