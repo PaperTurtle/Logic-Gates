@@ -5,8 +5,6 @@
 
 This project is a fully-fledged logic gates simulator designed to simulate the behavior of various logic gates. With this simulator, you can create, save, and open circuits, place gates, and connect them to observe their functionality.
 
-![Example Full Adder](https://github.com/PaperTurtle/Logic-Gates/assets/68080844/a615f3c8-fdbe-4ecb-af58-0b497bffb0f8)
-
 ## 📚 Table of Contents
 
 -  [📚 Table of Contents](#-table-of-contents)
@@ -20,6 +18,8 @@ This project is a fully-fledged logic gates simulator designed to simulate the b
 ## 🎯 Features
 
 ### 🔌 Supported Gates
+
+The SVGs that were used from this project are from [Wikipedia](https://en.wikipedia.org/wiki/Logic_gate) and [SVGREPO](https://www.svgrepo.com/), which minor alterations
 
 | Gate/Component | SVG                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------ |
