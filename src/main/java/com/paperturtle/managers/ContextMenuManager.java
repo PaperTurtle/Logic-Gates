@@ -144,7 +144,7 @@ public class ContextMenuManager {
         table.getColumns().add(outputCol);
         outputCol.setPrefWidth(75);
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.setMinWidth(Region.USE_PREF_SIZE);
         table.setMinHeight(Region.USE_PREF_SIZE);
 

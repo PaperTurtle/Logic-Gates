@@ -25,6 +25,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -199,11 +200,28 @@ public class InteractionManager {
 
         for (int i = 0; i < inputs.length; i++) {
             List<String> row = new ArrayList<>();
+            boolean rowIsEmpty = true;
+
+            System.out.println("Processing row " + i);
+
             for (Boolean input : inputs[i]) {
                 row.add(input ? "true" : "false");
+                if (input) {
+                    rowIsEmpty = false;
+                }
             }
-            row.add(outputs[i] ? "true" : "false");
-            data.add(row);
+
+            System.out.println("Row before adding output: " + row);
+            System.out.println("Row is empty: " + rowIsEmpty);
+            System.out.println("Output value: " + outputs[i]);
+
+            if (!rowIsEmpty || outputs[i]) {
+                row.add(outputs[i] ? "true" : "false");
+                data.add(row);
+                System.out.println("Added row: " + row);
+            } else {
+                System.out.println("Skipped row: " + row);
+            }
         }
 
         table.setItems(data);
@@ -214,9 +232,20 @@ public class InteractionManager {
         VBox vbox = new VBox(exportButton, table);
 
         Stage stage = new Stage();
-        stage.setTitle("Simplified Truth Table");
-        Scene scene = new Scene(vbox, 400, 300);
+        stage.setTitle("Truth Table");
+        Scene scene = new Scene(vbox);
         stage.setScene(scene);
+
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+
+        double rowHeight = 25;
+        double tableHeight = rowHeight * (data.size() + 1);
+        table.setPrefHeight(tableHeight);
+
+        vbox.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        vbox.setPrefHeight(Region.USE_COMPUTED_SIZE);
+
+        stage.sizeToScene();
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem exportCsv = new MenuItem("Export to CSV");
@@ -224,6 +253,7 @@ public class InteractionManager {
         contextMenu.getItems().add(exportCsv);
 
         table.setContextMenu(contextMenu);
+        table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
 
         stage.show();
     }
