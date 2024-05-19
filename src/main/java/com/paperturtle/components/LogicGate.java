@@ -113,7 +113,9 @@ public abstract class LogicGate implements CircuitComponent {
         this.outputPoint = outputPoint;
         this.id = "Gate" + idCounter++;
 
-        inputPoints.forEach(point -> inputConnections.add(new ArrayList<>()));
+        for (int i = 0; i < this.inputPoints.size(); i++) {
+            inputConnections.add(new ArrayList<>());
+        }
     }
 
     /**
