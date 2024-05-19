@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.data.GateData;
+import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.CircuitComponent;
 import com.paperturtle.utils.SvgUtil;
 

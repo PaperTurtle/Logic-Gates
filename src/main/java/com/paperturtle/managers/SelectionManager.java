@@ -2,10 +2,10 @@ package com.paperturtle.managers;
 
 import java.util.Map;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.SwitchGate;
 import com.paperturtle.components.TextLabel;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
@@ -343,6 +343,14 @@ public class SelectionManager {
         });
     }
 
+    /**
+     * Clamps a value between a minimum and maximum.
+     * 
+     * @param value The value to clamp
+     * @param min   The minimum value
+     * @param max   The maximum value
+     * @return The clamped value
+     */
     private double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(value, max));
     }

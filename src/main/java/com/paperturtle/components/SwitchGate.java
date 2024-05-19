@@ -8,8 +8,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import java.util.List;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.commands.ToggleSwitchStateCommand;
+import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.SvgUtil;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.paperturtle.components;
 
-import com.paperturtle.CircuitCanvas;
+import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.CircuitComponent;
 
 import javafx.application.Platform;

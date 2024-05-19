@@ -1,51 +1,13 @@
 package com.paperturtle;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import com.paperturtle.commands.AddGateCommand;
-import com.paperturtle.components.GateFactory;
-import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.TextLabel;
-import com.paperturtle.data.GateData;
-import com.paperturtle.managers.CircuitFileManager;
-import com.paperturtle.utils.CircuitComponent;
-import com.paperturtle.utils.SvgUtil;
+import com.paperturtle.gui.AppGUI;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.application.Application;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Duration;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.Cursor;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.ButtonBar.ButtonData;
 
 public class App extends Application {
     /**
@@ -69,463 +31,80 @@ public class App extends Application {
      */
     private BorderPane borderPane = new BorderPane();
 
-    /**
-     * The sidebar containing the controls for the application.
-     */
-    private VBox sidebar;
-
     @Override
     public void start(Stage stage) {
-        sidebar = new VBox(10);
-        sidebar.setPrefWidth(200);
-        ScrollPane scrollableSidebar = new ScrollPane();
-        scrollableSidebar.setContent(sidebar);
-        scrollableSidebar.setFitToWidth(true);
-        scrollableSidebar.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollableSidebar.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollableSidebar.setMinWidth(200);
-        scrollableSidebar.setMaxWidth(200);
-        scrollableSidebar.setPannable(false);
-
-        initializeSidebar(sidebar);
-
-        circuitCanvas = new CircuitCanvas(2000, 2000);
-
-        MenuBar menuBar = new MenuBar();
-
-        // Create menus
-        Menu fileMenu = new Menu("File");
-        MenuItem openItem = new MenuItem("Open...");
-        MenuItem saveItem = new MenuItem("Save...");
-        MenuItem exitItem = new MenuItem("Exit");
-        exitItem.setOnAction(e -> stage.close());
-
-        Menu editMenu = new Menu("Edit");
-        MenuItem undoItem = new MenuItem("Undo");
-        MenuItem redoItem = new MenuItem("Redo");
-        MenuItem copyItem = new MenuItem("Copy");
-        MenuItem pasteItem = new MenuItem("Paste");
-        MenuItem deleteItem = new MenuItem("Delete");
-
-        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN));
-        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN));
-        copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
-        pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
-        deleteItem.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
-
-        undoItem.setOnAction(e -> circuitCanvas.getCommandManager().undo());
-        redoItem.setOnAction(e -> circuitCanvas.getCommandManager().redo());
-        copyItem.setOnAction(e -> circuitCanvas.getClipboardManager().copySelectedGatesToClipboard());
-        pasteItem.setOnAction(e -> circuitCanvas.getClipboardManager().pasteGatesFromClipboard());
-        deleteItem.setOnAction(e -> circuitCanvas.getGateManager().removeSelectedGates());
-
-        Menu helpMenu = new Menu("Help");
-        MenuItem aboutItem = new MenuItem("About");
-        MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
-
-        aboutItem.setOnAction(e -> {
-            showAlert("About",
-                    "Logic Gates Simulator\nVersion 1.0\nCreated by Seweryn Czabanowski\nThis is a school project.",
-                    Alert.AlertType.INFORMATION);
-        });
-
-        shortcutsItem.setOnAction(e -> {
-            showAlert("Keyboard Shortcuts",
-                    "Ctrl+C: Copy selected gates\n" +
-                            "Ctrl+V: Paste gates from clipboard\n" +
-                            "Ctrl+X: Cut selected gates\n" +
-                            "Ctrl+A: Select all components\n" +
-                            "Ctrl+Z: Undo\n" +
-                            "Ctrl+Y: Redo\n",
-                    Alert.AlertType.INFORMATION);
-        });
-
-        Menu optionsMenu = new Menu("Options");
-        MenuItem tableItem = new MenuItem("Generate Truth Table");
-        MenuItem clearItem = new MenuItem("Clear the canvas");
-
-        tableItem.setOnAction(e -> {
-            circuitCanvas.getInteractionManager().generateAndDisplayCompleteTruthTable();
-        });
-
-        clearItem.setOnAction(e -> {
-            circuitCanvas.clearCanvas();
-        });
-
-        fileMenu.getItems().addAll(openItem, saveItem, exitItem);
-        optionsMenu.getItems().addAll(tableItem, clearItem);
-        editMenu.getItems().addAll(undoItem, redoItem, copyItem, pasteItem, deleteItem);
-        helpMenu.getItems().addAll(aboutItem, shortcutsItem);
-        menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, helpMenu);
-
-        openItem.setOnAction(e -> {
-            if (!circuitCanvas.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Open File");
-                alert.setHeaderText("Canvas is not empty");
-                alert.setContentText("Would you like to save your current work before opening a new file?");
-
-                ButtonType buttonSave = new ButtonType("Save");
-                ButtonType buttonContinue = new ButtonType("Continue without saving");
-                ButtonType buttonCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-
-                alert.getButtonTypes().setAll(buttonSave, buttonContinue, buttonCancel);
-
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isPresent() && result.get() == buttonSave) {
-                    saveCurrentWork(stage);
-                } else if (result.isPresent() && result.get() == buttonCancel) {
-                    return;
-                }
-            }
-
-            openNewFile(stage);
-        });
-
-        saveItem.setOnAction(e -> {
-            List<GateData> gateData = circuitCanvas.getAllGateData();
-            List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
-            List<CircuitComponent> components = new ArrayList<>();
-            components.addAll(gateData);
-            components.addAll(textLabels);
-
-            if (gateData.isEmpty() && textLabels.isEmpty()) {
-                showAlert("Warning", "The canvas is empty. Nothing to save.", Alert.AlertType.WARNING);
-                return;
-            }
-
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Circuit File");
-            fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
-            File file = fileChooser.showSaveDialog(stage);
-            if (file != null) {
-                try {
-                    String filePath = file.getPath();
-                    if (!filePath.toLowerCase().endsWith(".json")) {
-                        filePath += ".json";
-                    }
-                    new CircuitFileManager().saveCircuit(filePath, components);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            }
-        });
-
-        borderPane.setCenter(circuitCanvas);
-        borderPane.setLeft(scrollableSidebar);
-        borderPane.setTop(menuBar);
-
-        scene = new Scene(borderPane, 1000, 600);
-        scene.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
-        scene.setOnMouseMoved(event -> {
-            if (floatingImageView != null) {
-                floatingImageView.setX(event.getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
-                floatingImageView.setY(event.getY() - floatingImageView.getBoundsInLocal().getHeight() / 2);
-            }
-        });
-
-        scrollableSidebar.setOnMouseClicked(event -> {
-            if (floatingImageView != null && !(event.getTarget() instanceof ImageView)) {
-                borderPane.getChildren().remove(floatingImageView);
-                floatingImageView = null;
-            }
-        });
-
-        scene.setOnMouseClicked(event -> {
-            if (floatingImageView != null && event.getTarget() == circuitCanvas) {
-                double x = event.getSceneX() - circuitCanvas.getLayoutX()
-                        - floatingImageView.getBoundsInLocal().getWidth() / 2;
-                double y = event.getSceneY() - circuitCanvas.getLayoutY()
-                        - floatingImageView.getBoundsInLocal().getHeight() / 2;
-                if ("TextLabel".equals(floatingImageView.getId())) {
-                    TextLabel gateLabel = new TextLabel("Label", 90, 40);
-                    circuitCanvas.drawTextLabel(gateLabel, x, y);
-                } else {
-                    LogicGate gate = GateFactory.createGate(floatingImageView.getId());
-                    if (gate != null) {
-                        circuitCanvas.getCommandManager().executeCommand(new AddGateCommand(circuitCanvas, gate, x, y));
-                    }
-                }
-                borderPane.getChildren().remove(floatingImageView);
-                floatingImageView = null;
-            }
-        });
-
-        stage.setTitle("Logic Gates Simulator");
-        stage.setScene(scene);
-        stage.show();
-        circuitCanvas.requestFocus();
+        AppGUI appGUI = new AppGUI(this, stage);
+        appGUI.initialize();
     }
 
     /**
-     * Initializes the sidebar with the controls for the application.
+     * Returns the main layout container for the application's user interface.
      * 
-     * @param sidebar The sidebar to initialize.
+     * @return the main layout container
      */
-    private void initializeSidebar(VBox sidebar) {
-        VBox inputsSection = new VBox(5);
-        VBox outputsSection = new VBox(5);
-        VBox gatesSection = new VBox(5);
-        VBox flipflopsSection = new VBox(5);
-        VBox utilitiesSection = new VBox(5);
-        inputsSection.getStyleClass().add("section");
-        outputsSection.getStyleClass().add("section");
-        gatesSection.getStyleClass().add("section");
-        flipflopsSection.getStyleClass().add("section");
-        utilitiesSection.getStyleClass().add("section");
-
-        sidebar.getChildren().addAll(createSectionLabel("Inputs"), inputsSection, createSectionLabel("Outputs"),
-                outputsSection, createSectionLabel("Logic Gates"), gatesSection, createSectionLabel("Utilities"),
-                utilitiesSection);
-
-        String[] inputTypes = { "SWITCH", "CLOCK", "HIGHCONSTANT", "LOWCONSTANT" };
-        String[] outputTypes = { "LIGHTBULB", "FOURBITDIGIT" };
-        String[] gateTypes = { "AND", "OR", "NOT", "BUFFER", "NAND", "NOR", "XOR", "XNOR", "TRISTATE" };
-        // String[] flipflopTypes = { "ASYNC_RS_FLIPFLOP", "SYNC_RS_FLIPFLOP",
-        // "EDGE_JK_FLIPFLOP", "SYNC_T_FLIPFLOP",
-        // "EDGE_D_FLIPFLOP", "LEVEL_D_FLIPFLOP" };
-        String[] utilityTypes = { "TextLabel" };
-
-        addItemsToSection(inputsSection, inputTypes);
-        addItemsToSection(outputsSection, outputTypes);
-        addItemsToSection(gatesSection, gateTypes);
-        // addItemsToSection(flipflopsSection, flipflopTypes);
-        addItemsToSection(utilitiesSection, utilityTypes);
+    public BorderPane getBorderPane() {
+        return borderPane;
     }
 
     /**
-     * Creates a label for a section in the sidebar.
+     * Returns the scene containing the user interface of the application.
      * 
-     * @param text The text of the label.
-     * @return The label for the section.
+     * @return the scene containing the user interface
      */
-    private Label createSectionLabel(String text) {
-        Label label = new Label(text);
-        label.getStyleClass().add("label-style");
-        return label;
+    public Scene getScene() {
+        return scene;
     }
 
     /**
-     * Creates an image view from a text label.
+     * Sets the scene containing the user interface of the application.
      * 
-     * @param textLabel The text label to create an image view from.
-     * @return The image view created from the text label.
+     * @param scene the scene containing the user interface
      */
-    private ImageView createImageViewFromTextLabel(TextLabel textLabel) {
-        SnapshotParameters parameters = new SnapshotParameters();
-        parameters.setFill(Color.TRANSPARENT);
-        WritableImage writableImage = textLabel.snapshot(parameters, null);
-
-        ImageView imageView = new ImageView(writableImage);
-        imageView.setFitWidth(80);
-        imageView.setFitHeight(40);
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-        imageView.setPickOnBounds(true);
-
-        return imageView;
+    public void setScene(Scene scene) {
+        this.scene = scene;
     }
 
     /**
-     * Adds items to a section in the sidebar.
+     * Returns the canvas on which the circuit is drawn.
      * 
-     * @param section The section to add items to.
-     * @param types   The types of items to add.
+     * @return the circuit canvas
      */
-    private void addItemsToSection(VBox section, String[] types) {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(5, 0, 5, 0));
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-
-        // Add column constraints for equal width columns
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(30);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(30);
-        gridPane.getColumnConstraints().addAll(col1, col2);
-
-        int count = 0;
-
-        for (String type : types) {
-            ImageView imageView;
-            if (type.equals("TextLabel")) {
-                TextLabel textLabel = new TextLabel("Label", 90, 40);
-                imageView = createImageViewFromTextLabel(textLabel);
-            } else {
-                imageView = new ImageView(
-                        SvgUtil.loadSvgImage("/com/paperturtle/" + type + "_ANSI_Labelled.svg"));
-            }
-            imageView.setId(type);
-            imageView.setFitWidth(80);
-            imageView.setFitHeight(40);
-            imageView.setPreserveRatio(true);
-            imageView.setSmooth(true);
-            imageView.setPickOnBounds(true);
-
-            String tooltipText = getTooltipText(type);
-            Tooltip tooltip = new Tooltip(tooltipText);
-            tooltip.getStyleClass().add("tooltip-style");
-            tooltip.setShowDelay(Duration.millis(100));
-
-            Tooltip.install(imageView, tooltip);
-
-            imageView.setOnMouseEntered(event -> imageView.setCursor(Cursor.HAND));
-            imageView.setOnMouseExited(event -> imageView.setCursor(Cursor.DEFAULT));
-
-            imageView.setOnMouseClicked(event -> {
-                if (floatingImageView == null) {
-                    createFloatingImage(imageView, event);
-                }
-                if (floatingImageView != null) {
-                    borderPane.getChildren().remove(floatingImageView);
-                    floatingImageView = null;
-                    createFloatingImage(imageView, event);
-                }
-            });
-
-            int row = count / 2;
-            int col = count % 2;
-            gridPane.add(imageView, col, row);
-
-            // Align the imageView to the center of the cell
-            GridPane.setHalignment(imageView, HPos.CENTER);
-            GridPane.setValignment(imageView, VPos.CENTER);
-
-            count++;
-        }
-
-        section.getChildren().add(gridPane);
+    public CircuitCanvas getCircuitCanvas() {
+        return circuitCanvas;
     }
 
     /**
-     * Returns the tooltip text for a given type.
+     * Sets the canvas on which the circuit is drawn.
      * 
-     * @param type The type of the component.
-     * @return The tooltip text for the given type.
+     * @param circuitCanvas the circuit canvas
      */
-    private String getTooltipText(String type) {
-        switch (type) {
-            case "AND":
-                return "AND Gate";
-            case "OR":
-                return "OR Gate";
-            case "NOT":
-                return "NOT Gate";
-            case "BUFFER":
-                return "BUFFER Gate";
-            case "NAND":
-                return "NAND Gate";
-            case "NOR":
-                return "NOR Gate";
-            case "XOR":
-                return "XOR Gate";
-            case "XNOR":
-                return "XNOR Gate";
-            case "SWITCH":
-                return "Switch";
-            case "LIGHTBULB":
-                return "Lightbulb";
-            default:
-                return type + " Gate";
-        }
+    public void setCircuitCanvas(CircuitCanvas circuitCanvas) {
+        this.circuitCanvas = circuitCanvas;
     }
 
     /**
-     * Creates a floating image for dragging a logic gate.
+     * Returns the image view used for displaying a floating image (e.g., when
      * 
-     * @param sourceImageView The source image view.
-     * @param event           The mouse event.
+     * @return the floating image view
      */
-    private void createFloatingImage(ImageView sourceImageView, MouseEvent event) {
-        floatingImageView = new ImageView(sourceImageView.getImage());
-        floatingImageView.setId(sourceImageView.getId());
-        floatingImageView.setFitHeight(50);
-        floatingImageView.setPreserveRatio(true);
-        floatingImageView.setOpacity(0.5);
-        floatingImageView.setX(
-                event.getScreenX() - scene.getWindow().getX() - floatingImageView.getBoundsInLocal().getWidth() / 2);
-        floatingImageView.setY(event.getScreenY() - scene.getWindow().getY()
-                - floatingImageView.getBoundsInLocal().getHeight() / 2 - 28);
-        floatingImageView.setMouseTransparent(true);
-        borderPane.getChildren().add(floatingImageView);
+    public ImageView getFloatingImageView() {
+        return floatingImageView;
     }
 
     /**
-     * Saves the current work to a file.
+     * Sets the image view used for displaying a floating image (e.g., when
      * 
-     * @param stage The stage.
+     * @param floatingImageView the floating image view
      */
-    private void saveCurrentWork(Stage stage) {
-        List<GateData> gateData = circuitCanvas.getAllGateData();
-        List<TextLabel> textLabels = circuitCanvas.getAllTextLabels();
-        List<CircuitComponent> components = new ArrayList<>();
-        components.addAll(gateData);
-        components.addAll(textLabels);
-
-        if (!components.isEmpty()) {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Circuit File");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
-            File desktop = new File(System.getProperty("user.home"), "Desktop");
-            fileChooser.setInitialDirectory(desktop);
-            File file = fileChooser.showSaveDialog(stage);
-            if (file != null) {
-                try {
-                    String filePath = file.getPath();
-                    if (!filePath.toLowerCase().endsWith(".json")) {
-                        filePath += ".json";
-                    }
-                    new CircuitFileManager().saveCircuit(filePath, components);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            }
-        } else {
-            showAlert("Warning", "The canvas is empty. Nothing to save.", Alert.AlertType.WARNING);
-        }
+    public void setFloatingImageView(ImageView floatingImageView) {
+        this.floatingImageView = floatingImageView;
     }
 
     /**
-     * Opens a new file.
+     * Launches the application.
      * 
-     * @param stage The stage.
+     * @param args the command-line arguments
      */
-    private void openNewFile(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Circuit File");
-        fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
-        File desktop = new File(System.getProperty("user.home"), "Desktop");
-        fileChooser.setInitialDirectory(desktop);
-        File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            try {
-                List<CircuitComponent> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
-                circuitCanvas.loadComponents(gatesData);
-            } catch (IOException | IllegalArgumentException e) {
-                showAlert("Error", "Failed to load the file: " + e.getMessage(), Alert.AlertType.ERROR);
-            }
-        }
-    }
-
-    /**
-     * Shows an alert dialog.
-     * 
-     * @param title     The title of the alert.
-     * @param content   The content of the alert.
-     * @param alertType The type of the alert.
-     */
-    private void showAlert(String title, String content, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
     public static void main(String[] args) {
         launch(args);
     }

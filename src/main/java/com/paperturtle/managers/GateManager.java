@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.SwitchGate;
 import com.paperturtle.components.TextLabel;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;

@@ -3,7 +3,7 @@ package com.paperturtle.components;
 import java.util.Arrays;
 import java.util.List;
 
-import com.paperturtle.CircuitCanvas;
+import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.SvgUtil;
 
 import javafx.geometry.Insets;

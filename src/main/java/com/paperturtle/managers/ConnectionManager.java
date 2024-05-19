@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.commands.AddConnectionCommand;
 import com.paperturtle.commands.RemoveConnectionCommand;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;

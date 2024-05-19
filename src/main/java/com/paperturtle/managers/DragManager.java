@@ -1,8 +1,8 @@
 package com.paperturtle.managers;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.TextLabel;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;

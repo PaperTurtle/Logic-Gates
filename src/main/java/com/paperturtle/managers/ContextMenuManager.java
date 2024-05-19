@@ -3,9 +3,9 @@ package com.paperturtle.managers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.ClockGate;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;

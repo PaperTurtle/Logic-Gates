@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.data.ClipboardData;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;

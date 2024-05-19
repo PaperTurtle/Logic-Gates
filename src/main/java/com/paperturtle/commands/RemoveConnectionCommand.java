@@ -1,7 +1,7 @@
 package com.paperturtle.commands;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.scene.shape.Line;
 

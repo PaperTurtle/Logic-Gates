@@ -6,9 +6,9 @@ import javafx.scene.shape.Line;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.TextLabel;
+import com.paperturtle.gui.CircuitCanvas;
 
 /**
  * Command to remove all selected gates and their connections from the circuit

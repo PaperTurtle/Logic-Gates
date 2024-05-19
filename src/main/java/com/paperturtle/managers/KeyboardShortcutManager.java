@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.paperturtle.CircuitCanvas;
 import com.paperturtle.commands.PasteGatesCommand;
 import com.paperturtle.commands.RemoveSelectedGatesCommand;
+import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.KeyCombination;
 
 import javafx.scene.input.KeyCode;
