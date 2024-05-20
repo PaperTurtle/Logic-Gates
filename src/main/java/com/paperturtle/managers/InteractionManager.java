@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.paperturtle.components.HighConstantGate;
 import com.paperturtle.components.Lightbulb;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.LowConstantGate;
 import com.paperturtle.components.SwitchGate;
 import com.paperturtle.components.TextLabel;
 import com.paperturtle.gui.CircuitCanvas;
@@ -130,24 +132,30 @@ public class InteractionManager {
 
         List<SwitchGate> switchGates = new ArrayList<>();
         Lightbulb lightbulb = null;
+        List<Boolean> constantInputs = new ArrayList<>();
 
         for (LogicGate gate : selectedGates) {
             if (gate instanceof SwitchGate) {
                 switchGates.add((SwitchGate) gate);
             } else if (gate instanceof Lightbulb) {
                 lightbulb = (Lightbulb) gate;
+            } else if (gate instanceof HighConstantGate) {
+                constantInputs.add(true);
+            } else if (gate instanceof LowConstantGate) {
+                constantInputs.add(false);
             }
         }
 
-        if (switchGates.isEmpty() || lightbulb == null) {
+        if ((constantInputs.isEmpty() && switchGates.isEmpty()) || lightbulb == null) {
             System.out.println("SwitchGates or Lightbulb not found in the selected gates.");
             return;
         }
 
         int numInputs = switchGates.size();
+        int numConstants = constantInputs.size();
         int totalCombinations = 1 << numInputs;
 
-        Boolean[][] truthTableInputs = new Boolean[totalCombinations][numInputs];
+        Boolean[][] truthTableInputs = new Boolean[totalCombinations][numInputs + numConstants];
         Boolean[] truthTableOutputs = new Boolean[totalCombinations];
 
         boolean[] initialStates = new boolean[numInputs];
@@ -164,6 +172,10 @@ public class InteractionManager {
         for (int i = 0; i < totalCombinations; i++) {
             for (int j = 0; j < numInputs; j++) {
                 switchGates.get(j).setState(truthTableInputs[i][j]);
+            }
+
+            for (int j = 0; j < numConstants; j++) {
+                truthTableInputs[i][numInputs + j] = constantInputs.get(j);
             }
 
             truthTableOutputs[i] = lightbulb.evaluate();
