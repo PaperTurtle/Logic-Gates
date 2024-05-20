@@ -104,16 +104,6 @@ public class ContextMenuManager {
         alert.setTitle("Gate Properties");
         alert.setHeaderText("Properties for " + gate.getClass().getSimpleName());
 
-        Spinner<Integer> maxOutputSpinner = new Spinner<>(1, 10, gate.getMaxOutputConnections());
-        maxOutputSpinner.setEditable(true);
-        maxOutputSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
-            gate.setMaxOutputConnections(newValue);
-        });
-
-        Label spinnerLabel = new Label("Max Output Connections:");
-        HBox spinnerBox = new HBox(10, spinnerLabel, maxOutputSpinner);
-        spinnerBox.setAlignment(Pos.CENTER_LEFT);
-
         TableView<Boolean[]> table = new TableView<>();
         List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
         List<Boolean[]> dataList = new ArrayList<>();
@@ -159,10 +149,6 @@ public class ContextMenuManager {
             header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
         });
 
-        VBox vbox = new VBox(10, spinnerBox, table);
-        vbox.setPadding(new Insets(10));
-
-        alert.getDialogPane().setContent(vbox);
         alert.getDialogPane().getStylesheets()
                 .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         table.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());

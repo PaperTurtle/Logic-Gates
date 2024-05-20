@@ -601,33 +601,6 @@ public abstract class LogicGate implements CircuitComponent {
     }
 
     /**
-     * Returns the maximum number of output connections.
-     * 
-     * @return the maximum number of output connections.
-     */
-    public int getMaxOutputConnections() {
-        return maxOutputConnections;
-    }
-
-    /**
-     * Sets the maximum number of output connections.
-     * 
-     * @param maxOutputConnections the maximum number of output connections.
-     */
-    public void setMaxOutputConnections(int maxOutputConnections) {
-        this.maxOutputConnections = Math.min(Math.max(1, maxOutputConnections), 10);
-    }
-
-    /**
-     * Returns whether an output connection can be added.
-     * 
-     * @return true if an output connection can be added, false otherwise.
-     */
-    public boolean canAddOutputConnection() {
-        return outputConnections.size() < maxOutputConnections;
-    }
-
-    /**
      * Checks if the line is connected to the output marker.
      * 
      * @param line the line to be added.

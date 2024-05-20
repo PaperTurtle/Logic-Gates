@@ -75,7 +75,6 @@ public class RemoveConnectionCommand implements Command {
 
         targetGate.evaluate();
         targetGate.propagateStateChange();
-        sourceGate.setMaxOutputConnections(sourceGate.getMaxOutputConnections() + 1);
 
         canvas.scheduleUpdate(targetGate);
         canvas.scheduleUpdate(sourceGate);

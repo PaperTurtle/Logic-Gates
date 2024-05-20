@@ -44,6 +44,16 @@ public class GateManager {
     public void removeGate(ImageView gate) {
         LogicGate logicGate = canvas.getGateImageViews().get(gate);
         if (logicGate != null) {
+            for (List<Line> inputConnectionList : logicGate.getInputConnections()) {
+                for (Line line : inputConnectionList) {
+                    canvas.getChildren().remove(line);
+                }
+            }
+
+            for (Line line : logicGate.getOutputConnections()) {
+                canvas.getChildren().remove(line);
+            }
+
             canvas.getConnectionManager().removeAllConnections(logicGate);
             canvas.getChildren().removeAll(logicGate.getInputMarkers());
             if (logicGate.getOutputMarker() != null) {

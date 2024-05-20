@@ -377,8 +377,7 @@ public class InteractionManager {
      */
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null
-                    && gate.canAddOutputConnection()) {
+            if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null) {
                 Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
                 canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
                 Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
