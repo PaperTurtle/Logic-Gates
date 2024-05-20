@@ -131,14 +131,14 @@ public class InteractionManager {
         List<LogicGate> selectedGates = canvas.getSelectedGates();
 
         List<SwitchGate> switchGates = new ArrayList<>();
-        Lightbulb lightbulb = null;
+        List<Lightbulb> lightbulbs = new ArrayList<>();
         List<Boolean> constantInputs = new ArrayList<>();
 
         for (LogicGate gate : selectedGates) {
             if (gate instanceof SwitchGate) {
                 switchGates.add((SwitchGate) gate);
             } else if (gate instanceof Lightbulb) {
-                lightbulb = (Lightbulb) gate;
+                lightbulbs.add((Lightbulb) gate);
             } else if (gate instanceof HighConstantGate) {
                 constantInputs.add(true);
             } else if (gate instanceof LowConstantGate) {
@@ -146,17 +146,18 @@ public class InteractionManager {
             }
         }
 
-        if ((constantInputs.isEmpty() && switchGates.isEmpty()) || lightbulb == null) {
-            System.out.println("SwitchGates or Lightbulb not found in the selected gates.");
+        if ((constantInputs.isEmpty() && switchGates.isEmpty()) || lightbulbs.isEmpty()) {
+            System.out.println("SwitchGates or Lightbulbs not found in the selected gates.");
             return;
         }
 
         int numInputs = switchGates.size();
         int numConstants = constantInputs.size();
+        int numOutputs = lightbulbs.size();
         int totalCombinations = 1 << numInputs;
 
         Boolean[][] truthTableInputs = new Boolean[totalCombinations][numInputs + numConstants];
-        Boolean[] truthTableOutputs = new Boolean[totalCombinations];
+        Boolean[][] truthTableOutputs = new Boolean[totalCombinations][numOutputs];
 
         boolean[] initialStates = new boolean[numInputs];
         for (int i = 0; i < numInputs; i++) {
@@ -178,13 +179,15 @@ public class InteractionManager {
                 switchGates.get(j).setState(truthTableInputs[i][j]);
             }
 
-            truthTableOutputs[i] = lightbulb.evaluate();
+            for (int k = 0; k < numOutputs; k++) {
+                truthTableOutputs[i][k] = lightbulbs.get(k).evaluate();
+            }
         }
 
         for (int i = 0; i < numInputs; i++) {
             switchGates.get(i).setState(initialStates[i]);
         }
-        lightbulb.evaluate();
+        lightbulbs.forEach(Lightbulb::evaluate);
 
         displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
     }
@@ -195,7 +198,7 @@ public class InteractionManager {
      * @param inputs  the input values of the truth table
      * @param outputs the output values of the truth table
      */
-    private void displaySimplifiedTruthTable(Boolean[][] inputs, Boolean[] outputs) {
+    private void displaySimplifiedTruthTable(Boolean[][] inputs, Boolean[][] outputs) {
         TableView<List<String>> table = new TableView<>();
         ObservableList<List<String>> data = FXCollections.observableArrayList();
 
@@ -206,9 +209,12 @@ public class InteractionManager {
             table.getColumns().add(inputColumn);
         }
 
-        TableColumn<List<String>, String> outputColumn = new TableColumn<>("O1");
-        outputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(inputs[0].length)));
-        table.getColumns().add(outputColumn);
+        for (int i = 0; i < outputs[0].length; i++) {
+            final int colIndex = inputs[0].length + i;
+            TableColumn<List<String>, String> outputColumn = new TableColumn<>("O" + (i + 1));
+            outputColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().get(colIndex)));
+            table.getColumns().add(outputColumn);
+        }
 
         for (int i = 0; i < inputs.length; i++) {
             List<String> row = new ArrayList<>();
@@ -221,8 +227,11 @@ public class InteractionManager {
                 }
             }
 
-            if (!rowIsEmpty || outputs[i]) {
-                row.add(outputs[i] ? "true" : "false");
+            for (Boolean output : outputs[i]) {
+                row.add(output ? "true" : "false");
+            }
+
+            if (!rowIsEmpty) {
                 data.add(row);
             }
         }
@@ -267,7 +276,7 @@ public class InteractionManager {
      * @param inputs  the input values of the truth table
      * @param outputs the output values of the truth table
      */
-    private void exportTruthTableToCsv(Boolean[][] inputs, Boolean[] outputs) {
+    private void exportTruthTableToCsv(Boolean[][] inputs, Boolean[][] outputs) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
         fileChooser.setInitialFileName("truth_table.csv");
@@ -281,13 +290,26 @@ public class InteractionManager {
                 for (int i = 0; i < inputs[0].length; i++) {
                     sb.append("I").append(i + 1).append(",");
                 }
-                sb.append("O1\n");
+
+                for (int i = 0; i < outputs[0].length; i++) {
+                    sb.append("O").append(i + 1);
+                    if (i < outputs[0].length - 1) {
+                        sb.append(",");
+                    }
+                }
+                sb.append("\n");
 
                 for (int i = 0; i < inputs.length; i++) {
                     for (Boolean input : inputs[i]) {
                         sb.append(input ? "true" : "false").append(",");
                     }
-                    sb.append(outputs[i] ? "true" : "false").append("\n");
+                    for (int j = 0; j < outputs[i].length; j++) {
+                        sb.append(outputs[i][j] ? "true" : "false");
+                        if (j < outputs[i].length - 1) {
+                            sb.append(",");
+                        }
+                    }
+                    sb.append("\n");
                 }
 
                 writer.write(sb.toString());
