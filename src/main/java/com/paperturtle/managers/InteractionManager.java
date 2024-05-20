@@ -167,15 +167,15 @@ public class InteractionManager {
             for (int j = 0; j < numInputs; j++) {
                 truthTableInputs[i][j] = (i & (1 << j)) != 0;
             }
+
+            for (int j = 0; j < numConstants; j++) {
+                truthTableInputs[i][numInputs + j] = constantInputs.get(j);
+            }
         }
 
         for (int i = 0; i < totalCombinations; i++) {
             for (int j = 0; j < numInputs; j++) {
                 switchGates.get(j).setState(truthTableInputs[i][j]);
-            }
-
-            for (int j = 0; j < numConstants; j++) {
-                truthTableInputs[i][numInputs + j] = constantInputs.get(j);
             }
 
             truthTableOutputs[i] = lightbulb.evaluate();
@@ -214,25 +214,16 @@ public class InteractionManager {
             List<String> row = new ArrayList<>();
             boolean rowIsEmpty = true;
 
-            System.out.println("Processing row " + i);
-
             for (Boolean input : inputs[i]) {
                 row.add(input ? "true" : "false");
-                if (input) {
+                if (input != null) {
                     rowIsEmpty = false;
                 }
             }
 
-            System.out.println("Row before adding output: " + row);
-            System.out.println("Row is empty: " + rowIsEmpty);
-            System.out.println("Output value: " + outputs[i]);
-
             if (!rowIsEmpty || outputs[i]) {
                 row.add(outputs[i] ? "true" : "false");
                 data.add(row);
-                System.out.println("Added row: " + row);
-            } else {
-                System.out.println("Skipped row: " + row);
             }
         }
 
