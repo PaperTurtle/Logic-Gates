@@ -71,27 +71,37 @@ public class ConnectionManager {
      * @param logicGate the logic gate whose connections are to be removed
      */
     public void removeAllConnections(LogicGate logicGate) {
-        removeConnections(logicGate.getOutputConnections(), logicGate);
-        logicGate.getInputConnections().forEach(connections -> removeConnections(connections, logicGate));
-    }
+        List<Line> outputConnections = new ArrayList<>(logicGate.getOutputConnections());
+        for (Line line : outputConnections) {
+            LogicGate targetGate = canvas.getGateManager().findTargetGate(line);
+            if (targetGate != null) {
+                int index = targetGate.findInputConnectionIndex(line);
+                if (index != -1) {
+                    targetGate.removeInputConnection(line, index);
+                    targetGate.getInputs().remove(logicGate);
+                    targetGate.evaluate();
+                    targetGate.propagateStateChange();
+                }
+            }
+            canvas.getLineToStartGateMap().remove(line);
+            canvas.getChildren().remove(line);
+        }
 
-    /**
-     * Removes all connections for the specified logic gate.
-     * 
-     * @param connections the connections to remove
-     * @param logicGate   the logic gate whose connections are to be removed
-     */
-    private void removeConnections(List<Line> connections, LogicGate logicGate) {
-        new ArrayList<>(connections).forEach(line -> {
-            Optional.ofNullable(canvas.getLineToStartGateMap().get(line))
-                    .ifPresent(targetGate -> {
-                        int index = targetGate.findInputConnectionIndex(line);
-                        if (index != -1) {
-                            canvas.getCommandManager().executeCommand(
-                                    new RemoveConnectionCommand(canvas, logicGate, targetGate, line, index));
-                        }
-                    });
-        });
+        List<List<Line>> inputConnections = logicGate.getInputConnections();
+        for (List<Line> connections : inputConnections) {
+            List<Line> connectionsCopy = new ArrayList<>(connections);
+            for (Line line : connectionsCopy) {
+                LogicGate sourceGate = canvas.getLineToStartGateMap().get(line);
+                if (sourceGate != null) {
+                    sourceGate.getOutputConnections().remove(line);
+                    sourceGate.getOutputGates().remove(logicGate);
+                    sourceGate.evaluate();
+                    sourceGate.propagateStateChange();
+                }
+                canvas.getLineToStartGateMap().remove(line);
+                canvas.getChildren().remove(line);
+            }
+        }
     }
 
     /**

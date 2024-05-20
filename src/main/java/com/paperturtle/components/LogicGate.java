@@ -83,12 +83,6 @@ public abstract class LogicGate implements CircuitComponent {
     protected boolean currentState = false;
 
     /**
-     * The maximum number of connections that can be made from the output of this
-     * gate.
-     */
-    private int maxOutputConnections = 1;
-
-    /**
      * A counter used to generate unique IDs for each instance of LogicGate.
      */
     private static long idCounter = 0;
