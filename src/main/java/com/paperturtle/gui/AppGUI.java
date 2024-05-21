@@ -134,6 +134,10 @@ public class AppGUI {
             }
         });
 
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN),
+                this::saveCurrentWork);
+
         stage.setTitle("Logic Gates Simulator");
         stage.setScene(scene);
         stage.show();
@@ -218,7 +222,8 @@ public class AppGUI {
                             "Ctrl+X: Cut selected gates\n" +
                             "Ctrl+A: Select all components\n" +
                             "Ctrl+Z: Undo\n" +
-                            "Ctrl+Y: Redo\n",
+                            "Ctrl+Y: Redo\n" +
+                            "Ctrl+S: Save\n",
                     Alert.AlertType.INFORMATION);
         });
 
