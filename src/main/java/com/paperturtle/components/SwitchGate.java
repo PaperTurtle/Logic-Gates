@@ -188,6 +188,7 @@ public class SwitchGate extends LogicGate {
         this.state = state;
         updateVisualState();
         updateOutputConnectionsColor();
+        propagateStateChange();
     }
 
 }
