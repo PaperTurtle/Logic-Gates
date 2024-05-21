@@ -92,6 +92,8 @@ public abstract class LogicGate implements CircuitComponent {
      */
     protected String id;
 
+    private int maxOutputConnections = 1;
+
     /**
      * Constructs a LogicGate object with the specified SVG file path, input points,
      * and output point.
@@ -332,7 +334,11 @@ public abstract class LogicGate implements CircuitComponent {
      * @param line the Line to be added.
      */
     public void addOutputConnection(Line line) {
-        outputConnections.add(line);
+        if (outputConnections.size() < maxOutputConnections) {
+            outputConnections.add(line);
+        } else {
+            System.out.println("Max output connections reached.");
+        }
     }
 
     /**
@@ -526,6 +532,7 @@ public abstract class LogicGate implements CircuitComponent {
         data.type = getClass().getSimpleName();
         data.position = getPosition();
         data.state = currentState;
+        data.maxOutputConnections = getMaxOutputConnections();
 
         inputs.forEach(input -> data.inputs.add(new GateData.ConnectionData(input.getId(), inputs.indexOf(input))));
         outputGates.forEach(output -> {
@@ -602,6 +609,24 @@ public abstract class LogicGate implements CircuitComponent {
      */
     private boolean isConnected(Line line) {
         return line.getStartX() == getOutputMarker().getCenterX() && line.getStartY() == getOutputMarker().getCenterY();
+    }
+
+    /**
+     * Returns the maximum number of output connections allowed for this gate.
+     * 
+     * @return the maximum number of output connections.
+     */
+    public int getMaxOutputConnections() {
+        return maxOutputConnections;
+    }
+
+    /**
+     * Sets the maximum number of output connections allowed for this gate.
+     * 
+     * @param maxOutputConnections the maximum number of output connections.
+     */
+    public void setMaxOutputConnections(int maxOutputConnections) {
+        this.maxOutputConnections = maxOutputConnections;
     }
 
     /**
