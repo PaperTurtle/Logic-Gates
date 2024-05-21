@@ -99,12 +99,19 @@ public class TextLabel extends Group implements CircuitComponent {
         labelText.setFill(Color.WHITE);
         labelText.setFont(new Font("Arial", 16));
 
-        labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
-        labelText.setLayoutY((height / 2) + (labelText.getBoundsInLocal().getHeight() / 4));
+        updateTextPosition();
 
         this.getChildren().addAll(background, labelText);
 
         setupContextMenu();
+    }
+
+    public void updateTextPosition() {
+        double textWidth = labelText.getBoundsInLocal().getWidth();
+        double textHeight = labelText.getBoundsInLocal().getHeight();
+
+        labelText.setLayoutX((width - textWidth) / 2);
+        labelText.setLayoutY((height / 2) + (textHeight / 4));
     }
 
     /**
@@ -545,5 +552,72 @@ public class TextLabel extends Group implements CircuitComponent {
      */
     public TextAlignment getTextAlignment() {
         return labelText.getTextAlignment();
+    }
+
+    /**
+     * Returns the font weight of the label text.
+     * 
+     * @return FontWeight.BOLD if the font style contains "Bold", FontWeight.NORMAL
+     *         otherwise.
+     */
+    public FontWeight getFontWeight() {
+        return labelText.getFont().getStyle().contains("Bold") ? FontWeight.BOLD : FontWeight.NORMAL;
+    }
+
+    /**
+     * Returns the font posture of the label text.
+     * 
+     * @return FontPosture.ITALIC if the font style contains "Italic",
+     *         FontPosture.REGULAR otherwise.
+     */
+    public FontPosture getFontPosture() {
+        return labelText.getFont().getStyle().contains("Italic") ? FontPosture.ITALIC : FontPosture.REGULAR;
+    }
+
+    /**
+     * Checks if the label text is underlined.
+     * 
+     * @return true if the label text is underlined, false otherwise.
+     */
+    public boolean isUnderline() {
+        return labelText.isUnderline();
+    }
+
+    /**
+     * Checks if the label text is strikethrough.
+     * 
+     * @return true if the label text is strikethrough, false otherwise.
+     */
+    public boolean isStrikethrough() {
+        return labelText.isStrikethrough();
+    }
+
+    /**
+     * Sets the font of the label text.
+     * 
+     * @param font The new font to set.
+     */
+    public void setFont(Font font) {
+        labelText.setFont(font);
+    }
+
+    /**
+     * Sets the underline property of the label text.
+     * 
+     * @param isUnderline If true, the label text is underlined. If false, the
+     *                    underline is removed.
+     */
+    public void setUnderline(boolean isUnderline) {
+        labelText.setUnderline(isUnderline);
+    }
+
+    /**
+     * Sets the strikethrough property of the label text.
+     * 
+     * @param isStrikethrough If true, the label text is strikethrough. If false,
+     *                        the strikethrough is removed.
+     */
+    public void setStrikethrough(boolean isStrikethrough) {
+        labelText.setStrikethrough(isStrikethrough);
     }
 }
