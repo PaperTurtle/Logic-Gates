@@ -255,7 +255,7 @@ public class InteractionManager {
         table.setItems(data);
 
         Button exportButton = new Button("Export to CSV");
-        // exportButton.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+        exportButton.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
 
         VBox vbox = new VBox(exportButton, table);
 
@@ -277,7 +277,7 @@ public class InteractionManager {
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem exportCsv = new MenuItem("Export to CSV");
-        // exportCsv.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+        exportCsv.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
         contextMenu.getItems().add(exportCsv);
 
         table.setContextMenu(contextMenu);
@@ -292,7 +292,13 @@ public class InteractionManager {
      * @param inputs  the input values of the truth table
      * @param outputs the output values of the truth table
      */
-    private void exportTruthTableToCsv(Boolean[][] inputs, Boolean[][] outputs) {
+    /**
+     * Exports the truth table to a CSV file.
+     * 
+     * @param inputs  the input values of the truth table
+     * @param outputs the output values of the truth table
+     */
+    private void exportTruthTableToCsv(Boolean[][] inputs, Object[][] outputs) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
         fileChooser.setInitialFileName("truth_table.csv");
@@ -320,7 +326,11 @@ public class InteractionManager {
                         sb.append(input ? "true" : "false").append(",");
                     }
                     for (int j = 0; j < outputs[i].length; j++) {
-                        sb.append(outputs[i][j] ? "true" : "false");
+                        if (outputs[i][j] instanceof Boolean) {
+                            sb.append((Boolean) outputs[i][j] ? "true" : "false");
+                        } else if (outputs[i][j] instanceof Integer) {
+                            sb.append(outputs[i][j].toString());
+                        }
                         if (j < outputs[i].length - 1) {
                             sb.append(",");
                         }
