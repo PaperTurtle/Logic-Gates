@@ -144,15 +144,23 @@ public class RemoveSelectedGatesCommand implements Command {
         gate.getOutputConnections().forEach(connection -> {
             removedConnections.add(connection);
             LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
-            removedConnectionInfos.add(new ConnectionInfo(gate, targetGate, connection,
-                    targetGate != null ? targetGate.findInputConnectionIndex(connection) : -1));
+            if (targetGate != null) {
+                int index = targetGate.findInputConnectionIndex(connection);
+                removedConnectionInfos.add(new ConnectionInfo(gate, targetGate, connection, index));
+            } else {
+                removedConnectionInfos.add(new ConnectionInfo(gate, null, connection, -1));
+            }
         });
 
         gate.getInputConnections().forEach(connectionList -> connectionList.forEach(connection -> {
             removedConnections.add(connection);
             LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
-            removedConnectionInfos.add(new ConnectionInfo(sourceGate, gate, connection,
-                    gate != null ? gate.findInputConnectionIndex(connection) : -1));
+            if (sourceGate != null) {
+                int index = gate.findInputConnectionIndex(connection);
+                removedConnectionInfos.add(new ConnectionInfo(sourceGate, gate, connection, index));
+            } else {
+                removedConnectionInfos.add(new ConnectionInfo(null, gate, connection, -1));
+            }
         }));
     }
 
@@ -205,6 +213,11 @@ public class RemoveSelectedGatesCommand implements Command {
      * @param info the connection information to be reconnected
      */
     private void reconnect(ConnectionInfo info) {
+        if (info.sourceGate == null || info.targetGate == null) {
+            System.out.println("Source or target gate is null. Cannot reconnect.");
+            return;
+        }
+
         Point2D sourcePos = info.sourceGate.getOutputMarker().localToParent(
                 info.sourceGate.getOutputMarker().getCenterX(), info.sourceGate.getOutputMarker().getCenterY());
         Point2D targetPos = info.targetGate.getInputMarkers().get(info.inputIndex).localToParent(

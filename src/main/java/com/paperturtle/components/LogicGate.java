@@ -148,10 +148,8 @@ public abstract class LogicGate implements CircuitComponent {
     public void removeInput(LogicGate input) {
         int index = inputs.indexOf(input);
         if (index != -1) {
-            List<Line> connections = inputConnections.get(index);
-            if (connections != null) {
-                connections.forEach(line -> removeInputConnection(line, index));
-            }
+            List<Line> connections = new ArrayList<>(inputConnections.get(index));
+            connections.forEach(line -> removeInputConnection(line, index));
             inputs.remove(index);
             evaluateAndPropagate();
         }
@@ -380,14 +378,15 @@ public abstract class LogicGate implements CircuitComponent {
      */
     public void removeOutputConnection(Line line) {
         if (outputConnections.remove(line)) {
-            new ArrayList<>(outputGates).forEach(gate -> {
+            List<LogicGate> outputGatesCopy = new ArrayList<>(outputGates);
+            for (LogicGate gate : outputGatesCopy) {
                 int index = gate.findInputConnectionIndex(line);
                 if (index != -1) {
                     gate.removeInputConnection(line, index);
                     gate.removeInput(this);
                     gate.evaluateAndPropagate();
                 }
-            });
+            }
         }
     }
 
