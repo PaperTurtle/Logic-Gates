@@ -85,24 +85,23 @@ public class AddConnectionCommand implements Command {
         canvas.scheduleUpdate(targetGate);
     }
 
-    /**
-     * Undoes the command by removing the connection between the source and target
-     * logic gates.
-     * Updates the canvas and gate states accordingly.
-     */
     @Override
     public void undo() {
-        sourceGate.removeOutputConnection(connectionLine);
-        targetGate.removeInputConnection(connectionLine, targetInputIndex);
-        targetGate.removeInput(sourceGate);
+        if (targetInputIndex >= 0 && targetInputIndex < targetGate.getInputConnections().size()) {
+            sourceGate.removeOutputConnection(connectionLine);
+            targetGate.removeInputConnection(connectionLine, targetInputIndex);
+            targetGate.removeInput(sourceGate);
 
-        canvas.getChildren().remove(connectionLine);
-        canvas.getLineToStartGateMap().remove(connectionLine);
+            canvas.getChildren().remove(connectionLine);
+            canvas.getLineToStartGateMap().remove(connectionLine);
 
-        targetGate.evaluate();
-        targetGate.propagateStateChange();
+            targetGate.evaluate();
+            targetGate.propagateStateChange();
 
-        canvas.scheduleUpdate(targetGate);
-        canvas.scheduleUpdate(sourceGate);
+            canvas.scheduleUpdate(targetGate);
+            canvas.scheduleUpdate(sourceGate);
+        } else {
+            System.out.println("Invalid target input index: " + targetInputIndex);
+        }
     }
 }

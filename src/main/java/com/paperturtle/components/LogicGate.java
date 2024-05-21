@@ -146,9 +146,13 @@ public abstract class LogicGate implements CircuitComponent {
      * @param input the LogicGate to be removed.
      */
     public void removeInput(LogicGate input) {
-        if (inputs.remove(input)) {
-            inputConnections.get(inputs.indexOf(input))
-                    .forEach(line -> removeInputConnection(line, inputs.indexOf(input)));
+        int index = inputs.indexOf(input);
+        if (index != -1) {
+            List<Line> connections = inputConnections.get(index);
+            if (connections != null) {
+                connections.forEach(line -> removeInputConnection(line, index));
+            }
+            inputs.remove(index);
             evaluateAndPropagate();
         }
     }
@@ -170,7 +174,12 @@ public abstract class LogicGate implements CircuitComponent {
      * @param inputIndex the index of the input connection.
      */
     public void removeInputConnection(Line line, int inputIndex) {
-        Optional.ofNullable(getInputConnections(inputIndex)).ifPresent(connections -> connections.remove(line));
+        if (inputIndex >= 0 && inputIndex < inputConnections.size()) {
+            List<Line> connections = inputConnections.get(inputIndex);
+            if (connections != null && connections.remove(line)) {
+                evaluateAndPropagate();
+            }
+        }
     }
 
     /**
@@ -336,8 +345,6 @@ public abstract class LogicGate implements CircuitComponent {
     public void addOutputConnection(Line line) {
         if (outputConnections.size() < maxOutputConnections) {
             outputConnections.add(line);
-        } else {
-            System.out.println("Max output connections reached.");
         }
     }
 
@@ -372,12 +379,16 @@ public abstract class LogicGate implements CircuitComponent {
      * @param line the Line to be removed.
      */
     public void removeOutputConnection(Line line) {
-        outputConnections.remove(line);
-        new ArrayList<>(outputGates).forEach(gate -> {
-            gate.removeInput(this);
-            gate.removeInputConnection(line, gate.findInputConnectionIndex(line));
-            gate.evaluateAndPropagate();
-        });
+        if (outputConnections.remove(line)) {
+            new ArrayList<>(outputGates).forEach(gate -> {
+                int index = gate.findInputConnectionIndex(line);
+                if (index != -1) {
+                    gate.removeInputConnection(line, index);
+                    gate.removeInput(this);
+                    gate.evaluateAndPropagate();
+                }
+            });
+        }
     }
 
     /**
@@ -556,6 +567,7 @@ public abstract class LogicGate implements CircuitComponent {
         data.type = getClass().getSimpleName();
         data.position = getPosition();
         data.state = currentState;
+        data.maxOutputConnections = getMaxOutputConnections();
 
         inputs.forEach(input -> data.inputs
                 .add(new ClipboardData.ConnectionData(input.getId(), input.outputGates.indexOf(this))));

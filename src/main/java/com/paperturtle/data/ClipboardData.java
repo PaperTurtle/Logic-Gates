@@ -50,6 +50,11 @@ public class ClipboardData {
     public List<ConnectionData> outputs = new ArrayList<>();
 
     /**
+     * The maximum number of output connections allowed for this gate.
+     */
+    public int maxOutputConnections;
+
+    /**
      * Represents a connection data between gates.
      * Stores the ID of the gate and the index of the connection point.
      */
@@ -129,6 +134,15 @@ public class ClipboardData {
      */
     public List<ConnectionData> getOutputs() {
         return outputs;
+    }
+
+    /**
+     * Gets the maximum number of output connections.
+     * 
+     * @return the maximum number of output connections
+     */
+    public int getMaxOutputConnections() {
+        return maxOutputConnections;
     }
 
 }

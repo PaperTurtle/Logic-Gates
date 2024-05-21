@@ -128,6 +128,7 @@ public class PasteGatesCommand implements Command {
 
                 gate.setPosition(newX, newY);
                 gate.setId(data.getId());
+                gate.setMaxOutputConnections(data.getMaxOutputConnections());
                 createdGates.put(data.getId(), gate);
                 canvas.drawGate(gate, newX, newY);
                 gate.getImageView().getStyleClass().add("selected");
