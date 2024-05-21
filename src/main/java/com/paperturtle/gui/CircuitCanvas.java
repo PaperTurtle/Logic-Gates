@@ -267,6 +267,7 @@ public class CircuitCanvas extends Pane {
         }
         gate.setPosition(gateData.position.getX(), gateData.position.getY());
         gate.setId(gateData.id);
+        gate.setMaxOutputConnections(gateData.maxOutputConnections);
         createdGates.put(gateData.id, gate);
         drawGate(gate, gateData.position.getX(), gateData.position.getY());
     }
