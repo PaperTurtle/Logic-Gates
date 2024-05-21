@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.paperturtle.components.FourBitDigitGate;
 import com.paperturtle.components.HighConstantGate;
 import com.paperturtle.components.Lightbulb;
 import com.paperturtle.components.LogicGate;
@@ -132,6 +133,7 @@ public class InteractionManager {
 
         List<SwitchGate> switchGates = new ArrayList<>();
         List<Lightbulb> lightbulbs = new ArrayList<>();
+        List<FourBitDigitGate> fourBitDigitGates = new ArrayList<>();
         List<Boolean> constantInputs = new ArrayList<>();
 
         for (LogicGate gate : selectedGates) {
@@ -139,6 +141,8 @@ public class InteractionManager {
                 switchGates.add((SwitchGate) gate);
             } else if (gate instanceof Lightbulb) {
                 lightbulbs.add((Lightbulb) gate);
+            } else if (gate instanceof FourBitDigitGate) {
+                fourBitDigitGates.add((FourBitDigitGate) gate);
             } else if (gate instanceof HighConstantGate) {
                 constantInputs.add(true);
             } else if (gate instanceof LowConstantGate) {
@@ -146,18 +150,20 @@ public class InteractionManager {
             }
         }
 
-        if ((constantInputs.isEmpty() && switchGates.isEmpty()) || lightbulbs.isEmpty()) {
-            System.out.println("SwitchGates or Lightbulbs not found in the selected gates.");
+        if ((constantInputs.isEmpty() && switchGates.isEmpty())
+                || (lightbulbs.isEmpty() && fourBitDigitGates.isEmpty())) {
+            System.out.println("input or output gates not found in the selected gates.");
             return;
         }
 
         int numInputs = switchGates.size();
         int numConstants = constantInputs.size();
-        int numOutputs = lightbulbs.size();
+        int numLightbulbs = lightbulbs.size();
+        int numFourBitDigitGates = fourBitDigitGates.size();
         int totalCombinations = 1 << numInputs;
 
         Boolean[][] truthTableInputs = new Boolean[totalCombinations][numInputs + numConstants];
-        Boolean[][] truthTableOutputs = new Boolean[totalCombinations][numOutputs];
+        Object[][] truthTableOutputs = new Object[totalCombinations][numLightbulbs + numFourBitDigitGates];
 
         boolean[] initialStates = new boolean[numInputs];
         for (int i = 0; i < numInputs; i++) {
@@ -179,8 +185,12 @@ public class InteractionManager {
                 switchGates.get(j).setState(truthTableInputs[i][j]);
             }
 
-            for (int k = 0; k < numOutputs; k++) {
+            for (int k = 0; k < numLightbulbs; k++) {
                 truthTableOutputs[i][k] = lightbulbs.get(k).evaluate();
+            }
+
+            for (int k = 0; k < numFourBitDigitGates; k++) {
+                truthTableOutputs[i][numLightbulbs + k] = fourBitDigitGates.get(k).getOutputValue();
             }
         }
 
@@ -188,6 +198,7 @@ public class InteractionManager {
             switchGates.get(i).setState(initialStates[i]);
         }
         lightbulbs.forEach(Lightbulb::evaluate);
+        fourBitDigitGates.forEach(FourBitDigitGate::evaluate);
 
         displaySimplifiedTruthTable(truthTableInputs, truthTableOutputs);
     }
@@ -198,7 +209,7 @@ public class InteractionManager {
      * @param inputs  the input values of the truth table
      * @param outputs the output values of the truth table
      */
-    private void displaySimplifiedTruthTable(Boolean[][] inputs, Boolean[][] outputs) {
+    private void displaySimplifiedTruthTable(Boolean[][] inputs, Object[][] outputs) {
         TableView<List<String>> table = new TableView<>();
         ObservableList<List<String>> data = FXCollections.observableArrayList();
 
@@ -227,8 +238,13 @@ public class InteractionManager {
                 }
             }
 
-            for (Boolean output : outputs[i]) {
-                row.add(output ? "true" : "false");
+            for (Object output : outputs[i]) {
+                if (output instanceof Boolean) {
+                    row.add((Boolean) output ? "true" : "false");
+                } else if (output instanceof Integer) {
+                    row.add(output.toString());
+                }
+                System.out.println("Output for row " + i + ": " + output);
             }
 
             if (!rowIsEmpty) {
@@ -239,7 +255,7 @@ public class InteractionManager {
         table.setItems(data);
 
         Button exportButton = new Button("Export to CSV");
-        exportButton.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+        // exportButton.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
 
         VBox vbox = new VBox(exportButton, table);
 
@@ -261,7 +277,7 @@ public class InteractionManager {
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem exportCsv = new MenuItem("Export to CSV");
-        exportCsv.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
+        // exportCsv.setOnAction(e -> exportTruthTableToCsv(inputs, outputs));
         contextMenu.getItems().add(exportCsv);
 
         table.setContextMenu(contextMenu);
