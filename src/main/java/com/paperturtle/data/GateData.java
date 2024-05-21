@@ -46,6 +46,11 @@ public class GateData implements CircuitComponent {
     public List<ConnectionData> outputs = new ArrayList<>();
 
     /**
+     * The maximum number of output connections the gate can have.
+     */
+    public int maxOutputConnections;
+
+    /**
      * Represents a connection data between gates.
      * Stores the ID of the gate and the index of the connection point.
      */
