@@ -11,15 +11,20 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
 /**
@@ -142,6 +147,21 @@ public class ContextMenuManager {
             final TableHeaderRow header = (TableHeaderRow) table.lookup("TableHeaderRow");
             header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
         });
+
+        Label spinnerLabel = new Label("Max Output Connections:");
+        Spinner<Integer> maxOutputSpinner = new Spinner<>();
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10,
+                gate.getMaxOutputConnections());
+        maxOutputSpinner.setValueFactory(valueFactory);
+
+        maxOutputSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+            gate.setMaxOutputConnections(newValue);
+        });
+
+        VBox content = new VBox(10, table, spinnerLabel, maxOutputSpinner);
+        content.setPadding(new Insets(10));
+
+        alert.getDialogPane().setContent(content);
 
         alert.getDialogPane().getStylesheets()
                 .add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
