@@ -8,6 +8,9 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.paperturtle.components.TextLabel;
 
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+
 /**
  * Serializer for TextLabel objects to JSON.
  * Implements the JsonSerializer interface to provide custom serialization
@@ -49,6 +52,10 @@ public class TextLabelSerializer implements JsonSerializer<TextLabel> {
         data.addProperty("fontSize", src.getFontSize());
         data.addProperty("fillColor", src.getFillColor().toString());
         data.addProperty("textAlignment", src.getTextAlignment().toString());
+        data.addProperty("isBold", src.getFontWeight() == FontWeight.BOLD);
+        data.addProperty("isItalic", src.getFontPosture() == FontPosture.ITALIC);
+        data.addProperty("isUnderline", src.isUnderline());
+        data.addProperty("isStrikethrough", src.isStrikethrough());
 
         jsonObject.add("data", data);
         return jsonObject;

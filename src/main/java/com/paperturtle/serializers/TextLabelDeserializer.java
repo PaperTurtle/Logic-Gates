@@ -9,6 +9,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.paperturtle.components.TextLabel;
 
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 
 /**
@@ -53,6 +56,19 @@ public class TextLabelDeserializer implements JsonDeserializer<TextLabel> {
         textLabel.setFontSize(jsonObject.get("fontSize").getAsInt());
         textLabel.setFillColor(jsonObject.get("fillColor").getAsString());
         textLabel.setTextAlignment(TextAlignment.valueOf(jsonObject.get("textAlignment").getAsString()));
+
+        boolean isBold = jsonObject.get("isBold").getAsBoolean();
+        boolean isItalic = jsonObject.get("isItalic").getAsBoolean();
+        boolean isUnderline = jsonObject.get("isUnderline").getAsBoolean();
+        boolean isStrikethrough = jsonObject.get("isStrikethrough").getAsBoolean();
+
+        FontWeight fontWeight = isBold ? FontWeight.BOLD : FontWeight.NORMAL;
+        FontPosture fontPosture = isItalic ? FontPosture.ITALIC : FontPosture.REGULAR;
+        textLabel.setFont(Font.font(textLabel.getFontFamily(), fontWeight, fontPosture, textLabel.getFontSize()));
+        textLabel.setUnderline(isUnderline);
+        textLabel.setStrikethrough(isStrikethrough);
+
+        textLabel.updateTextPosition();
         return textLabel;
     }
 }
