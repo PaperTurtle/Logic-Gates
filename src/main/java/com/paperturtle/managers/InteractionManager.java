@@ -404,17 +404,20 @@ public class InteractionManager {
     public void setupOutputInteraction(Circle outputMarker, LogicGate gate) {
         outputMarker.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && canvas.getCurrentLine() == null) {
-                Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(), outputMarker.getCenterY());
-                canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
-                Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
-                canvas.getCurrentLine().setStroke(lineColor);
-                canvas.getCurrentLine().setStrokeWidth(3.5);
-                canvas.getChildren().add(canvas.getCurrentLine());
-                canvas.getLineToStartGateMap().put(canvas.getCurrentLine(), gate);
-                canvas.getConnectionManager().setStartGate(gate);
-                gate.addOutputConnection(canvas.getCurrentLine());
-                setupConnectionHandlers();
-                event.consume();
+                if (gate.getOutputConnections().size() < gate.getMaxOutputConnections()) {
+                    Point2D outputPos = outputMarker.localToParent(outputMarker.getCenterX(),
+                            outputMarker.getCenterY());
+                    canvas.setCurrentLine(new Line(outputPos.getX(), outputPos.getY(), event.getX(), event.getY()));
+                    Color lineColor = gate.evaluate() ? Color.RED : Color.BLACK;
+                    canvas.getCurrentLine().setStroke(lineColor);
+                    canvas.getCurrentLine().setStrokeWidth(3.5);
+                    canvas.getChildren().add(canvas.getCurrentLine());
+                    canvas.getLineToStartGateMap().put(canvas.getCurrentLine(), gate);
+                    canvas.getConnectionManager().setStartGate(gate);
+                    gate.addOutputConnection(canvas.getCurrentLine());
+                    setupConnectionHandlers();
+                    event.consume();
+                }
             }
         });
     }
