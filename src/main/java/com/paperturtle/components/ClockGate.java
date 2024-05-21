@@ -241,4 +241,11 @@ public class ClockGate extends LogicGate {
             durationField.setText("Invalid input!");
         }
     }
+
+    @Override
+    public void propagateStateChange() {
+        if (!outputConnections.isEmpty()) {
+            super.propagateStateChange();
+        }
+    }
 }

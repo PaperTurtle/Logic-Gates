@@ -308,10 +308,6 @@ public abstract class LogicGate implements CircuitComponent {
             currentState = newState;
             updateOutputConnectionsColor(newState);
             outputGates.forEach(LogicGate::propagateStateChange);
-            outputGates.stream()
-                    .filter(gate -> gate instanceof Lightbulb)
-                    .map(gate -> (Lightbulb) gate)
-                    .forEach(lightbulb -> lightbulb.toggleLight(currentState));
         }
     }
 

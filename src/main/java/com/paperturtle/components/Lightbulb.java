@@ -170,7 +170,7 @@ public class Lightbulb extends LogicGate {
     @Override
     public void propagateStateChange() {
         if (evaluate()) {
-            outputGates.forEach(LogicGate::propagateStateChange);
+            super.propagateStateChange();
         }
     }
 
