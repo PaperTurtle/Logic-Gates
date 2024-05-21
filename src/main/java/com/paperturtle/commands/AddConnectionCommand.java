@@ -75,6 +75,7 @@ public class AddConnectionCommand implements Command {
 
         canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
 
+        sourceGate.evaluate();
         targetGate.evaluate();
         targetGate.propagateStateChange();
         sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
@@ -83,6 +84,7 @@ public class AddConnectionCommand implements Command {
         sourceGate.getOutputMarker().toFront();
 
         canvas.scheduleUpdate(targetGate);
+        canvas.scheduleUpdate(sourceGate);
     }
 
     @Override
@@ -95,7 +97,9 @@ public class AddConnectionCommand implements Command {
             canvas.getChildren().remove(connectionLine);
             canvas.getLineToStartGateMap().remove(connectionLine);
 
+            sourceGate.evaluate();
             targetGate.evaluate();
+            sourceGate.propagateStateChange();
             targetGate.propagateStateChange();
 
             canvas.scheduleUpdate(targetGate);
