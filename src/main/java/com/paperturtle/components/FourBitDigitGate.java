@@ -168,4 +168,14 @@ public class FourBitDigitGate extends LogicGate {
         list.add(new Pair<>(new Boolean[] { true }, true));
         return list;
     }
+
+    /**
+     * Gets the output value of the four-bit digit gate.
+     * 
+     * @return the output value
+     */
+    public int getOutputValue() {
+        int activeCount = (int) inputs.stream().filter(LogicGate::getOutput).count();
+        return Math.min(activeCount, 4);
+    }
 }
