@@ -184,6 +184,10 @@ public class AppGUI {
         MenuItem openItem = new MenuItem("Open...");
         MenuItem saveItem = new MenuItem("Save...");
         MenuItem exitItem = new MenuItem("Exit");
+
+        saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
+
         exitItem.setOnAction(e -> stage.close());
 
         Menu editMenu = new Menu("Edit");
@@ -217,13 +221,15 @@ public class AppGUI {
 
         shortcutsItem.setOnAction(e -> {
             showAlert("Keyboard Shortcuts",
-                    "Ctrl+C: Copy selected gates\n" +
+                    "Ctrl+O: Open file\n" +
+                            "Ctrl+S: Save file\n" +
+                            "Ctrl+C: Copy selected gates\n" +
                             "Ctrl+V: Paste gates from clipboard\n" +
                             "Ctrl+X: Cut selected gates\n" +
                             "Ctrl+A: Select all components\n" +
                             "Ctrl+Z: Undo\n" +
                             "Ctrl+Y: Redo\n" +
-                            "Ctrl+S: Save\n",
+                            "Ctrl+D: Delete selected gates\n",
                     Alert.AlertType.INFORMATION);
         });
 
