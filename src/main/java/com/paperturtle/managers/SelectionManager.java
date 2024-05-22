@@ -7,6 +7,7 @@ import com.paperturtle.components.SwitchGate;
 import com.paperturtle.components.TextLabel;
 import com.paperturtle.gui.CircuitCanvas;
 
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -150,9 +151,12 @@ public class SelectionManager {
      */
     private void selectLabels() {
         canvas.getTextLabels().forEach(label -> {
-            boolean intersects = selectionRect.getBoundsInParent()
-                    .intersects(label.localToScene(label.getBoundsInLocal()));
-            updateSelectionState(label, intersects);
+            Bounds labelBoundsInScene = label.localToScene(label.getBoundsInLocal());
+            Bounds labelBoundsInParent = selectionRect.sceneToLocal(labelBoundsInScene);
+            Bounds selectionBounds = selectionRect.getBoundsInLocal();
+            boolean fullyContained = selectionBounds.contains(labelBoundsInParent);
+
+            updateSelectionState(label, fullyContained);
         });
     }
 
