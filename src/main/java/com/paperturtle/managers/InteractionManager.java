@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.paperturtle.components.FourBitDigitGate;
-import com.paperturtle.components.HighConstantGate;
-import com.paperturtle.components.Lightbulb;
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.LowConstantGate;
-import com.paperturtle.components.SwitchGate;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.inputs.HighConstantGate;
+import com.paperturtle.components.inputs.LowConstantGate;
+import com.paperturtle.components.inputs.SwitchGate;
+import com.paperturtle.components.outputs.FourBitDigitGate;
+import com.paperturtle.components.outputs.Lightbulb;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.beans.property.ReadOnlyStringWrapper;

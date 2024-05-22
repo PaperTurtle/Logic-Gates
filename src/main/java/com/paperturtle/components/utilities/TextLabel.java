@@ -1,4 +1,4 @@
-package com.paperturtle.components;
+package com.paperturtle.components.utilities;
 
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.CircuitComponent;

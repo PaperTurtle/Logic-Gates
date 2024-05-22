@@ -3,7 +3,7 @@ package com.paperturtle.managers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.serializers.Point2DDeserializer;
 import com.paperturtle.serializers.Point2DSerializer;
 import com.paperturtle.serializers.TextLabelDeserializer;

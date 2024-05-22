@@ -1,8 +1,9 @@
-package com.paperturtle.components;
+package com.paperturtle.components.gates;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.paperturtle.components.LogicGate;
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.SvgUtil;
 

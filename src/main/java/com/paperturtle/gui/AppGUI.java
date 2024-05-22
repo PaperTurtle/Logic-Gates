@@ -10,7 +10,7 @@ import com.paperturtle.App;
 import com.paperturtle.commands.AddGateCommand;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.GateData;
 import com.paperturtle.managers.CircuitFileManager;
 import com.paperturtle.utils.CircuitComponent;

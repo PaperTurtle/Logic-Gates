@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.utilities.TextLabel;
 
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;

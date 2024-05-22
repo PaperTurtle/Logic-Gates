@@ -1,7 +1,10 @@
-package com.paperturtle.components;
+package com.paperturtle.components.gates;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.paperturtle.components.LogicGate;
+
 import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
@@ -40,7 +43,7 @@ public class BufferGate extends LogicGate {
 
         return inputs.get(0).getOutput();
     }
-   
+
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
         List<Pair<Boolean[], Boolean>> list = new ArrayList<>();

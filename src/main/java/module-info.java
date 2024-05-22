@@ -21,6 +21,10 @@ module com.paperturtle {
 
     exports com.paperturtle;
     exports com.paperturtle.components;
+    exports com.paperturtle.components.gates;
+    exports com.paperturtle.components.inputs;
+    exports com.paperturtle.components.outputs;
+    exports com.paperturtle.components.utilities;
     exports com.paperturtle.data;
     exports com.paperturtle.managers;
     exports com.paperturtle.commands;
@@ -33,6 +37,10 @@ module com.paperturtle {
     opens com.paperturtle.managers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.commands to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.components to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.components.gates to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.components.inputs to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.components.outputs to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
+    opens com.paperturtle.components.utilities to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.serializers to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.utils to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;
     opens com.paperturtle.gui to javafx.fxml, batik.transcoder, batik.svggen, javafx.swing;

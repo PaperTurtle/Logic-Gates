@@ -1,6 +1,6 @@
 package com.paperturtle.commands;
 
-import com.paperturtle.components.SwitchGate;
+import com.paperturtle.components.inputs.SwitchGate;
 
 /**
  * Command to toggle the state of a switch gate.

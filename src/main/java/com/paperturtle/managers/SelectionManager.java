@@ -3,8 +3,8 @@ package com.paperturtle.managers;
 import java.util.Map;
 
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.SwitchGate;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.inputs.SwitchGate;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.geometry.Bounds;

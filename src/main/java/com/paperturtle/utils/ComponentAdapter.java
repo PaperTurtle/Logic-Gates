@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.GateData;
 
 import java.lang.reflect.Type;

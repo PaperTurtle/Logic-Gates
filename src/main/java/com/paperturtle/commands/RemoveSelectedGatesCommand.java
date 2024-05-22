@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.gui.CircuitCanvas;
 
 /**

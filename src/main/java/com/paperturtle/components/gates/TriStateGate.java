@@ -1,7 +1,9 @@
-package com.paperturtle.components;
+package com.paperturtle.components.gates;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.paperturtle.components.LogicGate;
 
 import javafx.geometry.Point2D;
 import javafx.util.Pair;

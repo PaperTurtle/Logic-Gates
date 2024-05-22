@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.SwitchGate;
-import com.paperturtle.components.TextLabel;
+import com.paperturtle.components.inputs.SwitchGate;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.GateData;
 import com.paperturtle.data.GateData.ConnectionData;
 import com.paperturtle.managers.*;

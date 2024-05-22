@@ -1,4 +1,4 @@
-package com.paperturtle.components;
+package com.paperturtle.components.outputs;
 
 import java.util.Arrays;
 
@@ -11,6 +11,7 @@ import javafx.scene.shape.Circle;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.paperturtle.components.LogicGate;
 import com.paperturtle.utils.SvgUtil;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.paperturtle.components;
+package com.paperturtle.components.inputs;
 
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
@@ -9,6 +9,7 @@ import javafx.scene.shape.Circle;
 import java.util.List;
 
 import com.paperturtle.commands.ToggleSwitchStateCommand;
+import com.paperturtle.components.LogicGate;
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.SvgUtil;
 
