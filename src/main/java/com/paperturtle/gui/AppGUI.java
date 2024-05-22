@@ -435,12 +435,24 @@ public class AppGUI {
                 return "XOR Gate";
             case "XNOR":
                 return "XNOR Gate";
+            case "TRISTATE":
+                return "TRISTATE Gate";
             case "SWITCH":
                 return "Switch";
+            case "CLOCK":
+                return "Clock";
+            case "HIGHCONSTANT":
+                return "High Constant";
+            case "LOWCONSTANT":
+                return "Low Constant";
             case "LIGHTBULB":
                 return "Lightbulb";
+            case "FOURBITDIGIT":
+                return "Four-bit Digit Display";
+            case "TextLabel":
+                return "Text Label";
             default:
-                return type + " Gate";
+                return type + " Component";
         }
     }
 
