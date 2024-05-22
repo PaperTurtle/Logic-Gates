@@ -92,7 +92,7 @@ public class AppGUI {
         app.getBorderPane().setLeft(scrollableSidebar);
         app.getBorderPane().setTop(menuBar);
 
-        Scene scene = new Scene(app.getBorderPane(), 1000, 600);
+        Scene scene = new Scene(app.getBorderPane(), 1200, 700);
         scene.getStylesheets().add(getClass().getResource("/com/paperturtle/styles.css").toExternalForm());
         app.setScene(scene);
 
@@ -354,9 +354,9 @@ public class AppGUI {
         gridPane.setVgap(10);
 
         ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(30);
+        col1.setPercentWidth(50);
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(30);
+        col2.setPercentWidth(50);
         gridPane.getColumnConstraints().addAll(col1, col2);
 
         int count = 0;
