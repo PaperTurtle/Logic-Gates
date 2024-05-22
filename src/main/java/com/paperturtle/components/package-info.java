@@ -1,5 +1,5 @@
 /**
- * This package contains the components of the PaperTurtle Logic Gate simulator
+ * This package contains the components of the Logic Gate simulator
  * application.
  * 
  * <p>
