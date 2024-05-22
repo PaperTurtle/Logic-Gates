@@ -292,12 +292,6 @@ public class InteractionManager {
      * @param inputs  the input values of the truth table
      * @param outputs the output values of the truth table
      */
-    /**
-     * Exports the truth table to a CSV file.
-     * 
-     * @param inputs  the input values of the truth table
-     * @param outputs the output values of the truth table
-     */
     private void exportTruthTableToCsv(Boolean[][] inputs, Object[][] outputs) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
