@@ -165,8 +165,43 @@ public class FourBitDigitGate extends LogicGate {
     @Override
     public List<Pair<Boolean[], Boolean>> getTruthTableData() {
         List<Pair<Boolean[], Boolean>> list = new ArrayList<>();
-        list.add(new Pair<>(new Boolean[] { false }, false));
-        list.add(new Pair<>(new Boolean[] { true }, true));
+        list.add(new Pair<>(new Boolean[] { false, false, false, false }, false));
+        list.add(new Pair<>(new Boolean[] { false, false, false, true }, true));
+        list.add(new Pair<>(new Boolean[] { false, false, true, false }, true));
+        list.add(new Pair<>(new Boolean[] { false, false, true, true }, true));
+        list.add(new Pair<>(new Boolean[] { false, true, false, false }, true));
+        list.add(new Pair<>(new Boolean[] { false, true, false, true }, true));
+        list.add(new Pair<>(new Boolean[] { false, true, true, false }, true));
+        list.add(new Pair<>(new Boolean[] { false, true, true, true }, true));
+        list.add(new Pair<>(new Boolean[] { true, false, false, false }, true));
+        list.add(new Pair<>(new Boolean[] { true, false, false, true }, true));
+        list.add(new Pair<>(new Boolean[] { true, false, true, false }, true));
+        list.add(new Pair<>(new Boolean[] { true, false, true, true }, true));
+        list.add(new Pair<>(new Boolean[] { true, true, false, false }, true));
+        list.add(new Pair<>(new Boolean[] { true, true, false, true }, true));
+        list.add(new Pair<>(new Boolean[] { true, true, true, false }, true));
+        list.add(new Pair<>(new Boolean[] { true, true, true, true }, true));
+        return list;
+    }
+
+    public List<Pair<Boolean[], Integer>> getNumericTruthTableData() {
+        List<Pair<Boolean[], Integer>> list = new ArrayList<>();
+        list.add(new Pair<>(new Boolean[] { false, false, false, false }, 0));
+        list.add(new Pair<>(new Boolean[] { false, false, false, true }, 1));
+        list.add(new Pair<>(new Boolean[] { false, false, true, false }, 1));
+        list.add(new Pair<>(new Boolean[] { false, false, true, true }, 2));
+        list.add(new Pair<>(new Boolean[] { false, true, false, false }, 1));
+        list.add(new Pair<>(new Boolean[] { false, true, false, true }, 2));
+        list.add(new Pair<>(new Boolean[] { false, true, true, false }, 2));
+        list.add(new Pair<>(new Boolean[] { false, true, true, true }, 3));
+        list.add(new Pair<>(new Boolean[] { true, false, false, false }, 1));
+        list.add(new Pair<>(new Boolean[] { true, false, false, true }, 2));
+        list.add(new Pair<>(new Boolean[] { true, false, true, false }, 2));
+        list.add(new Pair<>(new Boolean[] { true, false, true, true }, 3));
+        list.add(new Pair<>(new Boolean[] { true, true, false, false }, 2));
+        list.add(new Pair<>(new Boolean[] { true, true, false, true }, 3));
+        list.add(new Pair<>(new Boolean[] { true, true, true, false }, 3));
+        list.add(new Pair<>(new Boolean[] { true, true, true, true }, 4));
         return list;
     }
 
