@@ -2,9 +2,11 @@ package com.paperturtle.managers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.gates.ClockGate;
+import com.paperturtle.components.outputs.FourBitDigitGate;
 import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.beans.binding.Bindings;
@@ -103,33 +105,50 @@ public class ContextMenuManager {
         alert.setTitle("Gate Properties");
         alert.setHeaderText("Properties for " + gate.getClass().getSimpleName());
 
-        TableView<Boolean[]> table = new TableView<>();
-        List<Pair<Boolean[], Boolean>> pairList = gate.getTruthTableData();
-        List<Boolean[]> dataList = new ArrayList<>();
-        for (Pair<Boolean[], Boolean> pair : pairList) {
-            Boolean[] row = new Boolean[pair.getKey().length + 1];
+        TableView<Object[]> table = new TableView<>();
+        List<Pair<Boolean[], ?>> pairList;
+
+        if (gate instanceof FourBitDigitGate) {
+            pairList = ((FourBitDigitGate) gate).getNumericTruthTableData().stream()
+                    .map(pair -> new Pair<>(pair.getKey(), (Object) pair.getValue()))
+                    .collect(Collectors.toList());
+        } else {
+            pairList = gate.getTruthTableData().stream()
+                    .map(pair -> new Pair<>(pair.getKey(), (Object) pair.getValue()))
+                    .collect(Collectors.toList());
+        }
+
+        List<Object[]> dataList = new ArrayList<>();
+        for (Pair<Boolean[], ?> pair : pairList) {
+            Object[] row = new Object[pair.getKey().length + 1];
             System.arraycopy(pair.getKey(), 0, row, 0, pair.getKey().length);
             row[pair.getKey().length] = pair.getValue();
             dataList.add(row);
         }
 
-        ObservableList<Boolean[]> data = FXCollections.observableArrayList(dataList);
+        ObservableList<Object[]> data = FXCollections.observableArrayList(dataList);
         table.setItems(data);
 
         int numInputs = pairList.isEmpty() || pairList.get(0).getKey().length == 0 ? 0
                 : pairList.get(0).getKey().length;
         for (int i = 0; i < numInputs; i++) {
-            TableColumn<Boolean[], String> inputCol = new TableColumn<>("Input " + (i + 1));
+            TableColumn<Object[], String> inputCol = new TableColumn<>("Input " + (i + 1));
             final int index = i;
             inputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                    param.getValue().length > index ? (param.getValue()[index] ? "true" : "false") : "N/A"));
+                    param.getValue().length > index
+                            ? (param.getValue()[index] instanceof Boolean
+                                    ? ((Boolean) param.getValue()[index] ? "1" : "0")
+                                    : param.getValue()[index].toString())
+                            : "N/A"));
             table.getColumns().add(inputCol);
             inputCol.setPrefWidth(75);
         }
 
-        TableColumn<Boolean[], String> outputCol = new TableColumn<>("Output");
+        TableColumn<Object[], String> outputCol = new TableColumn<>("Output");
         outputCol.setCellValueFactory(param -> new SimpleStringProperty(
-                param.getValue()[param.getValue().length - 1] ? "true" : "false"));
+                param.getValue()[param.getValue().length - 1] instanceof Boolean
+                        ? ((Boolean) param.getValue()[param.getValue().length - 1] ? "1" : "0")
+                        : param.getValue()[param.getValue().length - 1].toString()));
         table.getColumns().add(outputCol);
         outputCol.setPrefWidth(75);
 
