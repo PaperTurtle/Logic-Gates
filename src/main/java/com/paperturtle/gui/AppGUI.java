@@ -31,6 +31,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
@@ -139,6 +140,7 @@ public class AppGUI {
                 this::saveCurrentWork);
 
         stage.setTitle("Logic Gates Simulator");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/paperturtle/logo.jpg")));
         stage.setScene(scene);
         stage.show();
         app.getCircuitCanvas().requestFocus();
