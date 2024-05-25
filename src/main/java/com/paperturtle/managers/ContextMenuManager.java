@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.gates.ClockGate;
 import com.paperturtle.components.outputs.FourBitDigitGate;
+import com.paperturtle.components.outputs.Lightbulb;
 import com.paperturtle.gui.CircuitCanvas;
 
 import javafx.beans.binding.Bindings;
@@ -167,19 +168,26 @@ public class ContextMenuManager {
             header.reorderingProperty().addListener((o, oldVal, newVal) -> header.setReordering(false));
         });
 
-        Label spinnerLabel = new Label("Max Output Connections:");
-        Spinner<Integer> maxOutputSpinner = new Spinner<>();
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10,
-                gate.getMaxOutputConnections());
-        maxOutputSpinner.setValueFactory(valueFactory);
+        VBox content;
 
-        maxOutputSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
-            gate.setMaxOutputConnections(newValue);
-        });
+        if (!(gate instanceof FourBitDigitGate) && !(gate instanceof Lightbulb)) {
+            Label spinnerLabel = new Label("Max Output Connections:");
+            Spinner<Integer> maxOutputSpinner = new Spinner<>();
+            SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10,
+                    gate.getMaxOutputConnections());
+            maxOutputSpinner.setValueFactory(valueFactory);
 
-        VBox content = new VBox(10, table, spinnerLabel, maxOutputSpinner);
+            maxOutputSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+                gate.setMaxOutputConnections(newValue);
+            });
+
+            content = new VBox(10, table, spinnerLabel, maxOutputSpinner);
+
+        } else {
+            content = new VBox(10, table);
+        }
+
         content.setPadding(new Insets(10));
-
         alert.getDialogPane().setContent(content);
 
         alert.getDialogPane().getStylesheets()
