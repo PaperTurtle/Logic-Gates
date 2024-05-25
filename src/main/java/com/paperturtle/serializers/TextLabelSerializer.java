@@ -51,6 +51,7 @@ public class TextLabelSerializer implements JsonSerializer<TextLabel> {
         data.addProperty("fontFamily", src.getFontFamily());
         data.addProperty("fontSize", src.getFontSize());
         data.addProperty("fillColor", src.getFillColor().toString());
+        data.addProperty("backgroundColor", src.getBackgroundColor().toString());
         data.addProperty("textAlignment", src.getTextAlignment().toString());
         data.addProperty("isBold", src.getFontWeight() == FontWeight.BOLD);
         data.addProperty("isItalic", src.getFontPosture() == FontPosture.ITALIC);

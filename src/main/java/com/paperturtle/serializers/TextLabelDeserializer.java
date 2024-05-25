@@ -55,6 +55,7 @@ public class TextLabelDeserializer implements JsonDeserializer<TextLabel> {
         textLabel.setFontFamily(jsonObject.get("fontFamily").getAsString());
         textLabel.setFontSize(jsonObject.get("fontSize").getAsInt());
         textLabel.setFillColor(jsonObject.get("fillColor").getAsString());
+        textLabel.setBackgroundColor(jsonObject.get("backgroundColor").getAsString());
         textLabel.setTextAlignment(TextAlignment.valueOf(jsonObject.get("textAlignment").getAsString()));
 
         boolean isBold = jsonObject.get("isBold").getAsBoolean();
