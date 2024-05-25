@@ -1,7 +1,6 @@
 /**
  * This package contains the main classes and interfaces for the Logic Gate
- * Simulator
- * application.
+ * Simulator application.
  * 
  * <p>
  * It includes the main application class, core logic, and essential components
