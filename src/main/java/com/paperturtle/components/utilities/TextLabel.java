@@ -548,6 +548,34 @@ public class TextLabel extends Group implements CircuitComponent {
     }
 
     /**
+     * Sets the background color of the TextLabel.
+     * 
+     * @param color the new background color for the TextLabel.
+     */
+    public void setBackgroundColor(Color color) {
+        background.setFill(color);
+    }
+
+    /**
+     * Sets the background color of the TextLabel.
+     * 
+     * @param color the new background color for the TextLabel, specified as a web
+     *              color string.
+     */
+    public void setBackgroundColor(String color) {
+        setBackgroundColor(Color.web(color));
+    }
+
+    /**
+     * Gets the background color of the TextLabel.
+     * 
+     * @return the background color of the TextLabel.
+     */
+    public Color getBackgroundColor() {
+        return (Color) background.getFill();
+    }
+
+    /**
      * Sets the text alignment of the TextLabel.
      * 
      * @param alignment the new text alignment for the TextLabel.
