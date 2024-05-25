@@ -240,7 +240,7 @@ public class AppGUI {
         MenuItem clearItem = new MenuItem("Clear the canvas");
 
         tableItem.setOnAction(e -> {
-            app.getCircuitCanvas().getInteractionManager().generateAndDisplayCompleteTruthTable();
+            app.getCircuitCanvas().getTruthTableManager().generateAndDisplayCompleteTruthTable();
         });
 
         clearItem.setOnAction(e -> {
