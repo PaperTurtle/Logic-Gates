@@ -217,13 +217,21 @@ public class TextLabel extends Group implements CircuitComponent {
         previewText.setFont(labelText.getFont());
         previewText.setUnderline(labelText.isUnderline());
         previewText.setStrikethrough(labelText.isStrikethrough());
-        Rectangle previewBackground = new Rectangle(width, height); // Set initial width and height
+        Rectangle previewBackground = new Rectangle(width, height);
         previewBackground.setFill(background.getFill());
 
         StackPane previewBox = new StackPane(previewBackground, previewText);
 
         ChangeListener<Object> previewChangeListener = (obs, oldVal, newVal) -> {
-            previewText.setText(textField.getText()); // Update the preview text
+            previewText.setText(textField.getText());
+            Font previewFont = Font.font(
+                    fontPicker.getValue(),
+                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    fontSizeComboBox.getValue());
+            previewText.setFont(previewFont);
+            previewText.setUnderline(underlineCheckBox.isSelected());
+            previewText.setStrikethrough(strikethroughCheckBox.isSelected());
             updatePreviewSize(previewText, previewBackground);
         };
 
