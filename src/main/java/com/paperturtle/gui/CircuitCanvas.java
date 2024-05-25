@@ -127,6 +127,11 @@ public class CircuitCanvas extends Pane {
     private ContextMenuManager contextMenuManager;
 
     /**
+     * The manager responsible for handling context menus.
+     */
+    private TruthTableManager truthTableManager;
+
+    /**
      * Constructs a CircuitCanvas with the specified width, height, and scroll pane.
      * 
      * @param width  the width of the canvas
@@ -145,6 +150,7 @@ public class CircuitCanvas extends Pane {
         this.gateManager = new GateManager(this);
         this.clipboardManager = new ClipboardManager(this);
         this.contextMenuManager = new ContextMenuManager(this);
+        this.truthTableManager = new TruthTableManager(this);
 
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
         new KeyboardShortcutManager(this);
@@ -558,6 +564,15 @@ public class CircuitCanvas extends Pane {
      */
     public ContextMenuManager getContextMenuManager() {
         return contextMenuManager;
+    }
+
+    /**
+     * Gets the truth table manager.
+     * 
+     * @return the truth table manager
+     */
+    public TruthTableManager getTruthTableManager() {
+        return truthTableManager;
     }
 
     /**
