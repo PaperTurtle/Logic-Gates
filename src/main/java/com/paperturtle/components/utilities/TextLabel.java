@@ -234,6 +234,8 @@ public class TextLabel extends Group implements CircuitComponent {
         italicCheckBox.selectedProperty().addListener(previewChangeListener);
         underlineCheckBox.selectedProperty().addListener(previewChangeListener);
         strikethroughCheckBox.selectedProperty().addListener(previewChangeListener);
+        widthField.textProperty().addListener(previewChangeListener);
+        heightField.textProperty().addListener(previewChangeListener);
 
         backgroundColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             previewBackground.setFill(newVal);
@@ -372,11 +374,7 @@ public class TextLabel extends Group implements CircuitComponent {
                 double currentWidth = Double.parseDouble(widthField.getText());
                 double currentHeight = Double.parseDouble(heightField.getText());
 
-                if (textWidth > currentWidth) {
-                    currentWidth = textWidth;
-                    widthField.setText(String.valueOf(currentWidth));
-                }
-
+                textWidth = Math.max(textWidth, currentWidth);
                 textHeight = Math.max(textHeight, currentHeight);
             } catch (NumberFormatException e) {
             }
