@@ -25,7 +25,7 @@ public class ClipboardData {
     public String id;
 
     /**
-     * The type of the clipboard data.
+     * The type of the clipboard data (gate or textlabel).
      */
     public String type;
 
