@@ -220,4 +220,13 @@ public class PasteGatesCommand implements Command {
         globalOffsetX -= 30;
         globalOffsetY -= 30;
     }
+
+    /**
+     * Set global offset to 0.
+     */
+    public static void resetGlobalOffset() {
+        globalOffsetX = 0;
+        globalOffsetY = 0;
+    }
+
 }
