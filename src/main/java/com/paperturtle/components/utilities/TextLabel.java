@@ -17,6 +17,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
@@ -284,7 +285,11 @@ public class TextLabel extends Group implements CircuitComponent {
         grid.add(new Label("Preview:"), 0, 12);
         grid.add(previewBox, 1, 12);
 
-        dialog.getDialogPane().setContent(grid);
+        ScrollPane scrollPane = new ScrollPane(grid);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        dialog.getDialogPane().setContent(scrollPane);
         Platform.runLater(() -> textField.requestFocus());
 
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
