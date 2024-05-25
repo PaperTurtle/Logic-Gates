@@ -10,8 +10,6 @@
  * like
  * text labels that can be used to annotate and provide information within the
  * circuit
- * diagrams. Utility components enhance the usability and clarity of the
- * simulated circuits.
  * </p>
  */
 package com.paperturtle.components.utilities;
