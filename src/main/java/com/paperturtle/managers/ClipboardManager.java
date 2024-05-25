@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.paperturtle.commands.PasteGatesCommand;
+import com.paperturtle.commands.PasteLabelsCommand;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.gui.CircuitCanvas;
 
@@ -32,6 +35,11 @@ public class ClipboardManager {
      * The list of clipboard data representing the copied elements.
      */
     private List<ClipboardData> clipboard = new ArrayList<>();
+
+    /**
+     * The list of clipboard data representing the copied text labels.
+     */
+    private List<TextLabel> clipboardLabels = new ArrayList<>();
 
     /**
      * The x-offset for pasting the copied gates.
@@ -112,10 +120,15 @@ public class ClipboardManager {
         });
     }
 
+    public void copySelectedComponentsToClipboard() {
+        copySelectedGatesToClipboard();
+        copySelectedLabelsToClipboard();
+    }
+
     /**
      * Copies the selected gates to the clipboard.
      */
-    public void copySelectedGatesToClipboard() {
+    private void copySelectedGatesToClipboard() {
         clipboard.clear();
         canvas.getGateImageViews().entrySet().stream()
                 .filter(entry -> entry.getKey().getStyleClass().contains("selected"))
@@ -123,6 +136,18 @@ public class ClipboardManager {
                     LogicGate gate = entry.getValue();
                     clipboard.add(gate.getGateClipboardData());
                 });
+        PasteGatesCommand.resetGlobalOffset();
+    }
+
+    /**
+     * Copies the selected textlabels to the clipboard.
+     */
+    private void copySelectedLabelsToClipboard() {
+        clipboardLabels.clear();
+        canvas.getSelectedTextLabels().forEach(label -> {
+            clipboardLabels.add(label);
+        });
+        PasteLabelsCommand.resetGlobalOffset();
     }
 
     /**
@@ -132,5 +157,14 @@ public class ClipboardManager {
      */
     public List<ClipboardData> getClipboard() {
         return clipboard;
+    }
+
+    /**
+     * Gets the clipboard labels.
+     * 
+     * @return the list of TextLabel
+     */
+    public List<TextLabel> getClipboardLabels() {
+        return clipboardLabels;
     }
 }

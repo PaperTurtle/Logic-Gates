@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.paperturtle.commands.PasteGatesCommand;
+import com.paperturtle.commands.PasteLabelsCommand;
 import com.paperturtle.commands.RemoveSelectedGatesCommand;
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.KeyCombination;
@@ -74,7 +75,7 @@ public class KeyboardShortcutManager {
      * @param event the key event
      */
     private void copy(KeyEvent event) {
-        canvas.getClipboardManager().copySelectedGatesToClipboard();
+        canvas.getClipboardManager().copySelectedComponentsToClipboard();
     }
 
     /**
@@ -85,6 +86,9 @@ public class KeyboardShortcutManager {
     private void paste(KeyEvent event) {
         canvas.getCommandManager()
                 .executeCommand(new PasteGatesCommand(canvas, canvas.getClipboardManager().getClipboard(), 30, 30));
+        canvas.getCommandManager()
+                .executeCommand(
+                        new PasteLabelsCommand(canvas, canvas.getClipboardManager().getClipboardLabels(), 30, 30));
     }
 
     /**
