@@ -1,5 +1,7 @@
 package com.paperturtle.components.utilities;
 
+import java.util.List;
+
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.CircuitComponent;
 
@@ -110,6 +112,9 @@ public class TextLabel extends Group implements CircuitComponent {
         setupContextMenu();
     }
 
+    /**
+     * Updates the position of the text label within the background rectangle.
+     */
     public void updateTextPosition() {
         double textWidth = labelText.getBoundsInLocal().getWidth();
         double textHeight = labelText.getBoundsInLocal().getHeight();
@@ -159,48 +164,26 @@ public class TextLabel extends Group implements CircuitComponent {
         ButtonType cancelButtonType = new ButtonType("Cancel");
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, cancelButtonType, ButtonType.CLOSE);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        GridPane grid = createGridPane();
 
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setMinWidth(Region.USE_PREF_SIZE);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
-        grid.getColumnConstraints().addAll(col1, col2);
+        TextField textField = createTextField();
+        ColorPicker backgroundColorPicker = createColorPicker((Color) background.getFill());
+        ColorPicker textColorPicker = createColorPicker((Color) labelText.getFill());
 
-        TextField textField = new TextField(labelText.getText());
-        ColorPicker backgroundColorPicker = new ColorPicker((Color) background.getFill());
-        ColorPicker textColorPicker = new ColorPicker((Color) labelText.getFill());
-
-        backgroundColorPicker.setMinWidth(150);
-        textColorPicker.setMinWidth(150);
-        backgroundColorPicker.setMinHeight(30);
-        textColorPicker.setMinHeight(30);
+        configureColorPicker(backgroundColorPicker);
+        configureColorPicker(textColorPicker);
 
         RadioButton autoSizeButton = new RadioButton("Automatic size");
         fixedSizeButton = new RadioButton("Fixed size");
-        ToggleGroup sizeGroup = new ToggleGroup();
-        autoSizeButton.setToggleGroup(sizeGroup);
-        fixedSizeButton.setToggleGroup(sizeGroup);
+        ToggleGroup sizeGroup = createToggleGroup(autoSizeButton, fixedSizeButton);
 
-        ComboBox<String> fontPicker = new ComboBox<>();
-        fontPicker.getItems().addAll(Font.getFamilies());
-        fontPicker.setValue(labelText.getFont().getFamily());
+        ComboBox<String> fontPicker = createComboBox(Font.getFamilies(), labelText.getFont().getFamily());
+        ComboBox<String> alignmentComboBox = createComboBox(List.of("Left", "Center", "Right"), "Center");
 
-        ComboBox<String> alignmentComboBox = new ComboBox<>();
-        alignmentComboBox.getItems().addAll("Left", "Center", "Right");
-        alignmentComboBox.setValue("Center");
+        widthField = createTextField(String.valueOf(width));
+        heightField = createTextField(String.valueOf(height));
 
-        widthField = new TextField(String.valueOf(width));
-        heightField = new TextField(String.valueOf(height));
-
-        ComboBox<Integer> fontSizeComboBox = new ComboBox<>();
-        for (int i = 1; i <= 48; i++) {
-            fontSizeComboBox.getItems().add(i);
-        }
-        fontSizeComboBox.setValue((int) labelText.getFont().getSize());
+        ComboBox<Integer> fontSizeComboBox = createFontSizeComboBox();
 
         Label widthLabel = new Label("Width:");
         Label heightLabel = new Label("Height:");
@@ -210,34 +193,206 @@ public class TextLabel extends Group implements CircuitComponent {
         CheckBox underlineCheckBox = new CheckBox("Underline");
         CheckBox strikethroughCheckBox = new CheckBox("Strikethrough");
 
-        if (labelText.getFont().getStyle().contains("Bold")) {
-            boldCheckBox.setSelected(true);
-        }
-        if (labelText.getFont().getStyle().contains("Italic")) {
-            italicCheckBox.setSelected(true);
-        }
-        if (labelText.isUnderline()) {
-            underlineCheckBox.setSelected(true);
-        }
-        if (labelText.isStrikethrough()) {
-            strikethroughCheckBox.setSelected(true);
-        }
+        setCheckBoxStates(boldCheckBox, italicCheckBox, underlineCheckBox, strikethroughCheckBox);
 
-        if (isAutoSize) {
+        if (isAutoSize)
             autoSizeButton.setSelected(true);
-        }
 
-        Text previewText = new Text(labelText.getText());
-        previewText.setFill(labelText.getFill());
-        previewText.setFont(labelText.getFont());
-        previewText.setUnderline(labelText.isUnderline());
-        previewText.setStrikethrough(labelText.isStrikethrough());
-        Rectangle previewBackground = new Rectangle(width, height);
-        previewBackground.setFill(background.getFill());
-
+        Text previewText = createPreviewText();
+        Rectangle previewBackground = createPreviewBackground();
         StackPane previewBox = new StackPane(previewBackground, previewText);
 
-        ChangeListener<Object> previewChangeListener = (obs, oldVal, newVal) -> {
+        ChangeListener<Object> previewChangeListener = createPreviewChangeListener(
+                textField, fontPicker, boldCheckBox, italicCheckBox, underlineCheckBox,
+                strikethroughCheckBox, fontSizeComboBox, previewText, previewBackground);
+
+        addPreviewListeners(previewChangeListener, fontSizeComboBox, textField, fontPicker,
+                boldCheckBox, italicCheckBox, underlineCheckBox, strikethroughCheckBox,
+                widthField, heightField, backgroundColorPicker, textColorPicker, previewBackground, previewText);
+
+        addComponentsToGrid(grid, textField, backgroundColorPicker, textColorPicker, fontPicker,
+                fontSizeComboBox, boldCheckBox, italicCheckBox, underlineCheckBox,
+                strikethroughCheckBox, autoSizeButton, fixedSizeButton, widthLabel,
+                widthField, heightLabel, heightField, alignmentComboBox, previewBox);
+
+        ScrollPane scrollPane = new ScrollPane(grid);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        dialog.getDialogPane().setContent(scrollPane);
+        Platform.runLater(textField::requestFocus);
+
+        configureSizeToggle(sizeGroup, autoSizeButton, widthLabel, widthField, heightLabel, heightField, grid,
+                previewText, previewBackground);
+
+        dialog.setResultConverter(dialogButton -> handleSave(dialogButton, saveButtonType, textField, textColorPicker,
+                backgroundColorPicker, fontPicker, boldCheckBox, italicCheckBox,
+                underlineCheckBox, strikethroughCheckBox, fontSizeComboBox,
+                alignmentComboBox));
+
+        dialog.setOnCloseRequest(event -> dialog.setResult(null));
+        dialog.showAndWait();
+    }
+
+    /**
+     * Creates a GridPane for the edit dialog.
+     * 
+     * @return the GridPane for the edit dialog.
+     */
+    private GridPane createGridPane() {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(Region.USE_PREF_SIZE);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(col1, col2);
+        return grid;
+    }
+
+    /**
+     * Creates a TextField with the current label text.
+     * 
+     * @return the TextField with the current label text.
+     */
+    private TextField createTextField() {
+        return new TextField(labelText.getText());
+    }
+
+    /**
+     * Creates a TextField with the specified value.
+     * 
+     * @param value the value to set in the TextField.
+     * @return the TextField with the specified value.
+     */
+    private TextField createTextField(String value) {
+        return new TextField(value);
+    }
+
+    /**
+     * Creates a ColorPicker with the specified color.
+     * 
+     * @param color the color to set in the ColorPicker.
+     * @return the ColorPicker with the specified color.
+     */
+    private ColorPicker createColorPicker(Color color) {
+        return new ColorPicker(color);
+    }
+
+    /**
+     * Configures the ColorPicker with a minimum width and height.
+     * 
+     * @param colorPicker the ColorPicker to configure.
+     */
+    private void configureColorPicker(ColorPicker colorPicker) {
+        colorPicker.setMinWidth(150);
+        colorPicker.setMinHeight(30);
+    }
+
+    /**
+     * Creates a ToggleGroup for the specified RadioButtons.
+     * 
+     * @param buttons the RadioButtons to add to the ToggleGroup.
+     */
+    private ToggleGroup createToggleGroup(RadioButton... buttons) {
+        ToggleGroup group = new ToggleGroup();
+        for (RadioButton button : buttons) {
+            button.setToggleGroup(group);
+        }
+        return group;
+    }
+
+    /**
+     * Creates a ComboBox with the specified items and value.
+     * 
+     * @param items the items to add to the ComboBox.
+     * @param value the value to set in the ComboBox.
+     */
+    private ComboBox<String> createComboBox(List<String> items, String value) {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.getItems().addAll(items);
+        comboBox.setValue(value);
+        return comboBox;
+    }
+
+    /**
+     * Creates a ComboBox with font sizes from 1 to 48.
+     * 
+     * @return the ComboBox with font sizes from 1 to 48.
+     */
+    private ComboBox<Integer> createFontSizeComboBox() {
+        ComboBox<Integer> comboBox = new ComboBox<>();
+        for (int i = 1; i <= 48; i++) {
+            comboBox.getItems().add(i);
+        }
+        comboBox.setValue((int) labelText.getFont().getSize());
+        return comboBox;
+    }
+
+    /**
+     * Sets the states of the CheckBoxes based on the current font style.
+     * 
+     * @param bold          the CheckBox for bold.
+     * @param italic        the CheckBox for italic.
+     * @param underline     the CheckBox for underline.
+     * @param strikethrough the CheckBox for strikethrough.
+     */
+    private void setCheckBoxStates(CheckBox bold, CheckBox italic, CheckBox underline, CheckBox strikethrough) {
+        if (labelText.getFont().getStyle().contains("Bold"))
+            bold.setSelected(true);
+        if (labelText.getFont().getStyle().contains("Italic"))
+            italic.setSelected(true);
+        if (labelText.isUnderline())
+            underline.setSelected(true);
+        if (labelText.isStrikethrough())
+            strikethrough.setSelected(true);
+    }
+
+    /**
+     * Creates a Text object with the current label text.
+     * 
+     * @return the Text object with the current label text.
+     */
+    private Text createPreviewText() {
+        Text text = new Text(labelText.getText());
+        text.setFill(labelText.getFill());
+        text.setFont(labelText.getFont());
+        text.setUnderline(labelText.isUnderline());
+        text.setStrikethrough(labelText.isStrikethrough());
+        return text;
+    }
+
+    /**
+     * Creates a Rectangle with the current background color.
+     * 
+     * @return the Rectangle with the current background color.
+     */
+    private Rectangle createPreviewBackground() {
+        Rectangle rectangle = new Rectangle(width, height);
+        rectangle.setFill(background.getFill());
+        return rectangle;
+    }
+
+    /**
+     * Creates a ChangeListener for updating the preview text and background.
+     * 
+     * @param textField             the TextField for the text.
+     * @param fontPicker            the ComboBox for the font.
+     * @param boldCheckBox          the CheckBox for bold.
+     * @param italicCheckBox        the CheckBox for italic.
+     * @param underlineCheckBox     the CheckBox for underline.
+     * @param strikethroughCheckBox the CheckBox for strikethrough.
+     * @param fontSizeComboBox      the ComboBox for the font size.
+     * @param previewText           the preview Text.
+     * @param previewBackground     the preview Rectangle.
+     * @return the ChangeListener for updating the preview text and background.
+     */
+    private ChangeListener<Object> createPreviewChangeListener(TextField textField, ComboBox<String> fontPicker,
+            CheckBox boldCheckBox, CheckBox italicCheckBox, CheckBox underlineCheckBox, CheckBox strikethroughCheckBox,
+            ComboBox<Integer> fontSizeComboBox, Text previewText, Rectangle previewBackground) {
+        return (obs, oldVal, newVal) -> {
             previewText.setText(textField.getText());
             Font previewFont = Font.font(
                     fontPicker.getValue(),
@@ -249,7 +404,32 @@ public class TextLabel extends Group implements CircuitComponent {
             previewText.setStrikethrough(strikethroughCheckBox.isSelected());
             updatePreviewSize(previewText, previewBackground);
         };
+    }
 
+    /**
+     * Adds listeners to the components that update the preview text and background.
+     * 
+     * @param previewChangeListener the ChangeListener for updating the preview text
+     *                              and background.
+     * @param fontSizeComboBox      the ComboBox for the font size.
+     * @param textField             the TextField for the text.
+     * @param fontPicker            the ComboBox for the font.
+     * @param boldCheckBox          the CheckBox for bold.
+     * @param italicCheckBox        the CheckBox for italic.
+     * @param underlineCheckBox     the CheckBox for underline.
+     * @param strikethroughCheckBox the CheckBox for strikethrough.
+     * @param widthField            the TextField for the width.
+     * @param heightField           the TextField for the height.
+     * @param backgroundColorPicker the ColorPicker for the background color.
+     * @param textColorPicker       the ColorPicker for the text color.
+     * @param previewBackground     the preview Rectangle.
+     * @param previewText           the preview Text.
+     */
+    private void addPreviewListeners(ChangeListener<Object> previewChangeListener, ComboBox<Integer> fontSizeComboBox,
+            TextField textField, ComboBox<String> fontPicker, CheckBox boldCheckBox, CheckBox italicCheckBox,
+            CheckBox underlineCheckBox, CheckBox strikethroughCheckBox, TextField widthField, TextField heightField,
+            ColorPicker backgroundColorPicker, ColorPicker textColorPicker, Rectangle previewBackground,
+            Text previewText) {
         fontSizeComboBox.valueProperty().addListener(previewChangeListener);
         textField.textProperty().addListener(previewChangeListener);
         fontPicker.valueProperty().addListener(previewChangeListener);
@@ -259,15 +439,41 @@ public class TextLabel extends Group implements CircuitComponent {
         strikethroughCheckBox.selectedProperty().addListener(previewChangeListener);
         widthField.textProperty().addListener(previewChangeListener);
         heightField.textProperty().addListener(previewChangeListener);
-
         backgroundColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             previewBackground.setFill(newVal);
         });
-
         textColorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             previewText.setFill(newVal);
         });
+    }
 
+    /**
+     * Adds components to the GridPane.
+     * 
+     * @param grid                  the GridPane to add components to.
+     * @param textField             the TextField for the text.
+     * @param backgroundColorPicker the ColorPicker for the background color.
+     * @param textColorPicker       the ColorPicker for the text color.
+     * @param fontPicker            the ComboBox for the font.
+     * @param fontSizeComboBox      the ComboBox for the font size.
+     * @param boldCheckBox          the CheckBox for bold.
+     * @param italicCheckBox        the CheckBox for italic.
+     * @param underlineCheckBox     the CheckBox for underline.
+     * @param strikethroughCheckBox the CheckBox for strikethrough.
+     * @param autoSizeButton        the RadioButton for automatic size.
+     * @param fixedSizeButton       the RadioButton for fixed size.
+     * @param widthLabel            the Label for the width.
+     * @param widthField            the TextField for the width.
+     * @param heightLabel           the Label for the height.
+     * @param heightField           the TextField for the height.
+     * @param alignmentComboBox     the ComboBox for the alignment.
+     * @param previewBox            the StackPane for the preview.
+     */
+    private void addComponentsToGrid(GridPane grid, TextField textField, ColorPicker backgroundColorPicker,
+            ColorPicker textColorPicker, ComboBox<String> fontPicker, ComboBox<Integer> fontSizeComboBox,
+            CheckBox boldCheckBox, CheckBox italicCheckBox, CheckBox underlineCheckBox, CheckBox strikethroughCheckBox,
+            RadioButton autoSizeButton, RadioButton fixedSizeButton, Label widthLabel, TextField widthField,
+            Label heightLabel, TextField heightField, ComboBox<String> alignmentComboBox, StackPane previewBox) {
         grid.add(new Label("Text:"), 0, 0);
         grid.add(textField, 1, 0);
         grid.add(new Label("Background Color:"), 0, 1);
@@ -298,14 +504,24 @@ public class TextLabel extends Group implements CircuitComponent {
         grid.add(alignmentComboBox, 1, 11);
         grid.add(new Label("Preview:"), 0, 12);
         grid.add(previewBox, 1, 12);
+    }
 
-        ScrollPane scrollPane = new ScrollPane(grid);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-
-        dialog.getDialogPane().setContent(scrollPane);
-        Platform.runLater(() -> textField.requestFocus());
-
+    /**
+     * Configures the size toggle for the TextLabel.
+     * 
+     * @param sizeGroup         the ToggleGroup for the size buttons.
+     * @param autoSizeButton    the RadioButton for automatic size.
+     * @param widthLabel        the Label for the width.
+     * @param widthField        the TextField for the width.
+     * @param heightLabel       the Label for the height.
+     * @param heightField       the TextField for the height.
+     * @param grid              the GridPane for the edit dialog.
+     * @param previewText       the preview Text.
+     * @param previewBackground the preview Rectangle.
+     */
+    private void configureSizeToggle(ToggleGroup sizeGroup, RadioButton autoSizeButton, Label widthLabel,
+            TextField widthField,
+            Label heightLabel, TextField heightField, GridPane grid, Text previewText, Rectangle previewBackground) {
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == autoSizeButton) {
                 grid.getChildren().removeAll(widthLabel, widthField, heightLabel, heightField);
@@ -326,64 +542,77 @@ public class TextLabel extends Group implements CircuitComponent {
                 updatePreviewSize(previewText, previewBackground);
             }
         });
+    }
 
-        widthField.textProperty().addListener(previewChangeListener);
-        heightField.textProperty().addListener(previewChangeListener);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                labelText.setText(textField.getText());
-                labelText.setFill(textColorPicker.getValue());
-                background.setFill(backgroundColorPicker.getValue());
-                Font newFont = Font.font(fontPicker.getValue(),
-                        boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
-                        italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
-                        fontSizeComboBox.getValue());
-                labelText.setFont(newFont);
-                labelText.setUnderline(underlineCheckBox.isSelected());
-                labelText.setStrikethrough(strikethroughCheckBox.isSelected());
-                if (fixedSizeButton.isSelected()) {
-                    try {
-                        width = Double.parseDouble(widthField.getText());
-                        height = Double.parseDouble(heightField.getText());
-                        isAutoSize = false;
-                    } catch (NumberFormatException e) {
-                    }
-                } else {
-                    width = labelText.getBoundsInLocal().getWidth() + 20;
-                    height = labelText.getBoundsInLocal().getHeight() + 20;
-                    isAutoSize = true;
+    /**
+     * Handles the save action for the TextLabel.
+     * 
+     * @param dialogButton          the ButtonType of the dialog.
+     * @param saveButtonType        the ButtonType for saving.
+     * @param textField             the TextField for the text.
+     * @param textColorPicker       the ColorPicker for the text color.
+     * @param backgroundColorPicker the ColorPicker for the background color.
+     * @param fontPicker            the ComboBox for the font.
+     * @param boldCheckBox          the CheckBox for bold.
+     * @param italicCheckBox        the CheckBox for italic.
+     * @param underlineCheckBox     the CheckBox for underline.
+     * @param strikethroughCheckBox the CheckBox for strikethrough.
+     * @param fontSizeComboBox      the ComboBox for the font size.
+     * @param alignmentComboBox     the ComboBox for the alignment.
+     * @return null.
+     */
+    private Void handleSave(ButtonType dialogButton, ButtonType saveButtonType, TextField textField,
+            ColorPicker textColorPicker,
+            ColorPicker backgroundColorPicker, ComboBox<String> fontPicker, CheckBox boldCheckBox,
+            CheckBox italicCheckBox,
+            CheckBox underlineCheckBox, CheckBox strikethroughCheckBox, ComboBox<Integer> fontSizeComboBox,
+            ComboBox<String> alignmentComboBox) {
+        if (dialogButton == saveButtonType) {
+            labelText.setText(textField.getText());
+            labelText.setFill(textColorPicker.getValue());
+            background.setFill(backgroundColorPicker.getValue());
+            Font newFont = Font.font(fontPicker.getValue(),
+                    boldCheckBox.isSelected() ? FontWeight.BOLD : FontWeight.NORMAL,
+                    italicCheckBox.isSelected() ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    fontSizeComboBox.getValue());
+            labelText.setFont(newFont);
+            labelText.setUnderline(underlineCheckBox.isSelected());
+            labelText.setStrikethrough(strikethroughCheckBox.isSelected());
+            if (fixedSizeButton.isSelected()) {
+                try {
+                    width = Double.parseDouble(widthField.getText());
+                    height = Double.parseDouble(heightField.getText());
+                    isAutoSize = false;
+                } catch (NumberFormatException e) {
                 }
-
-                background.setWidth(width);
-                background.setHeight(height);
-
-                double padding = 10;
-                switch (alignmentComboBox.getValue()) {
-                    case "Left":
-                        labelText.setTextAlignment(TextAlignment.LEFT);
-                        labelText.setLayoutX(padding);
-                        break;
-                    case "Center":
-                        labelText.setTextAlignment(TextAlignment.CENTER);
-                        labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
-                        break;
-                    case "Right":
-                        labelText.setTextAlignment(TextAlignment.RIGHT);
-                        labelText.setLayoutX(width - labelText.getBoundsInLocal().getWidth() - padding);
-                        break;
-                }
-
-                labelText.setLayoutY((height / 2) + (labelText.getBoundsInLocal().getHeight()) / 4);
+            } else {
+                width = labelText.getBoundsInLocal().getWidth() + 20;
+                height = labelText.getBoundsInLocal().getHeight() + 20;
+                isAutoSize = true;
             }
-            return null;
-        });
 
-        dialog.setOnCloseRequest(event -> {
-            dialog.setResult(null);
-        });
+            background.setWidth(width);
+            background.setHeight(height);
 
-        dialog.showAndWait();
+            double padding = 10;
+            switch (alignmentComboBox.getValue()) {
+                case "Left":
+                    labelText.setTextAlignment(TextAlignment.LEFT);
+                    labelText.setLayoutX(padding);
+                    break;
+                case "Center":
+                    labelText.setTextAlignment(TextAlignment.CENTER);
+                    labelText.setLayoutX((width - labelText.getBoundsInLocal().getWidth()) / 2);
+                    break;
+                case "Right":
+                    labelText.setTextAlignment(TextAlignment.RIGHT);
+                    labelText.setLayoutX(width - labelText.getBoundsInLocal().getWidth() - padding);
+                    break;
+            }
+
+            labelText.setLayoutY((height / 2) + (labelText.getBoundsInLocal().getHeight()) / 4);
+        }
+        return null;
     }
 
     /**
