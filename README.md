@@ -5,6 +5,8 @@
 
 This project is a fully-fledged logic gates simulator designed to simulate the behavior of various logic gates. With this simulator, you can create, save, and open circuits, place gates, and connect them to observe their functionality.
 
+![grafik](https://github.com/PaperTurtle/Logic-Gates/assets/68080844/5f24dd1c-af8c-4df5-aa09-cb0f73174d03)
+
 ## 📚 Table of Contents
 
 -  [📚 Table of Contents](#-table-of-contents)
