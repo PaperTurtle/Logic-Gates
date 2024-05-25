@@ -374,6 +374,11 @@ public class TextLabel extends Group implements CircuitComponent {
                 double currentWidth = Double.parseDouble(widthField.getText());
                 double currentHeight = Double.parseDouble(heightField.getText());
 
+                if (textWidth > currentWidth) {
+                    currentWidth = textWidth;
+                    widthField.setText(String.valueOf(currentWidth));
+                }
+
                 textWidth = Math.max(textWidth, currentWidth);
                 textHeight = Math.max(textHeight, currentHeight);
             } catch (NumberFormatException e) {
