@@ -29,7 +29,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 /**
@@ -161,9 +164,20 @@ public class TextLabel extends Group implements CircuitComponent {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(Region.USE_PREF_SIZE);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(col1, col2);
+
         TextField textField = new TextField(labelText.getText());
         ColorPicker backgroundColorPicker = new ColorPicker((Color) background.getFill());
         ColorPicker textColorPicker = new ColorPicker((Color) labelText.getFill());
+
+        backgroundColorPicker.setMinWidth(150);
+        textColorPicker.setMinWidth(150);
+        backgroundColorPicker.setMinHeight(30);
+        textColorPicker.setMinHeight(30);
 
         RadioButton autoSizeButton = new RadioButton("Automatic size");
         fixedSizeButton = new RadioButton("Fixed size");
