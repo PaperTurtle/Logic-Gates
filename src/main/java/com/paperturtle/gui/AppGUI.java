@@ -207,7 +207,7 @@ public class AppGUI {
 
         undoItem.setOnAction(e -> app.getCircuitCanvas().getCommandManager().undo());
         redoItem.setOnAction(e -> app.getCircuitCanvas().getCommandManager().redo());
-        copyItem.setOnAction(e -> app.getCircuitCanvas().getClipboardManager().copySelectedGatesToClipboard());
+        copyItem.setOnAction(e -> app.getCircuitCanvas().getClipboardManager().copySelectedComponentsToClipboard());
         pasteItem.setOnAction(e -> app.getCircuitCanvas().getClipboardManager().pasteGatesFromClipboard());
         deleteItem.setOnAction(e -> app.getCircuitCanvas().getGateManager().removeSelectedGates());
 
