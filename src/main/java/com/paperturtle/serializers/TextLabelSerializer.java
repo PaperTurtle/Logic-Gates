@@ -57,6 +57,7 @@ public class TextLabelSerializer implements JsonSerializer<TextLabel> {
         data.addProperty("isItalic", src.getFontPosture() == FontPosture.ITALIC);
         data.addProperty("isUnderline", src.isUnderline());
         data.addProperty("isStrikethrough", src.isStrikethrough());
+        data.addProperty("isAutoSize", src.isAutoSize());
 
         jsonObject.add("data", data);
         return jsonObject;

@@ -62,12 +62,14 @@ public class TextLabelDeserializer implements JsonDeserializer<TextLabel> {
         boolean isItalic = jsonObject.get("isItalic").getAsBoolean();
         boolean isUnderline = jsonObject.get("isUnderline").getAsBoolean();
         boolean isStrikethrough = jsonObject.get("isStrikethrough").getAsBoolean();
+        boolean isAutoSize = jsonObject.get("isAutoSize").getAsBoolean();
 
         FontWeight fontWeight = isBold ? FontWeight.BOLD : FontWeight.NORMAL;
         FontPosture fontPosture = isItalic ? FontPosture.ITALIC : FontPosture.REGULAR;
         textLabel.setFont(Font.font(textLabel.getFontFamily(), fontWeight, fontPosture, textLabel.getFontSize()));
         textLabel.setUnderline(isUnderline);
         textLabel.setStrikethrough(isStrikethrough);
+        textLabel.setAutoSize(isAutoSize);
 
         textLabel.updateTextPosition();
         return textLabel;
