@@ -537,6 +537,14 @@ public class TextLabel extends Group implements CircuitComponent {
         });
     }
 
+    /**
+     * Adds a node to the GridPane if it is not already present.
+     * 
+     * @param grid the GridPane to add the node to.
+     * @param node the node to add.
+     * @param col  the column to add the node to.
+     * @param row  the row to add the node to.
+     */
     private void addIfNotPresent(GridPane grid, Node node, int col, int row) {
         if (!grid.getChildren().contains(node)) {
             grid.add(node, col, row);
