@@ -96,8 +96,6 @@ public class PasteLabelsCommand implements Command {
 
     /**
      * Creates logic gates from the clipboard data and adds them to the canvas.
-     * 
-     * @return a map of the created gates, with the gate ID as the key
      */
     private void createLabels() {
         clipboardData.forEach(originalLabel -> {
@@ -153,6 +151,9 @@ public class PasteLabelsCommand implements Command {
 
     /**
      * Sets the global offset for pasting gates and connections.
+     * 
+     * @param x the x-coordinate offset
+     * @param y the y-coordinate offset
      */
     public static void setGlobalOffset(double x, double y) {
         globalOffsetX = x;

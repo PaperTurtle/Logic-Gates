@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -295,6 +296,8 @@ public class TextLabel extends Group implements CircuitComponent {
      * Creates a ToggleGroup for the specified RadioButtons.
      * 
      * @param buttons the RadioButtons to add to the ToggleGroup.
+     * 
+     * @return the ToggleGroup with the specified RadioButtons.
      */
     private ToggleGroup createToggleGroup(RadioButton... buttons) {
         ToggleGroup group = new ToggleGroup();
@@ -309,6 +312,8 @@ public class TextLabel extends Group implements CircuitComponent {
      * 
      * @param items the items to add to the ComboBox.
      * @param value the value to set in the ComboBox.
+     * 
+     * @return the ComboBox with the specified items and value.
      */
     private ComboBox<String> createComboBox(List<String> items, String value) {
         ComboBox<String> comboBox = new ComboBox<>();
@@ -474,36 +479,33 @@ public class TextLabel extends Group implements CircuitComponent {
             CheckBox boldCheckBox, CheckBox italicCheckBox, CheckBox underlineCheckBox, CheckBox strikethroughCheckBox,
             RadioButton autoSizeButton, RadioButton fixedSizeButton, Label widthLabel, TextField widthField,
             Label heightLabel, TextField heightField, ComboBox<String> alignmentComboBox, StackPane previewBox) {
-        grid.add(new Label("Text:"), 0, 0);
-        grid.add(textField, 1, 0);
-        grid.add(new Label("Background Color:"), 0, 1);
-        grid.add(backgroundColorPicker, 1, 1);
-        grid.add(new Label("Text Color:"), 0, 2);
-        grid.add(textColorPicker, 1, 2);
-        grid.add(new Label("Font:"), 0, 3);
-        grid.add(fontPicker, 1, 3);
-        grid.add(new Label("Font size:"), 0, 4);
-        grid.add(fontSizeComboBox, 1, 4);
-        grid.add(boldCheckBox, 0, 5);
-        grid.add(italicCheckBox, 1, 5);
-        grid.add(underlineCheckBox, 0, 6);
-        grid.add(strikethroughCheckBox, 1, 6);
-        grid.add(new Label("Size:"), 0, 7);
-        grid.add(autoSizeButton, 1, 7);
-        grid.add(fixedSizeButton, 1, 8);
+
+        int row = 0;
+        addRowToGrid(grid, "Text:", textField, row++);
+        addRowToGrid(grid, "Background Color:", backgroundColorPicker, row++);
+        addRowToGrid(grid, "Text Color:", textColorPicker, row++);
+        addRowToGrid(grid, "Font:", fontPicker, row++);
+        addRowToGrid(grid, "Font size:", fontSizeComboBox, row++);
+        addRowToGrid(grid, "Bold:", boldCheckBox, row++);
+        addRowToGrid(grid, "Italic:", italicCheckBox, row++);
+        addRowToGrid(grid, "Underline:", underlineCheckBox, row++);
+        addRowToGrid(grid, "Strikethrough:", strikethroughCheckBox, row++);
+        addRowToGrid(grid, "Size:", autoSizeButton, row++);
+        addRowToGrid(grid, "", fixedSizeButton, row++);
 
         if (!isAutoSize) {
             fixedSizeButton.setSelected(true);
-            grid.add(widthLabel, 0, 9);
-            grid.add(widthField, 1, 9);
-            grid.add(heightLabel, 0, 10);
-            grid.add(heightField, 1, 10);
+            addRowToGrid(grid, "Width:", widthField, row++);
+            addRowToGrid(grid, "Height:", heightField, row++);
         }
 
-        grid.add(new Label("Alignment:"), 0, 11);
-        grid.add(alignmentComboBox, 1, 11);
-        grid.add(new Label("Preview:"), 0, 12);
-        grid.add(previewBox, 1, 12);
+        addRowToGrid(grid, "Alignment:", alignmentComboBox, row++);
+        addRowToGrid(grid, "Preview:", previewBox, row);
+    }
+
+    private void addRowToGrid(GridPane grid, String labelText, Node control, int row) {
+        grid.add(new Label(labelText), 0, row);
+        grid.add(control, 1, row);
     }
 
     /**
@@ -520,28 +522,25 @@ public class TextLabel extends Group implements CircuitComponent {
      * @param previewBackground the preview Rectangle.
      */
     private void configureSizeToggle(ToggleGroup sizeGroup, RadioButton autoSizeButton, Label widthLabel,
-            TextField widthField,
-            Label heightLabel, TextField heightField, GridPane grid, Text previewText, Rectangle previewBackground) {
+            TextField widthField, Label heightLabel, TextField heightField, GridPane grid, Text previewText,
+            Rectangle previewBackground) {
         sizeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == autoSizeButton) {
                 grid.getChildren().removeAll(widthLabel, widthField, heightLabel, heightField);
-                updatePreviewSize(previewText, previewBackground);
             } else {
-                if (!grid.getChildren().contains(widthLabel)) {
-                    grid.add(widthLabel, 0, 9);
-                }
-                if (!grid.getChildren().contains(widthField)) {
-                    grid.add(widthField, 1, 9);
-                }
-                if (!grid.getChildren().contains(heightLabel)) {
-                    grid.add(heightLabel, 0, 10);
-                }
-                if (!grid.getChildren().contains(heightField)) {
-                    grid.add(heightField, 1, 10);
-                }
-                updatePreviewSize(previewText, previewBackground);
+                addIfNotPresent(grid, widthLabel, 0, 9);
+                addIfNotPresent(grid, widthField, 1, 9);
+                addIfNotPresent(grid, heightLabel, 0, 10);
+                addIfNotPresent(grid, heightField, 1, 10);
             }
+            updatePreviewSize(previewText, previewBackground);
         });
+    }
+
+    private void addIfNotPresent(GridPane grid, Node node, int col, int row) {
+        if (!grid.getChildren().contains(node)) {
+            grid.add(node, col, row);
+        }
     }
 
     /**
@@ -684,6 +683,10 @@ public class TextLabel extends Group implements CircuitComponent {
         return labelText.getText();
     }
 
+    public Text getLabelText() {
+        return labelText;
+    }
+
     /**
      * Sets the label of the TextLabel.
      * 
@@ -796,6 +799,13 @@ public class TextLabel extends Group implements CircuitComponent {
     }
 
     /**
+     * Get background of the TextLabel.
+     */
+    public Rectangle getBackground() {
+        return background;
+    }
+
+    /**
      * Sets the background color of the TextLabel.
      * 
      * @param color the new background color for the TextLabel.
@@ -880,6 +890,13 @@ public class TextLabel extends Group implements CircuitComponent {
     }
 
     /**
+     * Gets the font of the label text.
+     */
+    public Font getFont() {
+        return labelText.getFont();
+    }
+
+    /**
      * Sets the font of the label text.
      * 
      * @param font The new font to set.
@@ -906,5 +923,21 @@ public class TextLabel extends Group implements CircuitComponent {
      */
     public void setStrikethrough(boolean isStrikethrough) {
         labelText.setStrikethrough(isStrikethrough);
+    }
+
+    /**
+     * Gets the text of the label.
+     */
+    public String getText() {
+        return labelText.getText();
+    }
+
+    /**
+     * Sets the text of the label.
+     * 
+     * @param text The new text to set.
+     */
+    public void setText(String text) {
+        labelText.setText(text);
     }
 }
