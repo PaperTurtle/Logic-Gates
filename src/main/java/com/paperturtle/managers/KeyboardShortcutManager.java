@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.paperturtle.commands.PasteComponentsCommand;
 import com.paperturtle.commands.PasteGatesCommand;
 import com.paperturtle.commands.PasteLabelsCommand;
 import com.paperturtle.commands.RemoveSelectedComponentsCommand;
@@ -89,6 +90,9 @@ public class KeyboardShortcutManager {
         canvas.getCommandManager()
                 .executeCommand(
                         new PasteLabelsCommand(canvas, canvas.getClipboardManager().getClipboardLabels(), 30, 30));
+
+        canvas.getCommandManager()
+                .executeCommand(new PasteComponentsCommand(canvas));
     }
 
     /**

@@ -90,14 +90,12 @@ public class PasteGatesCommand implements Command {
         canvas.getGateManager().deselectAllGates();
         Map<String, LogicGate> createdGates = createGates();
 
-        for (ClipboardData data : clipboardData) {
+        clipboardData.forEach(data -> {
             LogicGate sourceGate = createdGates.get(data.getId());
             if (sourceGate != null) {
-                for (ClipboardData.ConnectionData output : data.getOutputs()) {
-                    createConnection(createdGates, sourceGate, output);
-                }
+                data.getOutputs().forEach(output -> createConnection(createdGates, sourceGate, output));
             }
-        }
+        });
 
         incrementGlobalOffset();
     }
