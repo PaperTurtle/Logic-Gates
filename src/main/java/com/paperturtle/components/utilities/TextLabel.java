@@ -2,6 +2,7 @@ package com.paperturtle.components.utilities;
 
 import java.util.List;
 
+import com.paperturtle.commands.RemoveLabelCommand;
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.CircuitComponent;
 
@@ -141,7 +142,11 @@ public class TextLabel extends Group implements CircuitComponent {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editItem = new MenuItem("Edit");
         MenuItem removeItem = new MenuItem("Remove");
-        removeItem.setOnAction(e -> removeSelf());
+        removeItem.setOnAction(e -> {
+            if (this.getParent() instanceof CircuitCanvas parent) {
+                parent.getCommandManager().executeCommand(new RemoveLabelCommand(parent, this));
+            }
+        });
         editItem.setOnAction(e -> showEditDialog());
         contextMenu.getItems().addAll(editItem, removeItem);
 
