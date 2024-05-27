@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.paperturtle.App;
@@ -58,6 +59,27 @@ public class AppGUI {
      * The primary stage of the application.
      */
     private final Stage stage;
+
+    /**
+     * The main layout container for the application's user interface.
+     */
+    private static final Map<String, String> TOOLTIP_TEXT_MAP = Map.ofEntries(
+            Map.entry("AND", "AND Gate"),
+            Map.entry("OR", "OR Gate"),
+            Map.entry("NOT", "NOT Gate"),
+            Map.entry("BUFFER", "BUFFER Gate"),
+            Map.entry("NAND", "NAND Gate"),
+            Map.entry("NOR", "NOR Gate"),
+            Map.entry("XOR", "XOR Gate"),
+            Map.entry("XNOR", "XNOR Gate"),
+            Map.entry("TRISTATE", "TRISTATE Gate"),
+            Map.entry("SWITCH", "Switch"),
+            Map.entry("CLOCK", "Clock"),
+            Map.entry("HIGHCONSTANT", "High Constant"),
+            Map.entry("LOWCONSTANT", "Low Constant"),
+            Map.entry("LIGHTBULB", "Lightbulb"),
+            Map.entry("FOURBITDIGIT", "Four-bit Digit Display"),
+            Map.entry("TextLabel", "Text Label"));
 
     /**
      * Constructs an AppGUI for the specified application and stage.
@@ -452,42 +474,7 @@ public class AppGUI {
      * @return the tooltip text for the specified gate type
      */
     private String getTooltipText(String type) {
-        switch (type) {
-            case "AND":
-                return "AND Gate";
-            case "OR":
-                return "OR Gate";
-            case "NOT":
-                return "NOT Gate";
-            case "BUFFER":
-                return "BUFFER Gate";
-            case "NAND":
-                return "NAND Gate";
-            case "NOR":
-                return "NOR Gate";
-            case "XOR":
-                return "XOR Gate";
-            case "XNOR":
-                return "XNOR Gate";
-            case "TRISTATE":
-                return "TRISTATE Gate";
-            case "SWITCH":
-                return "Switch";
-            case "CLOCK":
-                return "Clock";
-            case "HIGHCONSTANT":
-                return "High Constant";
-            case "LOWCONSTANT":
-                return "Low Constant";
-            case "LIGHTBULB":
-                return "Lightbulb";
-            case "FOURBITDIGIT":
-                return "Four-bit Digit Display";
-            case "TextLabel":
-                return "Text Label";
-            default:
-                return type + " Component";
-        }
+        return TOOLTIP_TEXT_MAP.getOrDefault(type, type + " Component");
     }
 
     /**
