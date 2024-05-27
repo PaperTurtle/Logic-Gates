@@ -536,6 +536,7 @@ public class AppGUI {
                 app.getCircuitCanvas().getCommandManager().clearStacks();
                 List<CircuitComponent> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
                 app.getCircuitCanvas().loadComponents(gatesData);
+                stage.setTitle("Logic Gates Simulator - " + file.getName());
             } catch (IOException | IllegalArgumentException e) {
                 showAlert("Error", "Failed to load the file: " + e.getMessage(), Alert.AlertType.ERROR);
             }
