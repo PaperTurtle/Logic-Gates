@@ -132,6 +132,21 @@ public class CircuitCanvas extends Pane {
     private TruthTableManager truthTableManager;
 
     /**
+     * The size of the grid cells.
+     */
+    private static final int GRID_SIZE = 20;
+
+    /**
+     * Indicates whether the grid is visible.
+     */
+    private boolean isGridVisible = true;
+
+    /**
+     * A list of lines representing the grid.
+     */
+    private List<Line> gridLines = new ArrayList<>();
+
+    /**
      * Constructs a CircuitCanvas with the specified width, height, and scroll pane.
      * 
      * @param width  the width of the canvas
@@ -152,8 +167,41 @@ public class CircuitCanvas extends Pane {
         this.contextMenuManager = new ContextMenuManager(this);
         this.truthTableManager = new TruthTableManager(this);
 
+        drawGrid();
+        toggleGridVisibility();
+
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, interactionManager::handleCanvasClick);
         new KeyboardShortcutManager(this);
+    }
+
+    /**
+     * Draws the grid on the canvas.
+     */
+    private void drawGrid() {
+        double width = getPrefWidth();
+        double height = getPrefHeight();
+
+        for (double i = 0; i < width; i += GRID_SIZE) {
+            Line verticalLine = new Line(i, 0, i, height);
+            verticalLine.setStroke(Color.LIGHTGRAY);
+            gridLines.add(verticalLine);
+            getChildren().add(verticalLine);
+        }
+
+        for (double i = 0; i < height; i += GRID_SIZE) {
+            Line horizontalLine = new Line(0, i, width, i);
+            horizontalLine.setStroke(Color.LIGHTGRAY);
+            gridLines.add(horizontalLine);
+            getChildren().add(horizontalLine);
+        }
+    }
+
+    /**
+     * Toggles the visibility of the grid.
+     */
+    public void toggleGridVisibility() {
+        isGridVisible = !isGridVisible;
+        gridLines.forEach(line -> line.setVisible(isGridVisible));
     }
 
     /**
@@ -242,19 +290,17 @@ public class CircuitCanvas extends Pane {
         Map<String, LogicGate> createdGates = new HashMap<>();
 
         components.forEach(component -> {
-            if (component instanceof GateData) {
-                createAndDrawGate((GateData) component, createdGates);
-            }
-        });
-
-        components.forEach(component -> {
-            if (component instanceof GateData) {
-                connectGateOutputs((GateData) component, createdGates);
-            } else if (component instanceof TextLabel) {
-                TextLabel textLabel = (TextLabel) component;
+            if (component instanceof GateData gateData) {
+                createAndDrawGate(gateData, createdGates);
+            } else if (component instanceof TextLabel textLabel) {
                 drawTextLabel(textLabel, textLabel.getLayoutX(), textLabel.getLayoutY());
             }
         });
+
+        components.stream()
+                .filter(GateData.class::isInstance)
+                .map(GateData.class::cast)
+                .forEach(gateData -> connectGateOutputs(gateData, createdGates));
     }
 
     /**
