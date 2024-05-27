@@ -6,10 +6,12 @@ package com.paperturtle.commands;
  * 
  * @see AddConnectionCommand
  * @see AddGateCommand
+ * @see AddLabelCommand
  * @see PasteGatesCommand
  * @see RemoveConnectionCommand
  * @see RemoveGateCommand
- * @see RemoveSelectedGatesCommand
+ * @see RemoveLabelCommand
+ * @see RemoveSelectedComponentsCommand
  * @see ToggleSwitchStateCommand
  * 
  * @author Seweryn Czabanowski
