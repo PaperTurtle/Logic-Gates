@@ -320,6 +320,7 @@ public class CircuitCanvas extends Pane {
 
             sourceGate.addOutputGate(targetGate);
             targetGate.addInput(sourceGate);
+            getLineToStartGateMap().put(connectionLine, sourceGate);
         }
     }
 
