@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.paperturtle.App;
 import com.paperturtle.commands.AddGateCommand;
+import com.paperturtle.commands.AddLabelCommand;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.utilities.TextLabel;
@@ -122,7 +123,9 @@ public class AppGUI {
                         - floatingImageView.getBoundsInLocal().getHeight() / 2;
                 if ("TextLabel".equals(floatingImageView.getId())) {
                     TextLabel gateLabel = new TextLabel("Label", 90, 40);
-                    app.getCircuitCanvas().drawTextLabel(gateLabel, x, y);
+                    // app.getCircuitCanvas().drawTextLabel(gateLabel, x, y);
+                    app.getCircuitCanvas().getCommandManager()
+                            .executeCommand(new AddLabelCommand(circuitCanvas, gateLabel, x, y));
                 } else {
                     LogicGate gate = GateFactory.createGate(floatingImageView.getId());
                     if (gate != null) {
