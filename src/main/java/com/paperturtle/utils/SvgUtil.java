@@ -18,33 +18,29 @@ public class SvgUtil {
     /**
      * Default constructor for SvgUtil.
      */
-    public SvgUtil() {
+    private SvgUtil() {
     }
 
     /**
      * Loads an SVG file from the specified path and converts it into a JavaFX
      * Image.
      * 
-     * The method uses Batik's PNGTranscoder to transcode the SVG file into a PNG
-     * format.
-     * The PNG data is then read into a BufferedImage using ImageIO, and finally
-     * converted
-     * into a JavaFX Image using SwingFXUtils.
-     * 
      * @param svgFilePath the path to the SVG file to load.
      * @return a JavaFX Image representing the SVG file, or null if an error
      *         occurred.
      */
     public static Image loadSvgImage(String svgFilePath) {
-        try {
-            PNGTranscoder transcoder = new PNGTranscoder();
-            TranscoderInput input = new TranscoderInput(SvgUtil.class.getResourceAsStream(svgFilePath));
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PNGTranscoder transcoder = new PNGTranscoder();
+        TranscoderInput input = new TranscoderInput(SvgUtil.class.getResourceAsStream(svgFilePath));
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             TranscoderOutput output = new TranscoderOutput(outputStream);
             transcoder.transcode(input, output);
             outputStream.flush();
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            return SwingFXUtils.toFXImage(javax.imageio.ImageIO.read(inputStream), null);
+
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
+                return SwingFXUtils.toFXImage(javax.imageio.ImageIO.read(inputStream), null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
