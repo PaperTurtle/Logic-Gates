@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.inputs.SwitchGate;
 import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.gui.CircuitCanvas;
