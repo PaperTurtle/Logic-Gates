@@ -233,11 +233,10 @@ public class AppGUI {
                             "Ctrl+S: Save file\n" +
                             "Ctrl+C: Copy selected gates\n" +
                             "Ctrl+V: Paste gates from clipboard\n" +
-                            "Ctrl+X: Cut selected gates\n" +
                             "Ctrl+A: Select all components\n" +
+                            "Ctrl+X: Delete selected gates\n" +
                             "Ctrl+Z: Undo\n" +
-                            "Ctrl+Y: Redo\n" +
-                            "Ctrl+D: Delete selected gates\n",
+                            "Ctrl+Y: Redo\n",
                     Alert.AlertType.INFORMATION);
         });
 
