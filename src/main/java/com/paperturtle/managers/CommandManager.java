@@ -57,6 +57,9 @@ public class CommandManager {
         }
     }
 
+    /**
+     * Clears the undo and redo stacks.
+     */
     public void clearStacks() {
         if (!undoStack.isEmpty()) {
             while (!undoStack.isEmpty()) {
