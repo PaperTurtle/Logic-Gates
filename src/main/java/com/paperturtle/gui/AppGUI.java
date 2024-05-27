@@ -211,6 +211,12 @@ public class AppGUI {
         pasteItem.setOnAction(e -> app.getCircuitCanvas().getClipboardManager().pasteGatesFromClipboard());
         deleteItem.setOnAction(e -> app.getCircuitCanvas().getGateManager().removeSelectedGates());
 
+        Menu viewMenu = new Menu("View");
+        MenuItem toggleGridItem = new MenuItem("Toggle Grid");
+
+        toggleGridItem.setOnAction(e -> app.getCircuitCanvas().toggleGridVisibility());
+        viewMenu.getItems().addAll(toggleGridItem);
+
         Menu helpMenu = new Menu("Help");
         MenuItem aboutItem = new MenuItem("About");
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
@@ -251,7 +257,7 @@ public class AppGUI {
         optionsMenu.getItems().addAll(tableItem, clearItem);
         editMenu.getItems().addAll(undoItem, redoItem, copyItem, pasteItem, deleteItem);
         helpMenu.getItems().addAll(aboutItem, shortcutsItem);
-        menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, helpMenu);
+        menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, viewMenu, helpMenu);
 
         openItem.setOnAction(e -> {
             if (!app.getCircuitCanvas().isEmpty()) {
