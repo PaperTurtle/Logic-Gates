@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.inputs.SwitchGate;
 import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.gui.CircuitCanvas;
@@ -100,14 +101,6 @@ public class PasteComponentsCommand implements Command {
      */
     @Override
     public void execute() {
-        // canvas.getCommandManager()
-        // .executeCommand(new PasteGatesCommand(canvas,
-        // canvas.getClipboardManager().getClipboard(), 30, 30));
-        // canvas.getCommandManager()
-        // .executeCommand(
-        // new PasteLabelsCommand(canvas,
-        // canvas.getClipboardManager().getClipboardLabels(), 30, 30));
-
         canvas.getGateManager().deselectAllGates();
         Map<String, LogicGate> createdGates = createGates();
 
@@ -225,6 +218,8 @@ public class PasteComponentsCommand implements Command {
         if (!pastedConnections.contains(connectionLine)) {
             pastedConnections.add(connectionLine);
         }
+        sourceGate.addOutputGate(targetGate);
+        targetGate.addInput(sourceGate);
         canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
     }
 
