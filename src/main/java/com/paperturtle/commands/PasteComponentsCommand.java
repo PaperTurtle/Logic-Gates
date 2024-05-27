@@ -1,6 +1,22 @@
 package com.paperturtle.commands;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.paperturtle.components.GateFactory;
+import com.paperturtle.components.LogicGate;
+import com.paperturtle.components.utilities.TextLabel;
+import com.paperturtle.data.ClipboardData;
 import com.paperturtle.gui.CircuitCanvas;
+
+import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 
 /**
  * Command to paste logic gates and their connections as well as text labels
@@ -19,12 +35,63 @@ public class PasteComponentsCommand implements Command {
     private CircuitCanvas canvas;
 
     /**
+     * The labels data from the clipboard to be pasted.
+     */
+    private List<TextLabel> clipboardLabelsData;
+
+    /**
+     * The gates data from the clipboard to be pasted.
+     */
+    private List<ClipboardData> clipboardGatesData;
+
+    /**
+     * The list of logic gates that have been pasted.
+     */
+    private List<TextLabel> pastedLabels = new ArrayList<>();
+
+    /**
+     * The list of logic gates that have been pasted.
+     */
+    private List<LogicGate> pastedGates = new ArrayList<>();
+
+    /**
+     * The list of connections that have been pasted.
+     */
+    private List<Line> pastedConnections = new ArrayList<>();
+
+    /**
+     * The x-coordinate offset for pasting.
+     */
+    private double offsetX;
+
+    /**
+     * The y-coordinate offset for pasting.
+     */
+    private double offsetY;
+
+    /**
+     * The global x-coordinate offset for pasting.
+     */
+    private static double globalOffsetX = 0;
+
+    /**
+     * The global y-coordinate offset for pasting.
+     */
+    private static double globalOffsetY = 0;
+
+    /**
      * Constructs an PasteComponentsCommand with the specified parameters.
      * 
      * @param canvas the circuit canvas
      */
-    public PasteComponentsCommand(CircuitCanvas canvas) {
+    public PasteComponentsCommand(CircuitCanvas canvas, List<ClipboardData> clipboardGatesData,
+            List<TextLabel> clipboardLabelsData, double offsetX, double offsetY) {
         this.canvas = canvas;
+        this.clipboardLabelsData = clipboardLabelsData;
+        this.clipboardGatesData = clipboardGatesData;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+
     }
 
     /**
@@ -33,11 +100,27 @@ public class PasteComponentsCommand implements Command {
      */
     @Override
     public void execute() {
-        canvas.getCommandManager()
-                .executeCommand(new PasteGatesCommand(canvas, canvas.getClipboardManager().getClipboard(), 30, 30));
-        canvas.getCommandManager()
-                .executeCommand(
-                        new PasteLabelsCommand(canvas, canvas.getClipboardManager().getClipboardLabels(), 30, 30));
+        // canvas.getCommandManager()
+        // .executeCommand(new PasteGatesCommand(canvas,
+        // canvas.getClipboardManager().getClipboard(), 30, 30));
+        // canvas.getCommandManager()
+        // .executeCommand(
+        // new PasteLabelsCommand(canvas,
+        // canvas.getClipboardManager().getClipboardLabels(), 30, 30));
+
+        canvas.getGateManager().deselectAllGates();
+        Map<String, LogicGate> createdGates = createGates();
+
+        clipboardGatesData.forEach(data -> {
+            LogicGate sourceGate = createdGates.get(data.getId());
+            if (sourceGate != null) {
+                data.getOutputs().forEach(output -> createConnection(createdGates, sourceGate, output));
+            }
+        });
+
+        canvas.getSelectionManager().deselectAllLabels();
+        createLabels();
+        incrementGlobalOffset();
     }
 
     /**
@@ -45,6 +128,164 @@ public class PasteComponentsCommand implements Command {
      */
     @Override
     public void undo() {
-        canvas.getCommandManager().executeCommand(new RemoveSelectedComponentsCommand(canvas));
+        removeConnections();
+        removeGates();
+        removeLabels();
+        decrementGlobalOffset();
+    }
+
+    /**
+     * Creates logic gates from the clipboard data and adds them to the canvas.
+     */
+    private void createLabels() {
+        clipboardLabelsData.forEach(originalLabel -> {
+            // Create a new TextLabel instance with the same properties as the original
+            TextLabel newLabel = new TextLabel(originalLabel.getLabel(), originalLabel.getWidth(),
+                    originalLabel.getHeight());
+            double newX = originalLabel.getLayoutX() + offsetX + globalOffsetX;
+            double newY = originalLabel.getLayoutY() + offsetY + globalOffsetY;
+
+            newLabel.setLayoutX(newX);
+            newLabel.setLayoutY(newY);
+            newLabel.setFillColor((Color) originalLabel.getFillColor());
+            newLabel.setBackgroundColor((Color) originalLabel.getBackgroundColor());
+            newLabel.setFontFamily(originalLabel.getFontFamily());
+            newLabel.setFontSize(originalLabel.getFontSize());
+            newLabel.setUnderline(originalLabel.isUnderline());
+            newLabel.setStrikethrough(originalLabel.isStrikethrough());
+            newLabel.setAutoSize(originalLabel.isAutoSize());
+            newLabel.setFont(Font.font(originalLabel.getFontFamily(),
+                    originalLabel.getFontWeight() == FontWeight.BOLD ? FontWeight.BOLD : FontWeight.NORMAL,
+                    originalLabel.getFontPosture() == FontPosture.ITALIC ? FontPosture.ITALIC : FontPosture.REGULAR,
+                    originalLabel.getFontSize()));
+
+            canvas.drawTextLabel(newLabel, newX, newY);
+            newLabel.getStyleClass().add("selected");
+            pastedLabels.add(newLabel);
+        });
+    }
+
+    /**
+     * Creates logic gates from the clipboard data and adds them to the canvas.
+     * 
+     * @return a map of the created gates, with the gate ID as the key
+     */
+    private Map<String, LogicGate> createGates() {
+        Map<String, LogicGate> createdGates = new HashMap<>();
+        clipboardGatesData.forEach(data -> {
+            LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
+            if (gate != null) {
+                double newX = data.getPosition().getX() + offsetX + globalOffsetX;
+                double newY = data.getPosition().getY() + offsetY + globalOffsetY;
+
+                gate.setPosition(newX, newY);
+                gate.setId(data.getId());
+                gate.setMaxOutputConnections(data.getMaxOutputConnections());
+                createdGates.put(data.getId(), gate);
+                canvas.drawGate(gate, newX, newY);
+                gate.getImageView().getStyleClass().add("selected");
+                pastedGates.add(gate);
+            } else {
+                System.out.println("Unable to create gate of type: " + data.getType());
+            }
+        });
+        return createdGates;
+    }
+
+    /**
+     * Creates a connection between two logic gates based on the provided output
+     * 
+     * @param createdGates the map of created gates
+     * @param sourceGate   the source gate of the connection
+     * @param output       the output data for the connection
+     */
+    private void createConnection(Map<String, LogicGate> createdGates, LogicGate sourceGate,
+            ClipboardData.ConnectionData output) {
+        LogicGate targetGate = createdGates.get(output.gateId);
+        if (targetGate == null) {
+            System.out.println("Output gate not found for ID: " + output.gateId);
+            return;
+        }
+
+        Point2D sourcePos = sourceGate.getOutputMarker().localToParent(sourceGate.getOutputMarker().getCenterX(),
+                sourceGate.getOutputMarker().getCenterY());
+        Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
+                targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
+                targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
+
+        Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
+        connectionLine.setStrokeWidth(3.5);
+        connectionLine.setStroke(Color.BLACK);
+
+        if (!canvas.getChildren().contains(connectionLine)) {
+            canvas.getChildren().add(connectionLine);
+        }
+        sourceGate.addOutputConnection(connectionLine);
+        targetGate.addInputConnection(connectionLine, output.pointIndex);
+        if (!pastedConnections.contains(connectionLine)) {
+            pastedConnections.add(connectionLine);
+        }
+        canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
+    }
+
+    /**
+     * Removes the pasted connections from the canvas.
+     */
+    private void removeConnections() {
+        pastedConnections.forEach(connection -> {
+            canvas.getChildren().remove(connection);
+            LogicGate sourceGate = canvas.getLineToStartGateMap().get(connection);
+            LogicGate targetGate = canvas.getGateManager().findTargetGate(connection);
+            if (sourceGate != null && targetGate != null) {
+                int index = targetGate.findInputConnectionIndex(connection);
+                if (index != -1) {
+                    sourceGate.removeOutputConnection(connection);
+                    targetGate.removeInputConnection(connection, index);
+                    targetGate.removeInput(sourceGate);
+                }
+            }
+            canvas.getLineToStartGateMap().remove(connection);
+        });
+        pastedConnections.clear();
+    }
+
+    /**
+     * Removes the pasted gates from the canvas.
+     */
+    private void removeGates() {
+        pastedGates.forEach(gate -> canvas.getGateManager().removeGate(gate.getImageView()));
+        pastedGates.clear();
+    }
+
+    /**
+     * Removes the pasted labels from the canvas.
+     */
+    private void removeLabels() {
+        pastedLabels.forEach(label -> canvas.removeTextLabel(label));
+        pastedLabels.clear();
+    }
+
+    /**
+     * Increments the global offset for pasting gates and connections.
+     */
+    private void incrementGlobalOffset() {
+        globalOffsetX += 30;
+        globalOffsetY += 30;
+    }
+
+    /**
+     * Decrements the global offset for pasting gates and connections.
+     */
+    private void decrementGlobalOffset() {
+        globalOffsetX -= 30;
+        globalOffsetY -= 30;
+    }
+
+    /**
+     * Set global offset to 0.
+     */
+    public static void resetGlobalOffset() {
+        globalOffsetX = 0;
+        globalOffsetY = 0;
     }
 }

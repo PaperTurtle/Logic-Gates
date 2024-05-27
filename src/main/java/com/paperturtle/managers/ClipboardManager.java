@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.paperturtle.commands.PasteGatesCommand;
-import com.paperturtle.commands.PasteLabelsCommand;
+import com.paperturtle.commands.PasteComponentsCommand;
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.utilities.TextLabel;
@@ -136,7 +135,7 @@ public class ClipboardManager {
                     LogicGate gate = entry.getValue();
                     clipboard.add(gate.getGateClipboardData());
                 });
-        PasteGatesCommand.resetGlobalOffset();
+        PasteComponentsCommand.resetGlobalOffset();
     }
 
     /**
@@ -147,7 +146,7 @@ public class ClipboardManager {
         canvas.getSelectedTextLabels().forEach(label -> {
             clipboardLabels.add(label);
         });
-        PasteLabelsCommand.resetGlobalOffset();
+        PasteComponentsCommand.resetGlobalOffset();
     }
 
     /**

@@ -361,6 +361,7 @@ public class CircuitCanvas extends Pane {
             connectionLine.setStroke(Color.BLACK);
 
             getChildren().add(connectionLine);
+
             sourceGate.addOutputConnection(connectionLine);
             targetGate.addInputConnection(connectionLine, output.pointIndex);
 

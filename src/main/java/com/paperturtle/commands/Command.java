@@ -7,7 +7,7 @@ package com.paperturtle.commands;
  * @see AddConnectionCommand
  * @see AddGateCommand
  * @see AddLabelCommand
- * @see PasteGatesCommand
+ * @see PasteComponentsCommand
  * @see RemoveConnectionCommand
  * @see RemoveGateCommand
  * @see RemoveLabelCommand

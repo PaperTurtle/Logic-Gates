@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.paperturtle.commands.Command;
-import com.paperturtle.commands.PasteGatesCommand;
 
 import javafx.geometry.Point2D;
 
@@ -14,7 +13,6 @@ import javafx.geometry.Point2D;
  * 
  * @see Command
  * @see ConnectionData
- * @see PasteGatesCommand
  * 
  * @author Seweryn Czabanowski
  */
