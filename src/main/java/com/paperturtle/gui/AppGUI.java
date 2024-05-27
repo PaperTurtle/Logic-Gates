@@ -238,18 +238,20 @@ public class AppGUI {
 
         shortcutsItem.setOnAction(e -> {
             showAlert("Keyboard Shortcuts",
-                    "Ctrl+O: Open file\n" +
-                            "Ctrl+S: Save file\n" +
-                            "Ctrl+C: Copy selected gates\n" +
-                            "Ctrl+V: Paste gates from clipboard\n" +
-                            "Ctrl+A: Select all components\n" +
-                            "Ctrl+X: Delete selected gates\n" +
-                            "Ctrl+T: Generate Truth Table\n" +
-                            "Ctrl+P: Save as Image\n" +
-                            "Ctrl+D: Clear the canvas\n" +
-                            "Ctrl+G: Toggle Grid Visibility\n" +
-                            "Ctrl+Z: Undo\n" +
-                            "Ctrl+Y: Redo\n",
+                    """
+                            Ctrl+O: Open file
+                            Ctrl+S: Save file
+                            Ctrl+C: Copy selected gates
+                            Ctrl+V: Paste gates from clipboard
+                            Ctrl+A: Select all components
+                            Ctrl+X: Delete selected gates
+                            Ctrl+T: Generate Truth Table
+                            Ctrl+P: Save as Image
+                            Ctrl+D: Clear the canvas
+                            Ctrl+G: Toggle Grid Visibility
+                            Ctrl+Z: Undo
+                            Ctrl+Y: Redo
+                            """,
                     Alert.AlertType.INFORMATION);
         });
 
