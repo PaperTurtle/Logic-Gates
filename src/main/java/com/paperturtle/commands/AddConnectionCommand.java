@@ -51,6 +51,9 @@ public class AddConnectionCommand implements Command {
      */
     public AddConnectionCommand(CircuitCanvas canvas, LogicGate sourceGate, LogicGate targetGate, Line connectionLine,
             int targetInputIndex) {
+        if (canvas == null || sourceGate == null || targetGate == null || connectionLine == null) {
+            throw new IllegalArgumentException("None of the parameters can be null");
+        }
         this.canvas = canvas;
         this.sourceGate = sourceGate;
         this.targetGate = targetGate;
@@ -75,10 +78,8 @@ public class AddConnectionCommand implements Command {
 
         canvas.getLineToStartGateMap().put(connectionLine, sourceGate);
 
-        sourceGate.evaluate();
-        targetGate.evaluate();
-        targetGate.propagateStateChange();
-        sourceGate.updateOutputConnectionsColor(sourceGate.evaluate());
+        evaluateAndPropagate(sourceGate);
+        evaluateAndPropagate(targetGate);
 
         targetGate.getInputMarkers().forEach(marker -> marker.toFront());
         sourceGate.getOutputMarker().toFront();
@@ -97,15 +98,19 @@ public class AddConnectionCommand implements Command {
             canvas.getChildren().remove(connectionLine);
             canvas.getLineToStartGateMap().remove(connectionLine);
 
-            sourceGate.evaluate();
-            targetGate.evaluate();
-            sourceGate.propagateStateChange();
-            targetGate.propagateStateChange();
+            evaluateAndPropagate(sourceGate);
+            evaluateAndPropagate(targetGate);
 
             canvas.scheduleUpdate(targetGate);
             canvas.scheduleUpdate(sourceGate);
         } else {
             System.out.println("Invalid target input index: " + targetInputIndex);
         }
+    }
+
+    private void evaluateAndPropagate(LogicGate gate) {
+        gate.evaluate();
+        gate.propagateStateChange();
+        gate.updateOutputConnectionsColor(gate.evaluate());
     }
 }

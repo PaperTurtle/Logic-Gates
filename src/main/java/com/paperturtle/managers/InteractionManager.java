@@ -172,7 +172,6 @@ public class InteractionManager {
                     canvas.getChildren().add(canvas.getCurrentLine());
                     canvas.getLineToStartGateMap().put(canvas.getCurrentLine(), gate);
                     canvas.getConnectionManager().setStartGate(gate);
-                    gate.addOutputConnection(canvas.getCurrentLine());
                     setupConnectionHandlers();
                     event.consume();
                 }
