@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import com.paperturtle.commands.PasteGatesCommand;
 import com.paperturtle.commands.PasteLabelsCommand;
-import com.paperturtle.commands.RemoveSelectedGatesCommand;
+import com.paperturtle.commands.RemoveSelectedComponentsCommand;
 import com.paperturtle.gui.CircuitCanvas;
 import com.paperturtle.utils.KeyCombination;
 
@@ -97,7 +97,7 @@ public class KeyboardShortcutManager {
      * @param event the key event
      */
     private void cut(KeyEvent event) {
-        canvas.getCommandManager().executeCommand(new RemoveSelectedGatesCommand(canvas));
+        canvas.getCommandManager().executeCommand(new RemoveSelectedComponentsCommand(canvas));
     }
 
     /**

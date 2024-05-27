@@ -22,7 +22,7 @@ import com.paperturtle.gui.CircuitCanvas;
  * 
  * @author Seweryn Czabanowski
  */
-public class RemoveSelectedGatesCommand implements Command {
+public class RemoveSelectedComponentsCommand implements Command {
     /**
      * The canvas on which the circuit is drawn.
      */
@@ -96,7 +96,7 @@ public class RemoveSelectedGatesCommand implements Command {
      * 
      * @param canvas the circuit canvas from which the selected gates are removed
      */
-    public RemoveSelectedGatesCommand(CircuitCanvas canvas) {
+    public RemoveSelectedComponentsCommand(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 

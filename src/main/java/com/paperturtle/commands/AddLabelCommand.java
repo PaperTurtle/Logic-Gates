@@ -18,7 +18,7 @@ public class AddLabelCommand implements Command {
     private CircuitCanvas canvas;
 
     /**
-     * The logic gate to be added to the canvas.
+     * The text label to be added to the canvas.
      */
     private TextLabel label;
 
@@ -48,7 +48,7 @@ public class AddLabelCommand implements Command {
     }
 
     /**
-     * Executes the command to add a logic gate to the canvas at the specified
+     * Executes the command to add a text label to the canvas at the specified
      * coordinates.
      * 
      * @see CircuitCanvas#drawTextLabel(TextLabel, double, double)
@@ -59,7 +59,7 @@ public class AddLabelCommand implements Command {
     }
 
     /**
-     * Undoes the command by removing the logic gate from the canvas.
+     * Undoes the command by removing the text label from the canvas.
      * 
      * @see CircuitCanvas#getGateManager()
      * @see TextLabel#removeSelf()
