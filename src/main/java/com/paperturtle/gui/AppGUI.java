@@ -527,6 +527,7 @@ public class AppGUI {
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             try {
+                app.getCircuitCanvas().getCommandManager().clearStacks();
                 List<CircuitComponent> gatesData = new CircuitFileManager().loadCircuit(file.getPath());
                 app.getCircuitCanvas().loadComponents(gatesData);
             } catch (IOException | IllegalArgumentException e) {
