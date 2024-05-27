@@ -56,4 +56,17 @@ public class CommandManager {
             undoStack.push(command);
         }
     }
+
+    public void clearStacks() {
+        if (!undoStack.isEmpty()) {
+            while (!undoStack.isEmpty()) {
+                undoStack.pop();
+            }
+        }
+        if (!redoStack.isEmpty()) {
+            while (!redoStack.isEmpty()) {
+                redoStack.pop();
+            }
+        }
+    }
 }
