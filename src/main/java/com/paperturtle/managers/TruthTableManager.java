@@ -18,6 +18,8 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -78,7 +80,11 @@ public class TruthTableManager {
 
         if ((constantInputs.isEmpty() && switchGates.isEmpty())
                 || (lightbulbs.isEmpty() && fourBitDigitGates.isEmpty())) {
-            System.out.println("input or output gates not found in the selected gates.");
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText(null);
+            alert.setContentText("Input or output gates not found in the selected gates.");
+            alert.showAndWait();
             return;
         }
 
@@ -170,7 +176,6 @@ public class TruthTableManager {
                 } else if (output instanceof Integer) {
                     row.add(output.toString());
                 }
-                System.out.println("Output for row " + i + ": " + output);
             }
 
             if (!rowIsEmpty) {
@@ -259,7 +264,6 @@ public class TruthTableManager {
                 }
 
                 writer.write(sb.toString());
-                System.out.println("Truth table exported to " + file.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
