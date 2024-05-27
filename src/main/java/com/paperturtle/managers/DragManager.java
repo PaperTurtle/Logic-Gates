@@ -60,7 +60,7 @@ public class DragManager {
         });
 
         canvas.setOnMouseClicked(event -> {
-            if (!(event.getTarget() instanceof ImageView)) {
+            if (!(event.getTarget() instanceof TextLabel) && !(event.getTarget() instanceof ImageView)) {
                 clearSelection();
                 canvas.requestFocus();
             }
@@ -106,7 +106,7 @@ public class DragManager {
         });
 
         canvas.setOnMouseClicked(event -> {
-            if (!(event.getTarget() instanceof TextLabel)) {
+            if (!(event.getTarget() instanceof TextLabel) && (!(event.getTarget() instanceof ImageView))) {
                 clearSelection();
                 canvas.requestFocus();
             }
