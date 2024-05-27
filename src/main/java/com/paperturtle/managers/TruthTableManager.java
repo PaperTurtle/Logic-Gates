@@ -226,7 +226,9 @@ public class TruthTableManager {
     private void exportTruthTableToCsv(Boolean[][] inputs, Object[][] outputs) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        File desktop = new File(System.getProperty("user.home"), "Desktop");
         fileChooser.setInitialFileName("truth_table.csv");
+        fileChooser.setInitialDirectory(desktop);
         Stage stage = new Stage();
         File file = fileChooser.showSaveDialog(stage);
 

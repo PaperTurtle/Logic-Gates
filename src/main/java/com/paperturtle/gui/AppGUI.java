@@ -292,6 +292,8 @@ public class AppGUI {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Circuit File");
             fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Files", "*.json"));
+            File desktop = new File(System.getProperty("user.home"), "Desktop");
+            fileChooser.setInitialDirectory(desktop);
             File file = fileChooser.showSaveDialog(stage);
             if (file != null) {
                 try {
@@ -305,6 +307,7 @@ public class AppGUI {
                 }
             }
         });
+
     }
 
     /**
