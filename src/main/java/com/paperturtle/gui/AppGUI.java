@@ -142,6 +142,10 @@ public class AppGUI {
                 new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN),
                 this::saveCurrentWork);
 
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN),
+                () -> app.getCircuitCanvas().saveAsImage());
+
         stage.setTitle("Logic Gates Simulator");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/paperturtle/logo.jpg")));
         stage.setScene(scene);
@@ -217,6 +221,8 @@ public class AppGUI {
         Menu viewMenu = new Menu("View");
         MenuItem toggleGridItem = new MenuItem("Toggle Grid");
 
+        toggleGridItem.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
+
         toggleGridItem.setOnAction(e -> app.getCircuitCanvas().toggleGridVisibility());
         viewMenu.getItems().addAll(toggleGridItem);
 
@@ -238,6 +244,10 @@ public class AppGUI {
                             "Ctrl+V: Paste gates from clipboard\n" +
                             "Ctrl+A: Select all components\n" +
                             "Ctrl+X: Delete selected gates\n" +
+                            "Ctrl+T: Generate Truth Table\n" +
+                            "Ctrl+P: Save as Image\n" +
+                            "Ctrl+D: Clear the canvas\n" +
+                            "Ctrl+G: Toggle Grid Visibility\n" +
                             "Ctrl+Z: Undo\n" +
                             "Ctrl+Y: Redo\n",
                     Alert.AlertType.INFORMATION);
@@ -245,10 +255,19 @@ public class AppGUI {
 
         Menu optionsMenu = new Menu("Options");
         MenuItem tableItem = new MenuItem("Generate Truth Table");
+        MenuItem pictureItem = new MenuItem("Save as Image");
         MenuItem clearItem = new MenuItem("Clear the canvas");
+
+        tableItem.setAccelerator(new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN));
+        pictureItem.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
+        clearItem.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
 
         tableItem.setOnAction(e -> {
             app.getCircuitCanvas().getTruthTableManager().generateAndDisplayCompleteTruthTable();
+        });
+
+        pictureItem.setOnAction(e -> {
+            app.getCircuitCanvas().saveAsImage();
         });
 
         clearItem.setOnAction(e -> {
@@ -256,7 +275,7 @@ public class AppGUI {
         });
 
         fileMenu.getItems().addAll(openItem, saveItem, exitItem);
-        optionsMenu.getItems().addAll(tableItem, clearItem);
+        optionsMenu.getItems().addAll(tableItem, pictureItem, clearItem);
         editMenu.getItems().addAll(undoItem, redoItem, copyItem, pasteItem, deleteItem);
         helpMenu.getItems().addAll(aboutItem, shortcutsItem);
         menuBar.getMenus().addAll(fileMenu, optionsMenu, editMenu, viewMenu, helpMenu);

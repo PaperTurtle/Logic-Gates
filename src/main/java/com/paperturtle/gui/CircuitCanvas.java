@@ -5,22 +5,30 @@ import javafx.scene.layout.Pane;
 import java.util.List;
 
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
@@ -368,6 +376,29 @@ public class CircuitCanvas extends Pane {
             sourceGate.addOutputGate(targetGate);
             targetGate.addInput(sourceGate);
             getLineToStartGateMap().put(connectionLine, sourceGate);
+        }
+    }
+
+    /**
+     * Saves a snapshot of the current canvas as an image file.
+     */
+    public void saveAsImage() {
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(Color.TRANSPARENT);
+        WritableImage snapshot = this.snapshot(parameters, null);
+        File desktop = new File(System.getProperty("user.home"), "Desktop");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(desktop);
+        fileChooser.setTitle("Save Canvas Image");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
+        File file = fileChooser.showSaveDialog(this.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
