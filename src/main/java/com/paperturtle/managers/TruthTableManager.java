@@ -65,12 +65,12 @@ public class TruthTableManager {
         List<Boolean> constantInputs = new ArrayList<>();
 
         for (LogicGate gate : selectedGates) {
-            if (gate instanceof SwitchGate) {
-                switchGates.add((SwitchGate) gate);
-            } else if (gate instanceof Lightbulb) {
-                lightbulbs.add((Lightbulb) gate);
-            } else if (gate instanceof FourBitDigitGate) {
-                fourBitDigitGates.add((FourBitDigitGate) gate);
+            if (gate instanceof SwitchGate switchGate) {
+                switchGates.add(switchGate);
+            } else if (gate instanceof Lightbulb lightbulb) {
+                lightbulbs.add(lightbulb);
+            } else if (gate instanceof FourBitDigitGate fourBitDigitGate) {
+                fourBitDigitGates.add(fourBitDigitGate);
             } else if (gate instanceof HighConstantGate) {
                 constantInputs.add(true);
             } else if (gate instanceof LowConstantGate) {
