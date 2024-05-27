@@ -43,8 +43,9 @@ public class DragManager {
         imageView.setOnMousePressed(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 handleMousePressed(imageView, gate, event);
+            } else {
+                handleMousePressedForGate(imageView, gate, event);
             }
-            handleMousePressedForGate(imageView, gate, event);
         });
 
         imageView.setOnMouseReleased(event -> {
@@ -78,7 +79,7 @@ public class DragManager {
             double offsetY = event.getSceneY() - textLabel.getLayoutY();
             textLabel.setUserData(new double[] { offsetX, offsetY });
 
-            if (!event.isControlDown() && !textLabel.getStyleClass().contains("selected")) {
+            if (!event.isControlDown() && !textLabel.getStyleClass().contains("selected") && !event.isShiftDown()) {
                 canvas.getSelectionManager().deselectAllLabelsExcept(textLabel);
             }
             if (!textLabel.getStyleClass().contains("selected")) {
@@ -186,7 +187,7 @@ public class DragManager {
     private void handleMousePressed(ImageView imageView, LogicGate gate, MouseEvent event) {
         double offsetX = event.getSceneX() - imageView.getLayoutX();
         double offsetY = event.getSceneY() - imageView.getLayoutY();
-        if (!event.isControlDown() && !imageView.getStyleClass().contains("selected")) {
+        if (!event.isControlDown() && !imageView.getStyleClass().contains("selected") && !event.isShiftDown()) {
             canvas.getSelectionManager().deselectAllGatesExcept(imageView);
             canvas.getSelectionManager().deselectAllLabels();
         }
