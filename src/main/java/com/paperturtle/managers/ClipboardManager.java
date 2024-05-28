@@ -1,20 +1,13 @@
 package com.paperturtle.managers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.paperturtle.commands.PasteComponentsCommand;
-import com.paperturtle.components.GateFactory;
 import com.paperturtle.components.LogicGate;
 import com.paperturtle.components.utilities.TextLabel;
 import com.paperturtle.data.ClipboardData;
 import com.paperturtle.gui.CircuitCanvas;
-
-import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 
 /**
  * The ClipboardManager class is responsible for handling copy and paste
@@ -63,60 +56,8 @@ public class ClipboardManager {
      * Pastes the gates from the clipboard onto the circuit canvas.
      */
     public void pasteGatesFromClipboard() {
-        canvas.getGateManager().deselectAllGates();
-        Map<String, LogicGate> createdGates = new HashMap<>();
-
-        clipboard.forEach(data -> {
-            LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
-            if (gate == null) {
-                System.out.println("Unable to create gate of type: " + data.getType());
-                return;
-            }
-
-            double newX = data.getPosition().getX() + OFFSET_X;
-            double newY = data.getPosition().getY() + OFFSET_Y;
-
-            gate.setPosition(newX, newY);
-            gate.setId(data.getId());
-            createdGates.put(data.getId(), gate);
-            canvas.drawGate(gate, newX, newY);
-            gate.getImageView().getStyleClass().add("selected");
-        });
-
-        clipboard.forEach(data -> createConnections(data, createdGates));
-    }
-
-    /**
-     * Creates the connections between the gates based on the clipboard data.
-     * 
-     * @param data         the clipboard data
-     * @param createdGates the map of created gates
-     */
-    private void createConnections(ClipboardData data, Map<String, LogicGate> createdGates) {
-        LogicGate sourceGate = createdGates.get(data.getId());
-        if (sourceGate == null)
-            return;
-
-        data.getOutputs().forEach(output -> {
-            LogicGate targetGate = createdGates.get(output.gateId);
-            if (targetGate == null) {
-                System.out.println("Output gate not found for ID: " + output.gateId);
-                return;
-            }
-            Point2D sourcePos = sourceGate.getOutputMarker().localToParent(
-                    sourceGate.getOutputMarker().getCenterX(), sourceGate.getOutputMarker().getCenterY());
-            Point2D targetPos = targetGate.getInputMarkers().get(output.pointIndex).localToParent(
-                    targetGate.getInputMarkers().get(output.pointIndex).getCenterX(),
-                    targetGate.getInputMarkers().get(output.pointIndex).getCenterY());
-
-            Line connectionLine = new Line(sourcePos.getX(), sourcePos.getY(), targetPos.getX(), targetPos.getY());
-            connectionLine.setStrokeWidth(3.5);
-            connectionLine.setStroke(Color.BLACK);
-
-            canvas.getChildren().add(connectionLine);
-            sourceGate.addOutputConnection(connectionLine);
-            targetGate.addInputConnection(connectionLine, output.pointIndex);
-        });
+        canvas.getCommandManager()
+                .executeCommand(new PasteComponentsCommand(canvas, clipboard, clipboardLabels, OFFSET_Y, OFFSET_X));
     }
 
     public void copySelectedComponentsToClipboard() {

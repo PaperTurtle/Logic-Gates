@@ -563,11 +563,15 @@ public abstract class LogicGate implements CircuitComponent {
         data.position = getPosition();
         data.state = currentState;
         data.maxOutputConnections = getMaxOutputConnections();
+        inputs.forEach(
+                input -> data.inputs.add(new ClipboardData.ConnectionData(input.getId(), inputs.indexOf(input))));
 
-        inputs.forEach(input -> data.inputs
-                .add(new ClipboardData.ConnectionData(input.getId(), input.outputGates.indexOf(this))));
-        outputGates.forEach(output -> data.outputs
-                .add(new ClipboardData.ConnectionData(output.getId(), output.inputs.indexOf(this))));
+        outputGates.forEach(output -> {
+            output.getInputConnections().forEach(connections -> connections.stream()
+                    .filter(this::isConnected)
+                    .forEach(line -> data.outputs.add(new ClipboardData.ConnectionData(output.getId(),
+                            output.getInputConnections().indexOf(connections)))));
+        });
 
         return data;
     }

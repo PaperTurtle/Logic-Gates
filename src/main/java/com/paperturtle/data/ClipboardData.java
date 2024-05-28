@@ -78,6 +78,22 @@ public class ClipboardData {
             this.pointIndex = pointIndex;
         }
 
+        public String getGateId() {
+            return gateId;
+        }
+
+        public void setGateId(String gateId) {
+            this.gateId = gateId;
+        }
+
+        public int getPointIndex() {
+            return pointIndex;
+        }
+
+        public void setPointIndex(int pointIndex) {
+            this.pointIndex = pointIndex;
+        }
+
     }
 
     /**
@@ -87,6 +103,10 @@ public class ClipboardData {
      */
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**

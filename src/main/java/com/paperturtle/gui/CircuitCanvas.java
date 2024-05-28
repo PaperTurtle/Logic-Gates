@@ -375,6 +375,10 @@ public class CircuitCanvas extends Pane {
 
             sourceGate.addOutputGate(targetGate);
             targetGate.addInput(sourceGate);
+
+            targetGate.getInputMarkers().forEach(marker -> marker.toFront());
+            sourceGate.getOutputMarker().toFront();
+
             getLineToStartGateMap().put(connectionLine, sourceGate);
         }
     }
@@ -448,7 +452,7 @@ public class CircuitCanvas extends Pane {
         if (selectionRect != null) {
             getChildren().add(selectionRect);
         }
-
+        commandManager.clearStacks();
         gateImageViews.clear();
         gateMarkers.clear();
         lineToStartGateMap.clear();
