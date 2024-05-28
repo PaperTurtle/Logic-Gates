@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.paperturtle.components.LogicGate;
-import com.paperturtle.components.gates.ClockGate;
+import com.paperturtle.components.inputs.ClockGate;
 import com.paperturtle.components.outputs.FourBitDigitGate;
 import com.paperturtle.components.outputs.Lightbulb;
 import com.paperturtle.gui.CircuitCanvas;

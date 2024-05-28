@@ -1,4 +1,4 @@
-package com.paperturtle.components.gates;
+package com.paperturtle.components.inputs;
 
 import java.util.Arrays;
 import java.util.List;

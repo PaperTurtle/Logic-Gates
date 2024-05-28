@@ -2,7 +2,6 @@ package com.paperturtle.components;
 
 import com.paperturtle.components.gates.AndGate;
 import com.paperturtle.components.gates.BufferGate;
-import com.paperturtle.components.gates.ClockGate;
 import com.paperturtle.components.gates.NandGate;
 import com.paperturtle.components.gates.NorGate;
 import com.paperturtle.components.gates.NotGate;
@@ -10,6 +9,7 @@ import com.paperturtle.components.gates.OrGate;
 import com.paperturtle.components.gates.TriStateGate;
 import com.paperturtle.components.gates.XnorGate;
 import com.paperturtle.components.gates.XorGate;
+import com.paperturtle.components.inputs.ClockGate;
 import com.paperturtle.components.inputs.HighConstantGate;
 import com.paperturtle.components.inputs.LowConstantGate;
 import com.paperturtle.components.inputs.SwitchGate;
