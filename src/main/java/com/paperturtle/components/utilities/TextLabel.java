@@ -508,6 +508,14 @@ public class TextLabel extends Group implements CircuitComponent {
         addRowToGrid(grid, "Preview:", previewBox, row);
     }
 
+    /**
+     * Adds a row to the GridPane.
+     * 
+     * @param grid      the GridPane to add the row to.
+     * @param labelText the text for the Label.
+     * @param control   the Node to add to the row.
+     * @param row       the row to add the row to.
+     */
     private void addRowToGrid(GridPane grid, String labelText, Node control, int row) {
         grid.add(new Label(labelText), 0, row);
         grid.add(control, 1, row);
@@ -696,6 +704,11 @@ public class TextLabel extends Group implements CircuitComponent {
         return labelText.getText();
     }
 
+    /**
+     * Returns the Text object of the TextLabel.
+     * 
+     * @return the Text object of the TextLabel.
+     */
     public Text getLabelText() {
         return labelText;
     }

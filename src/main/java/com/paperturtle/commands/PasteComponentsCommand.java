@@ -82,7 +82,11 @@ public class PasteComponentsCommand implements Command {
     /**
      * Constructs an PasteComponentsCommand with the specified parameters.
      * 
-     * @param canvas the circuit canvas
+     * @param canvas              the circuit canvas
+     * @param clipboardGatesData  the gates data from the clipboard
+     * @param clipboardLabelsData the labels data from the clipboard
+     * @param offsetX             the x-coordinate offset for pasting
+     * @param offsetY             the y-coordinate offset for pasting
      */
     public PasteComponentsCommand(CircuitCanvas canvas, List<ClipboardData> clipboardGatesData,
             List<TextLabel> clipboardLabelsData, double offsetX, double offsetY) {
@@ -191,33 +195,34 @@ public class PasteComponentsCommand implements Command {
         });
     }
 
-    /**
-     * Creates logic gates from the clipboard data and adds them to the canvas.
-     * 
-     * @return a map of the created gates, with the gate ID as the key
-     */
-    private Map<String, LogicGate> createGates() {
-        Map<String, LogicGate> createdGates = new HashMap<>();
-        clipboardGatesData.forEach(data -> {
-            LogicGate gate = GateFactory.createGate(canvas.normalizeType(data.getType()));
-            if (gate != null) {
-                double newX = data.getPosition().getX() + offsetX + globalOffsetX;
-                double newY = data.getPosition().getY() + offsetY + globalOffsetY;
+    // /**
+    // * Creates logic gates from the clipboard data and adds them to the canvas.
+    // *
+    // * @return a map of the created gates, with the gate ID as the key
+    // */
+    // private Map<String, LogicGate> createGates() {
+    // Map<String, LogicGate> createdGates = new HashMap<>();
+    // clipboardGatesData.forEach(data -> {
+    // LogicGate gate =
+    // GateFactory.createGate(canvas.normalizeType(data.getType()));
+    // if (gate != null) {
+    // double newX = data.getPosition().getX() + offsetX + globalOffsetX;
+    // double newY = data.getPosition().getY() + offsetY + globalOffsetY;
 
-                gate.setPosition(newX, newY);
-                gate.setId(data.getId());
-                gate.setMaxOutputConnections(data.getMaxOutputConnections());
-                createdGates.put(data.getId(), gate);
-                canvas.drawGate(gate, newX, newY);
-                gate.getImageView().getStyleClass().add("selected");
-                pastedGates.add(gate);
+    // gate.setPosition(newX, newY);
+    // gate.setId(data.getId());
+    // gate.setMaxOutputConnections(data.getMaxOutputConnections());
+    // createdGates.put(data.getId(), gate);
+    // canvas.drawGate(gate, newX, newY);
+    // gate.getImageView().getStyleClass().add("selected");
+    // pastedGates.add(gate);
 
-            } else {
-                System.out.println("Unable to create gate of type: " + data.getType());
-            }
-        });
-        return createdGates;
-    }
+    // } else {
+    // System.out.println("Unable to create gate of type: " + data.getType());
+    // }
+    // });
+    // return createdGates;
+    // }
 
     /**
      * Creates a connection between two logic gates based on the provided output

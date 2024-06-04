@@ -36,7 +36,7 @@ public class RemoveLabelCommand implements Command {
      * Constructs a RemoveGateCommand with the specified parameters.
      * 
      * @param canvas the circuit canvas from which the gate is removed
-     * @param gate   the text label to be removed
+     * @param label  the text label to be removed
      */
     public RemoveLabelCommand(CircuitCanvas canvas, TextLabel label) {
         this.canvas = canvas;

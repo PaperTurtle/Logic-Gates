@@ -60,6 +60,9 @@ public class ClipboardManager {
                 .executeCommand(new PasteComponentsCommand(canvas, clipboard, clipboardLabels, OFFSET_Y, OFFSET_X));
     }
 
+    /**
+     * Copies the selected components to the clipboard.
+     */
     public void copySelectedComponentsToClipboard() {
         copySelectedGatesToClipboard();
         copySelectedLabelsToClipboard();
